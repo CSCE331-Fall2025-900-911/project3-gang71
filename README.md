@@ -2,7 +2,7 @@ Web App for Kung Fu Tea
 Contributors: Claire Wu, Jayani Singh, Vaidehi Singhal, Sarah Muyshondt, Anna Williamson, Haajirah Siddiqi
 
 To deploy, run this once:
-git remote add render https://github.com/yclairew project3-gang71
+git remote add render https://github.com/CSCE331-Fall2025-900-911/project3-gang71
 git push -u render 
 
 After the first time, everyone can just do git push.
@@ -14,7 +14,7 @@ npm install
 To start:
 node index.js
 
-Link: https://project3-gang71.onrender.com/
+Link: https://new-project3-gang71.onrender.com
 
 
 
