@@ -1,0 +1,83 @@
+Supply ID,Supply Name,Supply Price,Unit,Quantity on Hand
+1,Coffee Grounds,5.99,100 grams,5000
+2,Oat Milk,3.99,1 Litre,640
+3,Lactose-free Milk,3.99,1 Litre,100
+4,Rosehip Syrup,4.99,Litres,120
+5,Red Bean,4.99,100 grams,200
+6,Earl Grey Tea,3.99,100 grams,200
+7,Milk Powder,3.99,100 grams,2500
+8,Lavender Syrup,7.99,1 Litre,100
+9,Taro Powder,6.99,100 grams,2000
+10,Black Tea,5.99,100 grams,200
+11,Coconut Extract,8.99,1 Litre,80
+12,Oolong Tea,9.99,100 grams,200
+13,Espresso,9.99,1 Litre,160
+14,Winter Melon Syrup,9.99,1 Litre,100
+15,Jasmine Green Tea,6.99,100 grams,150
+16,Strawberry Syrup,9.99,1 Litre,120
+17,Longan Honey,6.75,1 Litre,80
+18,Mango Syrup,6.99,1 Litre,120
+19,Blueberry Syrup,15.99,1 Litre,120
+20,Almond Extract,9.99,1 Litre,60
+21,Peach Syrup,9.99,1 Litre,120
+22,Toffee Syrup,9.99,1 Litre,100
+23,Malt Extract,9.99,1 Litre,90
+24,Pumpkin Syrup,9.99,1 Litre,100
+25,Caramel,9.99,1 Litre,120
+26,Strawberry Milk,9.99,1 Litre,200
+27,Lemon Juice,9.99,1 Litre,50
+28,Hersheys Chocolate Sauce,9.99,1 Litre,150
+29,Matcha Powder,8.75,Cups,2000
+30,Strawberry Jam,8.75,Ounces,150
+31,Pineapple Jam,8.75,Ounces,150
+32,Dragonfruit Syrup,8.75,Litres,120
+33,Vanilla Syrup,8.75,Litres,120
+34,Oreos,8.75,Ounces,100
+35,Passion Fruit Syrup,8.75,Litres,120
+36,Honeydew Syrup,8.75,Litres,120
+37,Marshmallow,8.75,Litres,150
+38,Papaya Syrup,8.75,Litres,120
+39,Guava Syrup,8.75,Litres,120
+40,Apple Syrup,8.75,Litres,120
+41,Cinnamon,2.45,Ounces,500
+42,Chia Seeds,3.99,100 grams,800
+43,White Grape Syrup,8.75,1 Litre,120
+44,Red Date Syrup,8.75,1 Litre,120
+45,Lychee Syrup,8.75,1 Litre,120
+46,Grapefruit Juice,8.75,1 Litre,300
+47,Kiwi Syrup,8.75,1 Litre,120
+48,Orange Juice,8.75,1 Litre,300
+49,Wow Bubbles,8.75,1 Litre,100
+50,Regular Milk,8.75,1 Litre,640
+51,Sesame,8.75,1 Litre,300
+52,Herbal Jelly,8.75,1 Litre,150
+53,Yakult Yogurt,9.99,1 Litre,325
+54,Heavy Cream,8.75,ounces,200
+55,Plum Syrup,8.75,1 Litre,150
+56,Strawberry Juice,8.75,1 Litre,175
+57,Pistachio,8.75,100 grams,800
+58,Espresso Shot,8.75,Ounces,200
+59,Strawberry Popping Boba,8.75,Ounces,80
+60,Pudding,8.75,Ounces,50
+61,Boba,4.45,100 grams,80
+62,Crystal Boba,4.45,100 grams,80
+63,Coffee Popping Boba,4.45,100 grams,80
+64,Graham Cracker,7.99,100 grams,160
+65,Bergamot Juice,9.99,1 Litre,130
+66,Star Anise,2.99,100 grams,275
+67,Cardamom,2.55,100 grams,325
+68,Aloe Jelly,8.75,1 Litre,90
+69,Mango Jelly,8.75,1 Litre,75
+70,Nata Jelly,8.75,1 Litre,100
+71,Grape Popping Boba,4.45,1 Litre,350
+72,Mango Popping Boba,4.45,1 Litre,400
+73,Small Cup,15.99,100 cups,700
+74,Medium Cup,17.99,100 cups,700
+75,Large Cup,20.99,100 cups,700
+76,Cane Sugar,15.99,1000 grams,5000
+77,Ice,20.99,1 bag,700
+78,Boba Straws,10.99,200 straws,1500
+79,Normal Straws,10.99,200 straws,1000
+80,Napkins,10.99,1000 napkins,4000
+81,Bag,20.99,500 bags,1000
+82,Drink Carriers,30.99,50 boxes,300
