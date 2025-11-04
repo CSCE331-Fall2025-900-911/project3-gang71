@@ -295,3 +295,77 @@ main .inventory-table a{
     margin: 1rem auto;
     color: var(--color-primary);
 }
+
+/* ------------inventory------------------- */
+main .salesOptions {
+    display: inline-block;
+    background: var(--color-light);
+    border-radius: var(--border-radius-1);
+    margin-top: 1rem;
+    padding: 0.5rem 1.6rem;
+    margin-right: 1rem;
+    box-shadow: var(--box-shadow);
+    transition: all 300ms ease;
+    cursor: pointer;
+    font-family: poppins, sans-serif;
+}
+main .salesOptions input[type="date"] {
+    background: transparent;
+    color: var(--color-dark);
+}
+main .salesOptions:hover {
+    background: var(--color-primary);
+    color: var(--color-white);
+    box-shadow: none;
+}
+
+main .salesOptions:hover input[type="date"] {
+    color: var(--color-white);
+    background: transparent;
+}
+
+main .sales-table{
+    margin-top: 2rem;
+}
+main .sales-table h2{
+    margin-bottom: 0.8rem;
+}
+
+main .sales-table table{
+    background: var(--color-white);
+    width: 100%;
+    border-radius: var(--card-border-radius);
+    padding: var(--card-padding);
+    text-align: center;
+    box-shadow: var(--box-shadow);
+    transition: all 300ms ease;
+}
+
+main .sales-table table:hover{
+    box-shadow: none;
+}
+
+main .sales-table a{
+    text-align: center;
+    display: block;
+    margin: 1rem auto;
+    color: var(--color-primary);
+}
+
+main .sales-graph {
+    background: var(--color-white);
+    padding: var(--card-padding);
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--box-shadow);
+    margin-top: 2rem;
+    transition: all 300ms ease;
+}
+
+main .sales-graph:hover {
+    box-shadow: none;
+}
+
+main .sales-graph canvas {
+    width: 100%;
+    max-height: 500px;
+}
