@@ -1,0 +1,127 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+body {
+    margin: 0;
+}
+
+.topPageBanner {
+    width: 100%;
+    height: 10%;
+    position: absolute;
+
+    background-color: #EB0C43;
+    color: black;
+}
+
+.logo {
+    position: absolute;
+    top: 1%;
+    right: 0%;
+}
+
+.employeeName {
+    height: 100%;
+    position: relative;
+    align-content: center;
+    text-align: right;
+    right: 7%;
+
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 30;
+    font-weight: bold;
+}
+
+.drinkCategoryPanel {
+    position: absolute;
+    display: flex;
+    top: 10%;
+    height: 90%;
+    width: 20%;
+    background-color: black;
+    color: white;
+}
+
+.drinkCategoryPanel ul {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+}
+
+.drinkCategoryPanel li {
+    align-content: center;
+    text-align: center;
+    height: 15%;
+
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 22px;
+    background-color: black;
+}
+
+.drinkCategoryPanel a {
+    color: white;
+    text-decoration: none;
+}
+
+.menu {
+    position: absolute;
+    width: 80%;
+    left: 20%;
+    top: 10%;
+}
+
+.menu h1 {
+    margin: 15px;
+    font-size: 50px;
+}
+
+.menuRow {
+    display: flex;
+    position: relative;
+    height: 70%;
+}
+
+.menuItem {
+    margin: 10px;
+    width: 23%;
+    text-align: center;
+    background-color: #ffe9ec;
+}
+
+.menuItem img {
+    position: relative;
+    width: 90%;
+    height: 45%;
+    top: 10px;
+}
+
+.menuItem h2 {
+    position: relative;
+}
+
+.menuItem p {
+    position: relative;
+    width: 90%;
+    height: 20%;
+    left: 5%;
+}
+
+.menuItem h1 {
+    margin: 0px;
+    left: 5%;
+    float: left;
+    position: relative;
+    width: 50%;
+    text-align: left;
+    font-size: 35px;
+}
+
+.menuItem button {
+    float: right;
+    right: 5%;
+    width: 40%;
+    height: 10%;
+    background-color: black;
+    color: white;
+    position: relative;
+    border-style: none;
+}

@@ -47,10 +47,6 @@
                     <h3>Inventory</h3>
                 </a>
                 <a href="#">
-                    <span class="material-icons-sharp"> report_gmailerrorred </span>
-                    <h3>Reports</h3>
-                </a>
-                <a href="#">
                     <span class="material-icons-sharp"> settings </span>
                     <h3>Settings</h3>
                 </a>
@@ -61,12 +57,58 @@
             </div>
         </aside>
 
+        <!-- ----------------SALES & TRENDS-------------------- -->
         <main>
-            <h1>Trends</h1>
-            <div class="date">
-                <input type="date">
+            <h1>Sales & Trends</h1>
+            <div class="salesOptions">
+                <input type="date" id="startDate"/>
+            </div>
+            <div class="salesOptions">
+                <input type="date" id="endDate"/>
             </div>
 
+            <select class="salesOptions" id="reportTypeBox">
+                <option value="dailySales">Daily Sales</option>
+                <option value="weeklySales">Weekly Sales</option>
+                <option value="monthlySales">Monthly Sales</option>
+                <option value="yearlySales">Yearly Sales</option>
+                <option value="topSellingProducts">Top Selling Products</option>
+                <option value="restockReport">Restock Report</option>
+                <option value="employeePerformance">Employee Performance</option>
+                <option value="productUsageChart">Product Usage Chart</option>
+                <option value="zReport">Z Report</option>
+                <option value="xReport">X Report</option>
+            </select>
+            <button class="salesOptions" id="generateReportTypeButton">Generate Report Type</button>
+            <button class="salesOptions" id="downloadReportButton">Download Report</button>
+    
+            <!-- ----------------TABLE-------------------- -->
+            <div class="sales-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <a href="#"> Show All</a>
+            </div>
+
+            <!-- ----------------GRAPH-------------------- -->
+            <div class="sales-graph">
+                <h2>Sales Graph</h2>
+                <canvas id="salesChart"></canvas>
+            </div>
+           <!--
             <div class="insights">
                 <div class="sales">
                     <span class="material-icons-sharp">analytics</span>
@@ -86,7 +128,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>-->
         </main>
         <!-- TOP -->
         <div class="right">
@@ -103,7 +145,8 @@
             </div>
         </div>
     </div>
-    <script src="manager.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="index.js"></script>
 </body>
 
 </html>
