@@ -65,38 +65,21 @@
             <h1>Inventory</h1>
 
             <div class="inventory-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Supply ID</th>
-                            <th>Supply Name</th>
-                            <th>Unit</th>
-                            <th>Quantity on Hand</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>101</td>
-                            <td>Syrup</td>
-                            <td>120ml</td>
-                            <td>200</td>
-                        </tr>
-                        <tr>
-                            <td>102</td>
-                            <td>Popping boba</td>
-                            <td>300mg</td>
-                            <td>150</td>
-                        </tr>
-                        <tr>
-                            <td>104</td>
-                            <td>Green Tea</td>
-                            <td>120 mg</td>
-                            <td>50</td>
-                        </tr>
-                    </tbody>
+                <table id="inventoryTable">
+                <thead>
+                    <tr>
+                    <th>Supply ID</th>
+                    <th>Supply Name</th>
+                    <th>Unit</th>
+                    <th>Quantity on Hand</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody">
+                    <!-- rows will be filled by JavaScript -->
+                </tbody>
                 </table>
-                <a href="#"> Show All</a>
             </div>
+
         </main>
         <!-- TOP -->
         <div class="right">
@@ -113,7 +96,7 @@
             </div>
         </div>
     </div>
-    <script src="index.js"></script>
+    <script src="manager.js"></script>
 </body>
 
 </html>
