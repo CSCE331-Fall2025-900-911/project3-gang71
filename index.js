@@ -5,6 +5,9 @@ const path = require("path");
 const { Pool } = require("pg"); //  importing PostgreSQL
 const cors = require("cors");
 
+// // for local testing
+// require('dotenv').config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
