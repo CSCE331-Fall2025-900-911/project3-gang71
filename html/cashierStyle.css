@@ -61,6 +61,7 @@ body {
 .drinkCategoryPanel a {
     color: white;
     text-decoration: none;
+    display: block; /* make whole area around links clickable */
 }
 
 .menu {
