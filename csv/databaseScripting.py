@@ -163,8 +163,11 @@ lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller
              'Watson', 'Brooks', 'Chavez', 'Wood', 'Bennet', 'Gray', 'Mendoza', 'Ruiz', 'Hughes', 'Price',
              'Alvarez', 'Castillo', 'Sanders', 'Patel', 'Myers', 'Long', 'Ross', 'Foster', 'Jimenez', 'Gupta']
 
-def generateNumSequence():
-  return str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9))
+def generateNumSequence(n):
+  str = ''
+  for i in range(0,n):
+    str = str + str(random.randint(0,9))
+  return str
 
 customercsv = open('customers.csv', 'w', newline = '')
 customerWriter = csv.writer(customercsv)
@@ -174,7 +177,7 @@ for c in range(1, 251):
   # generate random values
   fName = firstNames[random.randint(0, 99)]
   lName = lastNames[random.randint(0, 99)]
-  phoneNum = generateNumSequence() + '-' + generateNumSequence() + '-' + generateNumSequence()
+  phoneNum = str(random.randint(2,9)) + generateNumSequence(2) + '-' + str(random.randint(2,9)) + generateNumSequence(2) + '-' + generateNumSequence(4)
   loyalPoints = random.randint(0,500)
 
   # add new customer data to csv file
