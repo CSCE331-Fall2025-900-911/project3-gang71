@@ -87,6 +87,7 @@ body {
     width: 23%;
     text-align: center;
     background-color: #ffe9ec;
+    padding-bottom: 1%;
 }
 
 .menuItemImg {
@@ -112,6 +113,7 @@ body {
     width: 90%;
     height: 20%;
     left: 5%;
+    margin-bottom: 0;
 }
 
 .menuItemH1 {
@@ -125,7 +127,9 @@ body {
 }
 
 .menuItemButton {
-    float: right;
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    margin-left: auto;
     right: 5%;
     width: 40%;
     height: 10%;
@@ -161,7 +165,11 @@ body {
 }
 
 .modificationsPopup button {
-    padding: 10px;
+    padding: 10px; 
+}
+
+.modificationsPopup button:focus {
+    background-color: #ffe9ec;
 }
 
 .modifications {
@@ -246,6 +254,10 @@ body {
 .fourModificationChoices button, 
 #confirmModificationsDiv button {
     background-color: rgb(255, 255, 255);
+}
+
+#confirmModificationsDiv button:focus {
+    background-color: #ffe9ec;
 }
 
 

@@ -1,32 +1,52 @@
-function renderDrinks(drinks) {
-  const menuRow = document.getElementById("menuRow");
-  menuRow.innerHTML = ""; // clear previous items
-
+function renderDrinks(drinks, menuRow) {
   drinks.forEach(drink => {
     const itemDiv = document.createElement("div");
     itemDiv.classList.add("menuItem");
 
-    // build your drink structure using template literals
     itemDiv.innerHTML = `
-      <img src="${drink.image_url}" alt="${drink.name}">
-      <h2>${drink.name}</h2>
-      <p>${drink.description}</p>
-      <h1>$${drink.price.toFixed(2)}</h1>
-      <button class="openModifications" data-id="${drink.id}">Add to Order</button>
+      <img src="${drink.itemphoto}" alt="${drink.itemname}" class="menuItemImg">
+      <h2 class="menuItemH2">${drink.itemname}</h2>
+      <p class="menuItemP">${drink.itemdescrip}</p>
+      <div style="display: flex; align-items: center;">
+        <h1 class="menuItemH1">$${Number(drink.itemprice).toFixed(2)}</h1>
+        <button class="menuItemButton" data-id="${drink.menuid}">Add to Order</button>
+      </div>
     `;
-
     menuRow.appendChild(itemDiv);
-  });
 
-  // now attach click listeners for each button
-  document.querySelectorAll(".openModifications").forEach(btn => {
-    btn.addEventListener("click", e => {
-      const drinkId = e.target.dataset.id;
-      const drink = drinks.find(d => d.id == drinkId);
+    // event listeners
+    const addDrinkToOrderButton = itemDiv.querySelector(".menuItemButton");
+    addDrinkToOrderButton.addEventListener("click", () => {
       openModificationsPopup(drink);
     });
-  });
+
+    
+  }); 
 }
+
+function openModificationsPopup(drink) {
+  currentDrink = drink;
+  currentBasePrice = Number(drink.itemprice);
+
+  // put in drink info
+  document.getElementById("itemImage").src = drink.itemphoto;
+  document.getElementById("itemName").textContent = drink.itemname;
+  document.getElementById("itemDescription").textContent = drink.itemdescrip;
+  document.getElementById("modifiedDrinkPrice").textContent = `$${currentBasePrice.toFixed(2)}`;
+
+  // TODO: pull in toppings info (remove hardcoded version)
+
+  // reset modifications UI (size, sweetness, ice, toppings)
+  document.getElementById("smallDrinkButton").dataset.selected = "false";
+  document.getElementById("mediumDrinkButton").dataset.selected = "false";
+  document.getElementById("largeDrinkButton").dataset.selected = "false";
+  document.querySelectorAll(".threeModificationChoices button, .fourModificationChoices button").forEach(btn => btn.classList.remove("selected"));
+  document.querySelectorAll("select").forEach(sel => sel.selectedIndex = 0);
+
+  // show popup
+  document.getElementById("modificationsPopup").style.display = "block";
+}
+
 
 
 function closeModificationsPopup() {
@@ -53,7 +73,7 @@ function calculateModifiedPrice(fee) {
 
 // add to order popup
 let items = [];
-function openSidebar(itemName, price, url) {
+function openSidebar(itemName, price, url, modifications = []) {
     items.push({name: itemName, price: price, url: url });
 
     const sidebar = document.getElementById("drinksInCartSidebar");
@@ -61,6 +81,8 @@ function openSidebar(itemName, price, url) {
         console.error("Sidebar container not found!");
         return;
     }
+
+    // TODO: handle modifications
 
     // loop through all items
     items.forEach(item => {
@@ -127,7 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return res.json();
     })
     .then(drinks => {
-      // const drinks = drinks.filter(drink => drink.itemcategory === category);
       let startingIndex = 0;
       menuRows.forEach(menuRow => {
         // clear old content
@@ -135,20 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const chunk = drinks.slice(startingIndex, startingIndex + 4); // 4 drinks per row
         startingIndex += 4;
-
-        chunk.forEach(drink => {
-          const itemDiv = document.createElement("div");
-          itemDiv.classList.add("menuItem");
-
-          itemDiv.innerHTML = `
-            <img src="${drink.itemphoto}" alt="${drink.itemname}" class="menuItemImg">
-            <h2 class="menuItemH2">${drink.itemname}</h2>
-            <p class="menuItemP">${drink.itemdescrip}</p>
-            <h1 class="menuItemH1">$${Number(drink.itemprice).toFixed(2)}</h1>
-            <button class="menuItemButton" data-id="${drink.menuid}">Add to Order</button>
-          `;
-          menuRow.appendChild(itemDiv);
-        });
+        renderDrinks(chunk, menuRow);
       });
 
       // TODO: modification menu
