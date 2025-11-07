@@ -65,3 +65,22 @@ app.get("/api/menu/:category", async (req, res) => {
     res.status(500).json({ error: "Database query failed" });
   }
 });
+
+
+app.post("/api/inventory", async (req, res) => {
+  try {
+    const { name, unit, quantity } = req.body;
+    if (!name || !unit || isNaN(quantity)) {
+      return res.status(400).json({ error: "Invalid input" });
+    }
+
+    const result = await pool.query(
+      "INSERT INTO inventory (supplyname, unit, quantityonhand) VALUES ($1, $2, $3) RETURNING *",
+      [name, unit, quantity]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database insert failed" });
+  }
+});

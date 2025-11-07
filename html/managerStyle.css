@@ -296,12 +296,47 @@ main .inventory-table a{
     color: var(--color-primary);
 }
 
-
 main input[type=text]{
-    margin-top: 1.8rem;
+    margin: 0.8rem;
     padding: 6px;
-    font-size: 17px;
+    font-size: 15px;
+    font-family: poppins, sans-serif;
 }
+.search-container{
+    background: gray;
+    align-items: center;
+}
+
+.popup > button{
+    margin-left: 10px;
+    padding: 0.8rem;
+    transition: all 0.3s ease;
+    font-family: poppins, sans-serif;
+    color: var(--color-dark);
+}
+
+/* Style when the mouse hovers over the button */
+.popup > button:hover {
+  background-color: var(--color-primary);
+  cursor: pointer; /* Changes cursor to a pointer on hover */
+  color: white;
+}
+.popup{
+    width: 400px;
+    background-color: var(--color-info-light);
+    border-radius: 6px;
+    position: absolute;
+    top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    padding: 20px;
+    color:var(--color-dark);
+    display: none; /* hidden initially */
+}
+
+/* --------------------ADD/REMOVE ITEM------------------------- */
+
 
 /* ---------------------------- SALES -------------------------- */
 main .salesOptions {
