@@ -76,9 +76,8 @@
                 <option value="restockReport">Restock Report</option>
                 <option value="employeePerformance">Employee Performance</option>
                 <option value="productUsageChart">Product Usage Chart</option>
-                <option value="salesByItem">Sales by Item</option>
             </select>
-            <button class="salesOptions" id="generateReportTypeButton">Generate Report</button>
+            <button class="salesOptions" id="generateReportTypeButton">Generate Report Type</button>
             <button class="salesOptions" id="downloadReportButton">Download Report</button>
     
             <!-- ----------------TABLE-------------------- -->
@@ -86,9 +85,9 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Week / Product</th>
+                            <th>Product</th>
                             <th>Quantity</th>
-                            <th>Revenue ($)</th>
+                            <th>Revenue</th>
                         </tr>
                     </thead>
                     <tbody id="salesBody">
@@ -106,7 +105,6 @@
                 <h2>Sales Graph</h2>
                 <canvas id="salesChart"></canvas>
             </div>
-
             <!-- ----------------X & Z Reports-------------------- -->
             <br>
             <h2>X & Z Reports</h2>
@@ -127,7 +125,6 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="trends.js"></script>
     <script src="trends.js"></script>
 </body>
 
