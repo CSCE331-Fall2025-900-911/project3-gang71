@@ -1,10 +1,10 @@
 function checkout() {
-    // clear sessionStorage and page
-    const totalPrice = calculateTotalPrice();
+    // clear page
     document.getElementById("cartPage").innerHTML = "";
 
+    // total price before tip
+    const totalPrice = calculateTotalPrice();
     showPaymentScreen(totalPrice);
-    sessionStorage.clear();
 }
 
 function showPaymentScreen(totalPrice) {
@@ -14,9 +14,9 @@ function showPaymentScreen(totalPrice) {
     document.getElementById("paymentScreen").innerHTML = `
         <button>Card</button>
         <button>Cash</button>
-        <input type="text">
-        <button>Add Tip</button>
-        <h2>Total price: $${totalPrice}</h2>
+        <input id="tipInputAmount" type="text">
+        <button onclick=addTip()>Add Tip</button>
+        <h2 id="totalPriceH2">Total price: $${totalPrice}</h2>
         <a href="cashierCart.html" style="text-decoration: none; color: black;">
             <button>Cancel</button>
         </a>
@@ -25,14 +25,28 @@ function showPaymentScreen(totalPrice) {
 }
 
 function showThankYouScreen() {
+    // clear sessionStorage 
+    sessionStorage.clear();
+
     document.getElementById("paymentScreen").innerHTML = "";
     document.getElementById("paymentScreen").innerHTML = "<h1>Thank you for visiting!</h1>";
 }
 
-function calculateTotalPrice() {
+function addTip() {
+    const tipAmount = Number(document.getElementById("tipInputAmount").value);
+
+    const totalPrice = calculateTotalPrice(tipAmount);
+    const priceH2 = document.getElementById("totalPriceH2");
+    priceH2.textContent = "Total price: $" + totalPrice;
+}
+
+function calculateTotalPrice(tipAmount = 0) {
     const cartItems = JSON.parse(sessionStorage.getItem("cartItems")) || [];
 
-    const total = cartItems.reduce((sum, item) => sum + Number(item.price), 0);
+    total = cartItems.reduce((sum, item) => sum + Number(item.price), 0);
+    if (tipAmount != 0) {
+        total += tipAmount;
+    }
 
     return total.toFixed(2);
 }
