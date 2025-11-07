@@ -65,3 +65,44 @@ function filterContent() {
   }
 }
 
+
+
+const openAddBtn = document.getElementById("openAddBtn");
+const popup = document.querySelector(".popup");
+const closeRemoveBtn = document.getElementById("closeRemoveBtn");
+
+openAddBtn.addEventListener("click", () => {
+  popup.style.display = "block";
+});
+
+closeRemoveBtn.addEventListener("click", () => {
+  popup.style.display = "none";
+});
+
+
+document.getElementById("addItemBtn").addEventListener("click", async () => {
+  const name = document.getElementById("item-name").value;
+  const unit = document.getElementById("item-unit").value;
+  const quantity = parseInt(document.getElementById("item-quantity").value);
+
+  if (!name || !unit || isNaN(quantity)) {
+    alert("Please fill out all fields correctly.");
+    return;
+  }
+
+  // Send data to the server
+  const response = await fetch("/api/inventory", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, unit, quantity }),
+  });
+
+  if (response.ok) {
+    alert("Item added successfully!");
+    popup.style.display = "none";
+  } else {
+    alert("Failed to add item.");
+  }
+});
+
+
