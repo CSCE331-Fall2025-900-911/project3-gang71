@@ -200,6 +200,7 @@ aside .sidebar a:hover span{
 /* ------------------MAIN CONTENT----------------------- */
 main {
     margin-top: 1.4rem;
+    margin-bottom: 1.4rem;
 }
 
 main .date{
@@ -368,6 +369,8 @@ main .salesOptions:hover input[type="date"] {
 
 main .sales-table{
     margin-top: 2rem;
+    max-height: 500px;
+    overflow-y: auto;
 }
 main .sales-table h2{
     margin-bottom: 0.8rem;

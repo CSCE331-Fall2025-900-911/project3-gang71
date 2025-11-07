@@ -76,8 +76,6 @@
                 <option value="restockReport">Restock Report</option>
                 <option value="employeePerformance">Employee Performance</option>
                 <option value="productUsageChart">Product Usage Chart</option>
-                <option value="zReport">Z Report</option>
-                <option value="xReport">X Report</option>
             </select>
             <button class="salesOptions" id="generateReportTypeButton">Generate Report Type</button>
             <button class="salesOptions" id="downloadReportButton">Download Report</button>
@@ -92,7 +90,7 @@
                             <th>Revenue</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="salesBody">
                         <tr>
                             <td>-</td>
                             <td>-</td>
@@ -100,7 +98,6 @@
                         </tr>
                     </tbody>
                 </table>
-                <a href="#"> Show All</a>
             </div>
 
             <!-- ----------------GRAPH-------------------- -->
@@ -108,27 +105,12 @@
                 <h2>Sales Graph</h2>
                 <canvas id="salesChart"></canvas>
             </div>
-           <!--
-            <div class="insights">
-                <div class="sales">
-                    <span class="material-icons-sharp">analytics</span>
-                    <div class="middle">
-                        <div class="left">
-                            <h3>Total Sales</h3>
-                            <h1>$25,000</h1>
-                        </div>
-                    </div>
-                </div>
-                <div class="sales">
-                    <span class="material-icons-sharp">analytics</span>
-                    <div class="middle">
-                        <div class="left">
-                            <h3>Total Revenue</h3>
-                            <h1>$125,000</h1>
-                        </div>
-                    </div>
-                </div>
-            </div>-->
+            <!-- ----------------X & Z Reports-------------------- -->
+            <br>
+            <h2>X & Z Reports</h2>
+            <button class="salesOptions" id="downloadXReportButton">Download X Report</button>
+            <button class="salesOptions" id="downloadZReportButton">Download Z Report</button>
+            
         </main>
         <!-- TOP -->
         <div class="right">
@@ -143,7 +125,7 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="index.js"></script>
+    <script src="trends.js"></script>
 </body>
 
 </html>
