@@ -1,7 +1,7 @@
 function addItemToCart(itemName, price, url, modifications = []) {
 	const items = JSON.parse(sessionStorage.getItem("cartItems")) || [];
 
-    const newItem = { name: itemName, price, url, modifications };
+    const newItem = {name: itemName, price, url, modifications};
     items.push(newItem);
 
     // save updated array to sessionStorage
@@ -108,17 +108,13 @@ document.getElementById("addItemToCart").addEventListener("click", () => {
     const btn = document.getElementById("addItemToCart");
 	closeModificationsPopup();
 
-	const modifications = []
+	const modifications = [];
     addItemToCart(
         btn.dataset.name,
         Number(btn.dataset.price),
         btn.dataset.url,
         modifications
     );
-
-	console.log("drink object:", drink);
-	console.log("drink.itemphoto:", drink.itemphoto);
-
 });
 
 
