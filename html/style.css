@@ -201,6 +201,7 @@ aside .sidebar a:hover span{
 /* ------------------MAIN----------------------- */
 main {
     margin-top: 1.4rem;
+    margin-bottom: 1.4rem;
 }
 
 main .date{
@@ -296,7 +297,7 @@ main .inventory-table a{
     color: var(--color-primary);
 }
 
-/* ------------inventory------------------- */
+/* ------------Sales and Trends------------------- */
 main .salesOptions {
     display: inline-block;
     background: var(--color-light);
@@ -326,6 +327,8 @@ main .salesOptions:hover input[type="date"] {
 
 main .sales-table{
     margin-top: 2rem;
+    max-height: 500px;
+    overflow-y: auto;
 }
 main .sales-table h2{
     margin-bottom: 0.8rem;
