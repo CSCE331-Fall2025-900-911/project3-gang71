@@ -1,10 +1,32 @@
 const express = require("express");
 const path = require("path");
+const { Pool } = require("pg"); //  importing PostgreSQL
+const cors = require("cors");
+
+// for local testing
+require('dotenv').config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Serve static files (like index.html and index.js)
-app.use(express.static(path.join(__dirname)));
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "html"))); // Serve /html folder
+
+// PostgreSQL connection
+const pool = new Pool({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: 5432,
+  // ssl: { rejectUnauthorized: false }, // needed for secure remote connections
+});
+
+// show inventory.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "html", "inventory.html"));
+});
 
 // Start server
 app.listen(PORT, () => {
@@ -267,5 +289,24 @@ app.get("/api/xReport", async (req, res) => {
   } catch (err) {
     console.error("Database error:", err);
     res.status(500).json({ error: "Database query failed" });
+  }
+});
+
+
+app.post("/api/inventory", async (req, res) => {
+  try {
+    const { name, unit, quantity } = req.body;
+    if (!name || !unit || isNaN(quantity)) {
+      return res.status(400).json({ error: "Invalid input" });
+    }
+
+    const result = await pool.query(
+      "INSERT INTO inventory (supplyname, unit, quantityonhand) VALUES ($1, $2, $3) RETURNING *",
+      [name, unit, quantity]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database insert failed" });
   }
 });
