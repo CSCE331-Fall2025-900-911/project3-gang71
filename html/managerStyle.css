@@ -8,7 +8,7 @@
     --color-success:#41f1b6;
     --color-warning:#f0b051;
     --color-white:#fff;
-    --color-info-dark: #2c333b;
+    --color-info-dark: #48505a;
     --color-info-light: #dce1eb;
     --color-dark: #363949;
     --color-light: rgba(132,139,200,0.18);
@@ -142,7 +142,7 @@ aside .close{
     display: none;
 }
 
-/* ------------------------SIDEBAR---------------------- */
+/* ------------------------NAVIGATION SIDEBAR---------------------- */
 aside .sidebar{
     background: white;
     display: flex;
@@ -165,7 +165,6 @@ aside .sidebar a{
     transition: all 300ms ease;
 }
 aside .sidebar a span{
-    font-size: 1.6rem;
     transition: all 300ms ease;
 }
 aside .sidebar a:last-child{
@@ -198,7 +197,7 @@ aside .sidebar a:hover span{
     margin-left: 1rem;
 }
 
-/* ------------------MAIN----------------------- */
+/* ------------------MAIN CONTENT----------------------- */
 main {
     margin-top: 1.4rem;
     margin-bottom: 1.4rem;
@@ -236,7 +235,7 @@ main .insights > div .middle{
     justify-content: space-between;
 }
 
-/* ---------RIGHT-------------------- */
+/* ---------RIGHT SIDEBAR-------------------- */
 .right{
     margin-top: 1.4rem;
 }
@@ -260,7 +259,7 @@ main .insights > div .middle{
     left: 1rem;
 }
 
-/* ------------inventory------------------- */
+/* --------------------------INVENTORY---------------------------- */
 main .inventory-table{
     margin-top: 2rem;
 }
@@ -276,6 +275,7 @@ main .inventory-table table{
     text-align: center;
     box-shadow: var(--box-shadow);
     transition: all 300ms ease;
+    margin-bottom: 3rem;
 }
 
 main .inventory-table table:hover{

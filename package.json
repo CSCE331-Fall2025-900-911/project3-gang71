@@ -6,6 +6,21 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.21.2"
-  }
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "pg": "^8.16.3"
+  },
+  "description": "Web App for Kung Fu Tea  \r Contributors: Claire Wu, Jayani Singh, Vaidehi Singhal, Sarah Muyshondt, Anna Williamson, Haajirah Siddiqi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CSCE331-Fall2025-900-911/project3-gang71.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CSCE331-Fall2025-900-911/project3-gang71/issues"
+  },
+  "homepage": "https://github.com/CSCE331-Fall2025-900-911/project3-gang71#readme"
 }

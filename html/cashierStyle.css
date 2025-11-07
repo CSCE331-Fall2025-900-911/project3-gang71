@@ -2,6 +2,7 @@
 
 body {
     margin: 0;
+    padding: 0;
 }
 
 .topPageBanner {
@@ -60,6 +61,7 @@ body {
 .drinkCategoryPanel a {
     color: white;
     text-decoration: none;
+    display: block; /* make whole area around links clickable */
 }
 
 .menu {
@@ -85,38 +87,49 @@ body {
     width: 23%;
     text-align: center;
     background-color: #ffe9ec;
+    padding-bottom: 1%;
 }
 
-.menuItem img {
+.menuItemImg {
     position: relative;
     width: 90%;
     height: 45%;
     top: 10px;
 }
 
-.menuItem h2 {
-    position: relative;
+.menuItemH2 {
+    margin-left: 5%;
+    text-align: center;
+
+    /* keep drink name on one line */
+    max-width: 290px;
+    white-space: nowrap;
+    overflow: hidden; 
+    text-overflow: ellipsis;
 }
 
-.menuItem p {
+.menuItemP {
     position: relative;
     width: 90%;
     height: 20%;
     left: 5%;
+    margin-bottom: 0;
 }
 
-.menuItem h1 {
+.menuItemH1 {
     margin: 0px;
-    left: 5%;
+    left: 2%;
     float: left;
     position: relative;
-    width: 50%;
+    width: 30%;
     text-align: left;
-    font-size: 35px;
+    font-size: 30px;
 }
 
-.menuItem button {
-    float: right;
+.menuItemButton {
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    margin-left: auto;
     right: 5%;
     width: 40%;
     height: 10%;
@@ -124,4 +137,159 @@ body {
     color: white;
     position: relative;
     border-style: none;
+}
+
+
+/* modifications popup */
+.modificationsPopup {
+    display: none;
+
+    position: fixed;
+    left: 30%;
+    top: 13%;    
+    padding-left: 2%;
+    width: 50%;
+    height: fit-content;
+    padding-bottom: 2%;
+    padding-top: 2%;
+    /* justify-content: center; */
+    align-items: center;
+    background-color: rgb(255, 224, 224);
+    
+    /* keep on top */
+    z-index: 1000;
+}
+
+.modificationsPopup h3 {
+    padding-top: 4%;
+}
+
+.modificationsPopup button {
+    padding: 10px; 
+}
+
+.modificationsPopup button:focus {
+    background-color: #ffe9ec;
+}
+
+.modifications {
+    display: grid;
+    grid-template-columns: 1fr repeat(2, auto);
+}
+
+
+.toModifyDrinkInfo {
+    display: grid;
+    grid-template-columns: auto 2fr;
+    grid-template-rows: auto auto;
+    gap: 4%;
+    padding-right: 2%;
+}
+
+#itemImage {
+    grid-row: 1 / span 2;
+    height: fit-content;
+}
+
+#itemName {
+    grid-row: 1;
+    grid-column: 2;
+}
+
+#itemDescription {
+    grid-row: 2;
+    grid-column: 2;
+}
+
+.modification {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    width: fit-content;
+    align-items: center;
+    gap: 10%;
+}
+
+.modification h3 {
+    padding-top: 0;
+    width: max-content;
+}
+
+.twoModificationChoices {
+    width: 20%;
+
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 5%;
+}
+
+.twoModificationChoices button {
+    width: max-content;
+    height: fit-content;
+}
+
+.threeModificationChoices {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 5%;
+}
+
+.threeModificationChoices button {
+    width: max-content;
+}
+
+.fourModificationChoices {
+    width: 40%;
+
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    gap: 5%
+}
+
+.fourModificationChoices button {
+    height: fit-content;
+}
+
+.twoModificationChoices button, 
+.threeModificationChoices button, 
+.fourModificationChoices button, 
+#confirmModificationsDiv button {
+    background-color: rgb(255, 255, 255);
+}
+
+#confirmModificationsDiv button:focus {
+    background-color: #ffe9ec;
+}
+
+
+#modifiedDrinkPrice {
+    width: fit-content;
+}
+
+#confirmModificationsDiv {
+    float: right;
+    margin-right: 3%
+}
+
+
+/* drink cart/sidebar */
+.drinksInCartSidebar {
+    display: none;
+    float: right;
+    height: 100vh;
+    margin-right: 2%;
+}
+
+.sidebarItem {
+    display: grid;
+    grid-template-rows: auto auto auto;
+}
+
+.sidebarImage {
+    grid-row: 1;
+}
+
+.sidebarItemName, 
+.sidebarItemPrice {
+    width: fit-content;
+    margin: 0;
 }
