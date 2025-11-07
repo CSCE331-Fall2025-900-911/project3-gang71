@@ -146,7 +146,7 @@ body {
 
     position: fixed;
     left: 30%;
-    top: 13%;    
+    top: 10%;    
     padding-left: 2%;
     width: 50%;
     height: fit-content;
@@ -273,10 +273,14 @@ body {
 
 /* drink cart/sidebar */
 .drinksInCartSidebar {
+    background-color: #EB0C43;
     display: none;
     float: right;
     height: 100vh;
     margin-right: 2%;
+    /* keep on top */
+    position: relative;
+    z-index: 1000;
 }
 
 .sidebarItem {
