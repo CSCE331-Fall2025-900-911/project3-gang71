@@ -9,6 +9,7 @@
     <div class = logo>
       <img src = "https://cdn.vettedbiz.com/wp-content/uploads/2021/11/02114926/kung-fu-tea-logo.png" width = "75" height = "75">
     </div>
+    <a href="cashierCart.html">Cart</a>
     <div class = employeeName>
       <p>Employee Name</p>
     </div>
@@ -30,11 +31,75 @@
     </ul>
   </div>
 
+  <div id="modificationsPopup" class="modificationsPopup">
+        <div class="toModifyDrinkInfo">
+            <img id="itemImage">
+            <h2 id="itemName"></h2>
+            <p id="itemDescription"></p>
+        </div>
+
+        <div class="modification">
+            <h3>Cup Size:</h3>
+            <div class="threeModificationChoices">
+                <button id="smallDrinkButton">Small</button>
+                <button id="mediumDrinkButton" onclick="calculateModifiedPrice(0.5)">Medium</button>
+                <button id="largeDrinkButton" onclick="calculateModifiedPrice(1)">Large (+$1.00)</button>
+            </div>
+        </div>
+
+        <div class="modification">
+            <h3>Sweetness:</h3>
+            <div class="fourModificationChoices">
+                <button>0%</button>
+                <button>50%</button>
+                <button>75%</button>
+                <button>100%</button>
+            </div>
+        </div>
+
+        <div class="modification">
+            <h3>Ice:</h3>
+            <div class="fourModificationChoices">
+                <button>0%</button>
+                <button>50%</button>
+                <button>100%</button>
+                <button>120%</button>
+            </div>
+        </div>
+
+        <div class="modification">
+            <h3>Toppings:</h3>
+            <div class="twoModificationChoices" style="height: fit-content;">
+                <select name="topping1" id="hi">
+                    <option value="" selected disabled hidden>Topping 1</option>
+                    <option value="boba">Boba</option>
+                    <option value="crystalBoba">Crystal Boba</option>
+                    <option value="pudding">Pudding</option>
+                    <option value="grassJelly">Grass Jelly</option>
+                </select>
+                <select name="topping2">
+                    <option value="" selected disabled hidden>Topping 2</option>
+                    <option value="boba">Boba</option>
+                    <option value="crystalBoba">Crystal Boba</option>
+                    <option value="pudding">Pudding</option>
+                    <option value="grassJelly">Grass Jelly</option>
+                </select>
+            </div>
+        </div>
+
+        <h3 id="modifiedDrinkPrice"></h3>
+
+        <div id="confirmModificationsDiv">
+            <button onclick="closeModificationsPopup()">Cancel</button>
+            <button id="addItemToCart">Add to Cart</button>
+        </div>
+    </div>
+
   <div class = menu>
     <h1>La Colombe Cold Brews</h1>
     <div class = menuRow>
     </div>
   </div>
-  <script src="cashier.js"></script>
+  <script src="cashierMenu.js"></script>
 </body>
 </html>

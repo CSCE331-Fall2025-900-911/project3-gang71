@@ -3,8 +3,8 @@ const path = require("path");
 const { Pool } = require("pg"); //  importing PostgreSQL
 const cors = require("cors");
 
-// // for local testing
-// require('dotenv').config();
+// for local testing
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,7 +20,7 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: 5432,
-  ssl: { rejectUnauthorized: false }, // needed for secure remote connections
+  // ssl: { rejectUnauthorized: false }, // needed for secure remote connections
 });
 
 // show inventory.html
