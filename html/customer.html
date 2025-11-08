@@ -32,7 +32,7 @@
                 </a>
                 <a href="customer.html">
                     <span class="material-icons-sharp">person_outline</span>
-                    <h3>Customer</h3>
+                    <h3>Customers</h3>
                 </a>
                 <a href="#">
                     <span class="material-icons-sharp"> receipt_long </span>
@@ -57,60 +57,29 @@
             </div>
         </aside>
 
-        <!-- ----------------SALES & TRENDS-------------------- -->
         <main>
-            <h1>Sales & Trends</h1>
-            <div class="salesOptions">
-                <input type="date" id="startDate"/>
+            <h1>Customers</h1>
+            <div class="search-container">
+                <input id="search-bar" type="text" onkeyup="filterContent()" placeholder="Search.." name="search" >
             </div>
-            <div class="salesOptions">
-                <input type="date" id="endDate"/>
-            </div>
-
-            <select class="salesOptions" id="reportTypeBox">
-                <option value="dailySales">Daily Sales</option>
-                <option value="weeklySales">Weekly Sales</option>
-                <option value="monthlySales">Monthly Sales</option>
-                <option value="yearlySales">Yearly Sales</option>
-                <option value="topSellingProducts">Top Selling Products</option>
-                <option value="restockReport">Restock Report</option>
-                <option value="employeePerformance">Employee Performance</option>
-                <option value="productUsageChart">Product Usage Chart</option>
-            </select>
-            <button class="salesOptions" id="generateReportTypeButton">Generate Report Type</button>
-            <button class="salesOptions" id="downloadReportButton">Download Report</button>
-    
-            <!-- ----------------TABLE-------------------- -->
-            <div class="sales-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody id="salesBody">
-                        <tr>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
-                        </tr>
-                    </tbody>
+            
+            <div class="inventory-table">
+                <table id="customerTable">
+                <thead>
+                    <tr>
+                    <th>Customer ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Phone Number</th>
+                    <th>Loyalty Points</th>
+                    </tr>
+                </thead>
+                <tbody id="customerBody">
+                    <!-- rows will be filled by JavaScript -->
+                </tbody>
                 </table>
             </div>
 
-            <!-- ----------------GRAPH-------------------- -->
-            <div class="sales-graph">
-                <h2>Sales Graph</h2>
-                <canvas id="salesChart"></canvas>
-            </div>
-            <!-- ----------------X & Z Reports-------------------- -->
-            <br>
-            <h2>X & Z Reports</h2>
-            <button class="salesOptions" id="downloadXReportButton">Download X Report</button>
-            <button class="salesOptions" id="downloadZReportButton">Download Z Report</button>
-            
         </main>
         <!-- TOP -->
         <div class="right">
@@ -124,8 +93,7 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="trends.js"></script>
+    <script src="customer.js"></script>
 </body>
 
 </html>
