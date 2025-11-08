@@ -14,8 +14,8 @@ function showPaymentScreen(totalPrice) {
     document.getElementById("paymentScreen").innerHTML = `
         <button>Card</button>
         <button>Cash</button>
-        <input id="tipInputAmount" type="text">
-        <button onclick=addTip()>Add Tip</button>
+        <input id="tipInputAmount" type="text" placeholder="Enter tip amount">
+        <button onclick="addTip()">Add Tip</button>
         <h2 id="totalPriceH2">Total price: $${totalPrice}</h2>
         <a href="cashierCart.html" style="text-decoration: none; color: black;">
             <button>Cancel</button>
@@ -35,6 +35,11 @@ function showThankYouScreen() {
 function addTip() {
     const tipAmount = Number(document.getElementById("tipInputAmount").value);
 
+    if (isNaN(tipAmount) || tipAmount < 0) {
+        alert("Please enter a valid tip amount");
+        return;
+    }
+
     const totalPrice = calculateTotalPrice(tipAmount);
     const priceH2 = document.getElementById("totalPriceH2");
     priceH2.textContent = "Total price: $" + totalPrice;
@@ -43,7 +48,7 @@ function addTip() {
 function calculateTotalPrice(tipAmount = 0) {
     const cartItems = JSON.parse(sessionStorage.getItem("cartItems")) || [];
 
-    total = cartItems.reduce((sum, item) => sum + Number(item.price), 0);
+    let total = cartItems.reduce((sum, item) => sum + Number(item.price), 0);
     if (tipAmount != 0) {
         total += tipAmount;
     }
@@ -65,18 +70,38 @@ window.addEventListener("DOMContentLoaded", () => {
         const itemDiv = document.createElement("div");
         itemDiv.classList.add("cartItem");
 
+        // Format modifications properly
+        const mods = item.modifications || {};
+        let modsText = '';
+        
+        if (mods.size) {
+            modsText += `Size: ${mods.size}<br>`;
+        }
+        if (mods.sweetness) {
+            modsText += `Sweetness: ${mods.sweetness}<br>`;
+        }
+        if (mods.ice) {
+            modsText += `Ice: ${mods.ice}<br>`;
+        }
+        if (mods.toppings && mods.toppings.length > 0) {
+            const toppingNames = mods.toppings.map(t => t.name).join(", ");
+            modsText += `Toppings: ${toppingNames}`;
+        }
+
+        // USE modsText here, not the old code!
         itemDiv.innerHTML = `
             <img src="${item.url}" alt="${item.name}" class="cartItemImg">
             <div>
                 <h3>${item.name}</h3>
-                <p>Price: $${item.price.toFixed(2)}</p>
-                <p>Modifications: ${(item.modifications || []).join(", ") || "None"}</p>
+                <p>Price: $${Number(item.price).toFixed(2)}</p>
+                <p>${modsText || "No modifications"}</p>
                 <button class="removeBtn" data-index="${index}">Remove</button>
             </div>
         `;
 
         cartDiv.appendChild(itemDiv);
     });
+    
     const price = document.createElement("h2");
     price.textContent = "Total price: $" + calculateTotalPrice();
     cartDiv.appendChild(price);
@@ -89,6 +114,4 @@ window.addEventListener("DOMContentLoaded", () => {
             location.reload(); // re-render cart
         });
     });
-
-    // change + - quantity
 });
