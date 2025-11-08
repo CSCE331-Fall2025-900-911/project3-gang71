@@ -14,7 +14,6 @@
     <div class="container">
         <!-- ----------------SIDEBAR-------------------- -->
         <aside>
-            <!-- Adding logo and Name of shop in top left corner -->
             <div class="top">
                 <div class="logo">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Kung_Fu_Tea_Official_Logo.png/1200px-Kung_Fu_Tea_Official_Logo.png"
@@ -26,13 +25,12 @@
                 </div>
             </div>
 
-            <!-- Sidebar tabs -->
             <div class="sidebar">
                 <a href="manager.html" class="active">
                     <span class="material-icons-sharp"> grid_view </span>
                     <h3>Dashboard</h3>
                 </a>
-                <a href="#">
+                <a href="customer.html">
                     <span class="material-icons-sharp">person_outline</span>
                     <h3>Customers</h3>
                 </a>
@@ -59,26 +57,12 @@
             </div>
         </aside>
 
-        <!-- ----------------MAIN CONTENT SECTION----------------------------->
         <main>
             <h1>Inventory</h1>
-            <!-- search bar, add/remove functionality -->
             <div class="search-container">
                 <input id="search-bar" type="text" onkeyup="filterContent()" placeholder="Search.." name="search" >
-                
-                <button type="button" id="openAddBtn">Add Item</button>
-                <span class="popup">
-                    <h2> Add an Item to Inventory</h2>
-                    <input id="item-name" type="text" placeholder="Enter item name">
-                    <input id="item-unit" type="text" placeholder="Enter item unit">
-                    <input id="item-quantity" type="text" placeholder="Enter item quantity"><br>
-                    <button type="button" id="addItemBtn">Add</button>
-                    <br><button type="button" id="closeRemoveBtn">Close</button>
-                </span>
-                <button type="button" id="openRemoveBtn">Remove Item</button>
             </div>
             
-            <!-- inventory table from the database -->
             <div class="inventory-table">
                 <table id="inventoryTable">
                 <thead>
@@ -87,7 +71,6 @@
                     <th>Supply Name</th>
                     <th>Unit</th>
                     <th>Quantity on Hand</th>
-                    <th>Restock</th>
                     </tr>
                 </thead>
                 <tbody id="inventoryBody">
@@ -97,8 +80,7 @@
             </div>
 
         </main>
-
-        <!-- TOP RIGHT -->
+        <!-- TOP -->
         <div class="right">
             <div class="top">
                 <div class="profile">

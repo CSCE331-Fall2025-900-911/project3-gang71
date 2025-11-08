@@ -345,3 +345,18 @@ app.get("/api/xReport", async (req, res) => {
     res.status(500).json({ error: "Database query failed" });
   }
 });
+
+
+
+// API route to get customer data
+app.get("/api/customer", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT customerid, firstname, lastname, phonenumber, loyaltypoints FROM customer ORDER BY customerid;"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database query for customer failed" });
+  }
+});
