@@ -49,6 +49,19 @@ app.get("/api/inventory", async (req, res) => {
   }
 });
 
+// API route to get employee data
+app.get("/api/employee", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT employeeid, firstname, lastname, employeerole, payrate, hoursworked FROM employee ORDER BY employeeid;"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database query for employee failed" });
+  }
+});
+
 
 app.get("/api/menu/:category", async (req, res) => {
   try {
