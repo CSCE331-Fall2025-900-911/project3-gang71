@@ -115,3 +115,8 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     });
 });
+
+// load employee name
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
+});

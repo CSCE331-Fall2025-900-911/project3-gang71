@@ -396,3 +396,19 @@ app.get("/api/customer", async (req, res) => {
     res.status(500).json({ error: "Database query for customer failed" });
   }
 });
+
+// login
+app.get("/api/login", async (req, res) => {
+  try {
+    const username = req.query.user;
+    const password = req.query.userPassword;
+    const result = await pool.query(
+      "SELECT firstName, lastName, employeeRole FROM employee WHERE username = $1 AND password = $2;",
+      [username, password]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Database error: ", err);
+    res.status(500).json({error: "Database query for login failed"});
+  }
+});
