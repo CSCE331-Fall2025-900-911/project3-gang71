@@ -307,8 +307,21 @@ main input[type=text]{
     background: gray;
     align-items: center;
 }
+.search-container > button {
+    margin-left: 10px;
+    padding: 0.8rem;
+    transition: all 0.3s ease;
+    font-family: poppins, sans-serif;
+    color: var(--color-dark);
+}
+/* Style when the mouse hovers over the button */
+.search-container > button:hover {
+  background-color: var(--color-primary);
+  cursor: pointer; /* Changes cursor to a pointer on hover */
+  color: white;
+}
 
-.popup > button{
+.addItemPopup > button{
     margin-left: 10px;
     padding: 0.8rem;
     transition: all 0.3s ease;
@@ -317,12 +330,12 @@ main input[type=text]{
 }
 
 /* Style when the mouse hovers over the button */
-.popup > button:hover {
+.addItemPopup > button:hover {
   background-color: var(--color-primary);
   cursor: pointer; /* Changes cursor to a pointer on hover */
   color: white;
 }
-.popup{
+.addItemPopup{
     width: 400px;
     background-color: var(--color-info-light);
     border-radius: 6px;
@@ -335,7 +348,33 @@ main input[type=text]{
     color:var(--color-dark);
     display: none; /* hidden initially */
 }
+.removeItemPopup > button{
+    margin-left: 10px;
+    padding: 0.8rem;
+    transition: all 0.3s ease;
+    font-family: poppins, sans-serif;
+    color: var(--color-dark);
+}
 
+/* Style when the mouse hovers over the button */
+.removeItemPopup > button:hover {
+  background-color: var(--color-primary);
+  cursor: pointer; /* Changes cursor to a pointer on hover */
+  color: white;
+}
+.removeItemPopup{
+    width: 400px;
+    background-color: var(--color-info-light);
+    border-radius: 6px;
+    position: absolute;
+    top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    padding: 20px;
+    color:var(--color-dark);
+    display: none; /* hidden initially */
+}
 /* --------------------ADD/REMOVE ITEM------------------------- */
 
 

@@ -72,25 +72,35 @@ function filterContent() {
 
 
 const openAddBtn = document.getElementById("openAddBtn");
-const popup = document.querySelector(".popup");
-const closeRemoveBtn = document.getElementById("closeRemoveBtn");
-
+const addItemPopup = document.querySelector(".addItemPopup");
 openAddBtn.addEventListener("click", () => {
-  popup.style.display = "block";
+  addItemPopup.style.display = "block";
 });
 
-closeRemoveBtn.addEventListener("click", () => {
-  popup.style.display = "none";
+
+const openRemoveBtn = document.getElementById("openRemoveBtn");
+const removeItemPopup = document.querySelector(".removeItemPopup");
+openRemoveBtn.addEventListener("click", () => {
+  removeItemPopup.style.display = "block";
+});
+
+const closeAddPopup = document.getElementById("closeAddPopup");
+closeAddPopup.addEventListener("click", () => {
+  addItemPopup.style.display = "none";
+});
+const closeRemovePopup = document.getElementById("closeRemovePopup");
+closeRemovePopup.addEventListener("click", () => {
+  removeItemPopup.style.display = "none";
 });
 
 // Function to add an item to the inventory database
 document.getElementById("addItemBtn").addEventListener("click", async () => {
-  const name = document.getElementById("item-name").value;
-  const price = document.getElementById("item-price").value;
-  const unit = document.getElementById("item-unit").value;
-  const quantity = parseInt(document.getElementById("item-quantity").value);
+  const name = document.getElementById("item-name").value.trim();
+  const price = parseFloat(document.getElementById("item-price").value);
+  const unit = document.getElementById("item-unit").value.trim();
+  const quantity = parseInt(document.getElementById("item-quantity").value, 10);
 
-  if (!name || !price || !unit || isNaN(quantity)) {
+  if (!name || isNaN(price) || !unit || isNaN(quantity)) {
     alert("Please fill out all fields correctly.");
     return;
   }
@@ -101,14 +111,56 @@ document.getElementById("addItemBtn").addEventListener("click", async () => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, price, unit, quantity }),
   });
-  fetchInventory();
+  
   
   if (response.ok) {
     alert("Item added successfully!");
-    popup.style.display = "none";
+    //refresh table and close pop up
+    fetchInventory();
+    addItemPopup.style.display = "none";
+
+    // clear inputs, ie, reset them back to blank 
+    document.getElementById("item-name").value = "";
+    document.getElementById("item-price").value = "";
+    document.getElementById("item-unit").value = "";
+    document.getElementById("item-quantity").value = "";
   } else {
+    const text = await response.text();
+    console.error("Failed to add item:", text);
     alert("Failed to add item.");
   }
 });
 
+// Function to delete an item from the inventory database
+document.getElementById("removeItemBtn").addEventListener("click", async () => {
+  const name = document.getElementById("remove-item-name").value.trim();
 
+  if (!name) {
+    alert("Please fill out the field correctly.");
+    return;
+  }
+
+  try {
+    // Send delete request to the server
+    const response = await fetch(`/api/inventory/${encodeURIComponent(name)}`, {
+      method: "DELETE"
+    });
+    
+    if (response.ok) {
+      alert("Item removed successfully!");
+      // refresh table and close popup
+      fetchInventory();
+      removeItemPopup.style.display = "none";
+
+      // clear input
+      document.getElementById("remove-item-name").value = "";
+    } else {
+      const error = await response.json();
+      console.error("Failed to remove item:", error);
+      alert(error.error || "Failed to remove item.");
+    }
+  } catch (err) {
+    console.error("Error removing item:", err);
+    alert("Failed to remove item.");
+  }
+});
