@@ -40,7 +40,7 @@ app.listen(PORT, () => {
 app.get("/api/inventory", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT supplyid, supplyname, unit, quantityonhand FROM inventory ORDER BY supplyid;"
+      "SELECT supplyid, supplyname, supplyprice, unit, quantityonhand FROM inventory ORDER BY supplyid;"
     );
     res.json(result.rows);
   } catch (err) {

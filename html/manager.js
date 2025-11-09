@@ -1,5 +1,5 @@
 //loading inventory table from the database
-document.addEventListener("DOMContentLoaded", () => {
+function fetchInventory () {
   const tableBody = document.getElementById("inventoryBody");
 
   fetch("/api/inventory")
@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
         row.innerHTML = `
           <td>${item.supplyid}</td>
           <td>${item.supplyname}</td>
+          <td>${item.supplyprice}</td>
           <td>${item.unit}</td>
           <td>${item.quantityonhand}</td>
         `;
@@ -23,7 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
       tableBody.innerHTML =
         "<tr><td colspan='4'>Failed to load inventory data</td></tr>";
     });
-});
+}
+
+// Run function on page load
+document.addEventListener("DOMContentLoaded", fetchInventory);
 
 //searching the inventory table
 // function filterContent() {
@@ -79,13 +83,14 @@ closeRemoveBtn.addEventListener("click", () => {
   popup.style.display = "none";
 });
 
-
+// Function to add an item to the inventory database
 document.getElementById("addItemBtn").addEventListener("click", async () => {
   const name = document.getElementById("item-name").value;
+  const price = document.getElementById("item-price").value;
   const unit = document.getElementById("item-unit").value;
   const quantity = parseInt(document.getElementById("item-quantity").value);
 
-  if (!name || !unit || isNaN(quantity)) {
+  if (!name || !price || !unit || isNaN(quantity)) {
     alert("Please fill out all fields correctly.");
     return;
   }
@@ -94,9 +99,10 @@ document.getElementById("addItemBtn").addEventListener("click", async () => {
   const response = await fetch("/api/inventory", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, unit, quantity }),
+    body: JSON.stringify({ name, price, unit, quantity }),
   });
-
+  fetchInventory();
+  
   if (response.ok) {
     alert("Item added successfully!");
     popup.style.display = "none";
