@@ -27,5 +27,10 @@ function fetchEmployees () {
     });
 }
 
+// load employee name
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
+});
+
 // Run function on page load
 document.addEventListener("DOMContentLoaded", fetchEmployees);

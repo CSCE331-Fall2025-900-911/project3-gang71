@@ -1,11 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang = "en">
+
 <head>
-  <title>Test</title>
+    <meta charset = "UTF-8">
+    <meta http-equiv = "X-UA-Compatible" content = "IE=edge">
+    <meta name = "viewport" content = "width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel = "stylesheet" href = "login.css">
+    <link href = "https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel = "stylesheet">
 </head>
+
 <body>
-  <h1 id="greeting">Hello!</h1>
-  <button id="btn">Click me</button>
-  <script src="index.js"></script>
+    <div class = "logo">
+        <img src = "https://cdn.vettedbiz.com/wp-content/uploads/2021/11/02114926/kung-fu-tea-logo.png">
+    </div>
+
+    <div class = "login">
+        <div class = "username">
+            <h2>Username</h2>
+            <input id = "username">
+        </div>
+
+        <div class = "password">
+            <h2>Password</h2>
+            <input type = "password" id = "password">
+        </div>
+
+        <p id = "failedLogin" hidden = true >Invalid username or password. Please try again.</p>
+
+        <button onclick = "loginUser()">Login</button>
+    </div>
+
+    <script src = "login.js"></script>
+    <script src = "cashierMenu.js"></script>
 </body>
 </html>

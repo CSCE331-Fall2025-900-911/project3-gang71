@@ -142,3 +142,8 @@ downloadXReportButton.addEventListener("click", () => {
       console.error("Error loading X report sales:", err);
     });
 });
+
+// load employee name
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
+});
