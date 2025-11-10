@@ -22,7 +22,7 @@
             </div>
 
             <div class="sidebar">
-                <a href="manager.html" class="active">
+                <a href="manager.html">
                     <span class="material-icons-sharp"> grid_view </span>
                     <h3>Dashboard</h3>
                 </a>
@@ -114,6 +114,25 @@
         </div>
     </div>
     <script src="manager.js"></script>
+    <script>
+        // Set active class on the correct sidebar link based on current page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get current page filename
+            const currentPage = window.location.pathname.split('/').pop() || 'manager.html';
+            
+            // Remove active class from all sidebar links
+            document.querySelectorAll('aside .sidebar a').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Add active class to the link matching current page
+            document.querySelectorAll('aside .sidebar a').forEach(link => {
+                if (link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
