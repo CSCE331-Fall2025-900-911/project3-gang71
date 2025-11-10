@@ -62,8 +62,44 @@
 
         <main>
             <h1>Full Store Menu</h1>
-            <div class="date">
-                <input type="date">
+
+            <div class="search-container">
+                <input id="search-bar" type="text" onkeyup="filterContent()" placeholder="Search.." name="search" >
+                
+                <button type="button" id="openMenuBtn">Add Item</button>
+                <span class="addMenuPopup">
+                    <h2> Add an Item to Menu</h2>
+                    <input id="menu-name" type="text" placeholder="Enter item name">
+                    <input id="menu-price" type="text" placeholder="Enter menu item price">
+                    <input id="menu-category" type="text" placeholder="Enter menu category">
+                    <input id="menu-descrip" type="text" placeholder="Enter item description"><br>
+                    <button type="button" id="addMenuBtn">Add</button>
+                    <br><button type="button" id="closeMenuAddPopup">Close</button>
+                </span>
+                <button type="button" id="openMenuRemoveBtn">Remove Item</button>
+                <span class="removeMenuPopup">
+                    <h2> Remove an Item from Menu</h2>
+                    <input id="remove-menu-item-name" type="text" placeholder="Enter item name">
+                    <button type="button" id="removeMenuBtn">Remove</button>
+                    <button type="button" id="closeMenuRemovePopup">Close</button>
+                </span>
+            </div>
+
+            <div class="menu-table">
+                <table id="menuTable">
+                <thead>
+                    <tr>
+                    <th>Menu ID</th>
+                    <th>Item Name</th>
+                    <th>Price</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="menuBody">
+                    <!-- rows will be filled by JavaScript -->
+                </tbody>
+                </table>
             </div>
 
 
@@ -82,7 +118,7 @@
             </div>
         </div>
     </div>
-    <script src="manager.js"></script>
+    <script src="menu.js"></script>
 </body>
 
 </html>
