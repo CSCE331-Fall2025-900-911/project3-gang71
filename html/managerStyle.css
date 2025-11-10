@@ -138,9 +138,6 @@ aside .logo img{
     width: 3rem;
     height: 3rem;
 }
-aside .close{
-    display: none;
-}
 
 /* ------------------------NAVIGATION SIDEBAR---------------------- */
 aside .sidebar{
@@ -259,6 +256,30 @@ main .insights > div .middle{
     left: 1rem;
 }
 
+/* -------------------------SEARCH BAR----------------------------- */
+main input[type=text]{
+    margin: 0.8rem;
+    padding: 6px;
+    font-size: 15px;
+    font-family: poppins, sans-serif;
+}
+.search-container{
+    background: var(--color-info-light);
+    align-items: center;
+}
+.search-container > button {
+    margin-left: 10px;
+    padding: 0.8rem;
+    transition: all 0.3s ease;
+    font-family: poppins, sans-serif;
+    color: var(--color-dark);
+}
+.search-container > button:hover {
+  background-color: var(--color-primary);
+  cursor: pointer; /* Changes cursor to a pointer on hover */
+  color: white;
+}
+
 /* --------------------------INVENTORY---------------------------- */
 main .inventory-table{
     margin-top: 2rem;
@@ -297,30 +318,7 @@ main .inventory-table a{
     color: var(--color-primary);
 }
 
-main input[type=text]{
-    margin: 0.8rem;
-    padding: 6px;
-    font-size: 15px;
-    font-family: poppins, sans-serif;
-}
-.search-container{
-    background: gray;
-    align-items: center;
-}
-.search-container > button {
-    margin-left: 10px;
-    padding: 0.8rem;
-    transition: all 0.3s ease;
-    font-family: poppins, sans-serif;
-    color: var(--color-dark);
-}
-/* Style when the mouse hovers over the button */
-.search-container > button:hover {
-  background-color: var(--color-primary);
-  cursor: pointer; /* Changes cursor to a pointer on hover */
-  color: white;
-}
-
+/* ----------------Inventory popup boxes ADD/REMOVE ITEM----------------------------*/
 .addItemPopup > button{
     margin-left: 10px;
     padding: 0.8rem;
@@ -329,7 +327,6 @@ main input[type=text]{
     color: var(--color-dark);
 }
 
-/* Style when the mouse hovers over the button */
 .addItemPopup > button:hover {
   background-color: var(--color-primary);
   cursor: pointer; /* Changes cursor to a pointer on hover */
@@ -356,7 +353,6 @@ main input[type=text]{
     color: var(--color-dark);
 }
 
-/* Style when the mouse hovers over the button */
 .removeItemPopup > button:hover {
   background-color: var(--color-primary);
   cursor: pointer; /* Changes cursor to a pointer on hover */
@@ -375,8 +371,6 @@ main input[type=text]{
     color:var(--color-dark);
     display: none; /* hidden initially */
 }
-/* --------------------ADD/REMOVE ITEM------------------------- */
-
 
 /* ---------------------------- SALES -------------------------- */
 main .salesOptions {
@@ -455,8 +449,7 @@ main .sales-graph canvas {
 }
 
 
-
-/* ------------------------EMPLOYEES TAB ----------------------------- */
+/* ------------------------EMPLOYEES PAGE------------------------------- */
 main .employees-table{
     margin-top: 2rem;
 }
@@ -495,7 +488,7 @@ main .employees-table a{
 }
 
 
-/* ------------------------MENU PAGE ----------------------------- */
+/* ---------------------------MENU PAGE ----------------------------- */
 main .menu-table{
     margin-top: 2rem;
 }
@@ -533,6 +526,7 @@ main .menu-table a{
     color: var(--color-primary);
 }
 
+/* --------------------Menu Page -ADD/REMOVE MENU ITEMS -------------------------------- */
 .addMenuPopup > button{
     margin-left: 10px;
     padding: 0.8rem;
@@ -541,7 +535,6 @@ main .menu-table a{
     color: var(--color-dark);
 }
 
-/* Style when the mouse hovers over the button */
 .addMenuPopup > button:hover {
   background-color: var(--color-primary);
   cursor: pointer; /* Changes cursor to a pointer on hover */
@@ -568,7 +561,6 @@ main .menu-table a{
     color: var(--color-dark);
 }
 
-/* Style when the mouse hovers over the button */
 .removeMenuPopup > button:hover {
   background-color: var(--color-primary);
   cursor: pointer; /* Changes cursor to a pointer on hover */

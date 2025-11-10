@@ -29,16 +29,7 @@ function fetchInventory () {
 // Run function on page load
 document.addEventListener("DOMContentLoaded", fetchInventory);
 
-//searching the inventory table
-// function filterContent() {
-// const filter = document.getElementById("search-bar").value.toLowerCase().trim();
-//      const rows = document.querySelectorAll("#inventoryBody tr");
-
-//    rows.forEach(row => {
-//  const text = row.textContent.toLowerCase();
-//     row.style.display = text.includes(filter) ? "" : "none";
-//   });
-// }
+//searching the inventory table based on name in search bar
 function filterContent() {
   const filter = document.getElementById("search-bar").value.toLowerCase().trim();
   const tableBody = document.getElementById("inventoryBody");
@@ -70,28 +61,32 @@ function filterContent() {
 }
 
 
-
+// Open "Add an Item" to inventory popup
 const openAddBtn = document.getElementById("openAddBtn");
 const addItemPopup = document.querySelector(".addItemPopup");
 openAddBtn.addEventListener("click", () => {
   addItemPopup.style.display = "block";
 });
 
+// close button for "add an item to inventory" popup
+const closeAddPopup = document.getElementById("closeAddPopup");
+closeAddPopup.addEventListener("click", () => {
+  addItemPopup.style.display = "none";
+});
 
+// Open "Remove an Item from Inventory" database popup
 const openRemoveBtn = document.getElementById("openRemoveBtn");
 const removeItemPopup = document.querySelector(".removeItemPopup");
 openRemoveBtn.addEventListener("click", () => {
   removeItemPopup.style.display = "block";
 });
 
-const closeAddPopup = document.getElementById("closeAddPopup");
-closeAddPopup.addEventListener("click", () => {
-  addItemPopup.style.display = "none";
-});
+// close "remove an item from inventory" popup
 const closeRemovePopup = document.getElementById("closeRemovePopup");
 closeRemovePopup.addEventListener("click", () => {
   removeItemPopup.style.display = "none";
 });
+
 
 // Function to add an item to the inventory database
 document.getElementById("addItemBtn").addEventListener("click", async () => {

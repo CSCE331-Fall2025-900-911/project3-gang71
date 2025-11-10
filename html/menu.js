@@ -29,29 +29,59 @@ function fetchMenu () {
 // Run function on page load
 document.addEventListener("DOMContentLoaded", fetchMenu);
 
+// function to search through table and find menu items based on name entered 
+function filterContent() {
+  const filter = document.getElementById("search-bar").value.toLowerCase().trim();
+  const tableBody = document.getElementById("menuBody");
+  const rows = tableBody.querySelectorAll("tr");
 
+  let matchFound = false;
 
+  rows.forEach((row) => {
+    const text = row.textContent.toLowerCase();
+    if (text.includes(filter) || filter === "") {
+      row.style.display = "";
+      matchFound = true;
+    } else {
+      row.style.display = "none";
+    }
+  });
+
+  // If no match found, add a new message row
+  if (!matchFound && filter !== "") {
+    const noItemRow = document.createElement("tr");
+    noItemRow.id = "no-items-row";
+    noItemRow.innerHTML = `
+      <td colspan="4" style="text-align:center; color:gray; font-style:italic;">
+        No items found
+      </td>
+    `;
+    tableBody.appendChild(noItemRow);
+  }
+}
+
+// Open and close "add menu item" popup
 const openMenuBtn = document.getElementById("openMenuBtn");
 const addMenuPopup = document.querySelector(".addMenuPopup");
 openMenuBtn.addEventListener("click", () => {
   addMenuPopup.style.display = "block";
 });
+const closeMenuAddPopup = document.getElementById("closeMenuAddPopup");
+closeMenuAddPopup.addEventListener("click", () => {
+  addMenuPopup.style.display = "none";
+});
 
-
+//  Open and close "remove menu item" popup
 const openMenuRemoveBtn = document.getElementById("openMenuRemoveBtn");
 const removeMenuPopup = document.querySelector(".removeMenuPopup");
 openMenuRemoveBtn.addEventListener("click", () => {
   removeMenuPopup.style.display = "block";
 });
-
-const closeMenuAddPopup = document.getElementById("closeMenuAddPopup");
-closeMenuAddPopup.addEventListener("click", () => {
-  addMenuPopup.style.display = "none";
-});
 const closeMenuRemovePopup = document.getElementById("closeMenuRemovePopup");
 closeMenuRemovePopup.addEventListener("click", () => {
   removeMenuPopup.style.display = "none";
 });
+
 
 // Function to add an item to the menu database
 document.getElementById("addMenuBtn").addEventListener("click", async () => {
