@@ -62,6 +62,19 @@ app.get("/api/employee", async (req, res) => {
   }
 });
 
+// API route to get all menu items
+app.get("/api/menu", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT menuid, itemname, itemprice, itemcategory, itemdescrip FROM menu ORDER BY menuid;"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database query for menu failed" });
+  }
+});
+
 
 app.get("/api/menu/:category", async (req, res) => {
   try {
@@ -98,6 +111,32 @@ app.post("/api/inventory", async (req, res) => {
   }
 });
 
+// API route to add a menu item
+app.post("/api/menu", async (req, res) => {
+  try {
+    const { name, price, category, description } = req.body;
+    if (!name || isNaN(price) || !category) {
+      return res.status(400).json({ error: "Invalid input" });
+    }
+
+    // Start a transaction
+    await pool.query('BEGIN');
+
+    // Get the next available menuid
+    const maxIdResult = await pool.query('SELECT MAX(menuid) FROM menu');
+    const nextId = (maxIdResult.rows[0].max || 0) + 1;
+
+    const result = await pool.query(
+      "INSERT INTO menu (menuid, itemname, itemprice, itemcategory, itemdescrip) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [nextId, name, price, category, description]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database insert failed" });
+  }
+});
+
 //API route to delete an inventory item
 app.delete("/api/inventory/:name", async (req, res) => {
   try {
@@ -122,6 +161,30 @@ app.delete("/api/inventory/:name", async (req, res) => {
   }
 });
 
+
+//API route to delete a menu item
+app.delete("/api/menu/:name", async (req, res) => {
+  try {
+    const name = req.params.name;
+    if (!name) {
+      return res.status(400).json({ error: "Name is required" });
+    }
+
+    const result = await pool.query(
+      "DELETE FROM menu WHERE itemname = $1 RETURNING *",
+      [name]
+    );
+    
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database delete failed" });
+  }
+});
 
 // API route to get daily sales
 app.get("/api/dailySales", async (req, res) => {
