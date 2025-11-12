@@ -1,0 +1,339 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* --------------ROOT VARIABLES----------------- */
+:root{
+    --color-primary:#ec73a1;
+    --color-danger:#fc4c5b;
+    --color-success:#41f1b6;
+    --color-warning:#f0b051;
+    --color-white:#fff;
+    --color-info-dark: #2c333b;
+    --color-info-light: #dce1eb;
+    --color-dark: #363949;
+    --color-light: rgba(132,139,200,0.18);
+    --color-background: #f6f6f9;
+    --color-dark-variant: #677483;
+    --color-primary-variant: #111e88;
+    --color-kf-red: #eb0c43;
+
+    --card-border-radius: 2rem;
+    --border-radius-1: 0.4rem;
+    --border-radius-2: 0.8rem;
+    --border-radius-3: 1.2rem;
+
+    --card-padding: 1.8rem;
+    --padding-1: 1.2rem;
+
+    --box-shadow: 0 2rem 3rem var(--color-light);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    outline: 0;
+    appearance: none;
+    border: 0;
+    text-decoration: none;
+    list-style:none;
+    box-sizing: border-box;
+}
+
+html{
+    font-size: 14px;
+}
+
+body{
+    width: 100vw;
+    height: 100vh;
+    font-family: poppins, sans-serif;
+    font-size: 0.88rem;
+    background: var(--color-background);
+    user-select: none;
+    overflow-x: hidden;
+    color:var(--color-dark);
+}
+
+.container{
+    display: grid;
+    width: 100%;
+    margin: 0 auto;
+    gap: 1.8rem;
+    grid-template-columns: 14rem auto 23rem;
+}
+
+
+/*---------------------------- TOP OF PAGE -----------------------------*/
+nav {
+    height: 100vh;
+}
+
+nav .top{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.4rem;
+}
+
+nav .logo{
+    display: flex;
+    align-content: center;
+    gap: 0.8rem;
+    color: var(--color-kf-red);
+}
+
+nav .logo img{
+    width: 3rem;
+    height: 3rem;
+}
+
+nav .close{
+    display: none;
+}
+
+.pageTitle h1 {
+    position: relative;
+    top: 2vh;
+    font-size: 50px;
+}
+
+.pageTitle h4 {
+    position: absolute;
+    text-align: right;
+    width: 20%;
+    font-size: 12pt;
+    left: 45%;
+    top: 3%;
+}
+
+.pageTitle button {
+    position: absolute;
+    font-family: poppins, sans-serif;
+    background: black;
+    color: white;
+    font-weight: bold;
+    width: 10%;
+    height: 5%;
+    left: 67%;
+    top: 2%;
+}
+
+.pageTitle button:hover {
+    background: var(--color-kf-red);
+    color: black;
+}
+
+/* -------------------------- NAVIGATION BAR ------------------------------- */
+nav .sidebar{
+    background: white;
+    display: flex;
+    flex-direction: column;
+    height: 86vh;
+    position: relative;
+    left: 5%;
+    top: 3rem;
+}
+
+nav .sidebar a{
+    display: flex;
+    color: var(--color-info-dark);
+    margin-left: 2rem;
+    gap: 1rem;
+    align-items: center;
+    position: relative;
+    height: 3.7rem;
+    transition: all 300ms ease;
+}
+
+nav .sidebar a span{
+    font-size: 1.6rem;
+    transition: all 300ms ease;
+}
+
+nav .sidebar a.active{
+    background: var(--color-light);
+    color: var(--color-kf-red);
+    margin-left: 0;
+}
+
+nav .sidebar a.active:before{
+    content: "";
+    width: 6px;
+    height: 100%;
+    background: var(--color-kf-red);
+}
+
+nav .sidebar a.active span{
+    color: var(--color-kf-red);
+    margin-left: calc(1rem -6px);
+}
+
+nav .sidebar a:hover{
+    color: var(--color-kf-red);
+}
+
+nav .sidebar a:hover span{
+    margin-left: 1rem;
+}
+
+/*--------------------------- MAIN MENU ----------------------------*/
+main {
+    display: grid;
+    position: absolute;
+    width: 96%;
+    margin: 0 auto;
+    column-gap: 1.8rem;
+    grid-template-columns: 20% 20% 20%;
+    top: 15vh;
+    left: 16vw;
+}
+
+main .menuItem {
+    background-color: #ffe9ec;
+    height: 80%;
+}
+
+.menuItemImg {
+    position: relative; 
+    float: left;
+    width: 50%;
+    height: 90%;
+    left: 3%;
+    top: 5%;
+}
+
+.menuItemH3 {
+    position: relative;
+    padding: 1%;
+    left: 55%;
+    height: 20%;
+    width: 45%;
+    bottom: 80%;
+}
+
+.menuItemP {
+    position: relative;
+    float: left;
+    font-weight: bold;
+    padding: 1%;
+    left: 5%;
+    top: 60%;
+}
+
+.menuItemButton {
+    position: relative;
+    float: right;
+    width: 20%;
+    height: 20%;
+    right: 2%;
+    top: 55%;
+    background: black;
+    color: white;
+    font-family: poppins, sans-serif;
+}
+
+.menuItem button:hover {
+    background: var(--color-kf-red);
+    color: black;
+}
+
+/*---------------------- BASKET ------------------------*/
+aside {
+    display: grid;
+    row-gap: 1.5rem;
+    grid-template-rows: 10% 65% 10% 5%;
+    height: 100vh;
+    width: 96%;
+    background: white;
+}
+
+aside h1 {
+    position: relative;
+    align-content: center;
+    margin: 10px;
+}
+
+aside .basket {
+    display: grid;
+    row-gap: 1.8rem;
+    grid-template-rows: 1fr 1fr 1fr;
+    overflow-y: auto;
+}
+
+aside .basketItem {
+    position: relative;
+    background: var(--color-info-light);
+    width: 90%;
+    left: 5%;
+}
+
+aside .basketItem h2 {
+    margin: 10px;
+    width: 80%;
+}
+
+aside .basketItem button {
+    float: inline-end;
+    position: relative;
+    width: 15%;
+    height: 20%;
+    margin: 20px;
+    bottom: 7%;
+    background: var(--color-info-light);
+}
+
+aside .basketItem button:hover {
+    color: black;
+    background: var(--color-info-light);
+}
+
+aside .basketItem input {
+    position: relative;
+    width: 30%;
+    height: 15%;
+    margin: 10px;
+}
+
+aside .basketItem p {
+    position: relative;
+    left: 5%;
+    width: 80%;
+}
+
+aside .basketItem h3 {
+    float: inline-end;
+    margin: 10px;
+}
+
+aside .price {
+    display: grid;
+    row-gap: 0px;
+    grid-template-rows: 1fr 1fr 2fr 2fr;
+    grid-template-columns: 1fr 1fr;
+}
+
+aside .price h3 {
+    float: left;
+    position: relative;
+    left: 10px;
+}
+
+aside .price p {
+    text-align: right;
+    position: relative;
+    right: 10px;
+}
+
+aside button {
+    position: relative;
+    width: 90%;
+    left: 5%;
+    background: var(--color-kf-red);
+    color: black;
+    font-family: poppins, sans-serif;
+    font-weight: bold;
+}
+
+aside button:hover {
+    background: black;
+    color: white;
+}
