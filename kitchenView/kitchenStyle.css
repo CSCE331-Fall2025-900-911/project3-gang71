@@ -1,0 +1,91 @@
+/* need to fix color scheme to match rest of app */
+
+/* --- BASIC LAYOUT --- */
+body {
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+  background: #121212;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #222;
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  border-bottom: 2px solid #444;
+}
+
+#clock{
+    font-size: 1rem;
+}
+
+/* MAIN ORDER GRID */
+#order-board {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* ORDER CARD */
+.order-card {
+  background: #1e1e1e;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 2px solid #333;
+  transition: transform 0.2s;
+}
+
+.order-card:hover {
+    transform: scale(1.05);
+}
+
+.order-header {
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+}
+
+.order-items {
+    margin: 10px 0;
+    list-style: none;
+    padding: 0;
+}
+
+.order-items li {
+    padding: 4px 0;
+    border-bottom: 1px solid #333;
+}
+
+/* BUTTONS */
+.order-actions button {
+  font-size: 1.1rem;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+button.start { background: #2b8a3e; color: white; }
+button.done { background: #0078d7; color: white; }
+button.bump { background: #d72638; color: white; } /* bump button is for when order is completed to delete */
+
+.footer {
+  background: #222;
+  text-align: center;
+  padding: 10px;
+}

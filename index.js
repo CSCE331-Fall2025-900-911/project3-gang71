@@ -475,3 +475,16 @@ app.get("/api/login", async (req, res) => {
     res.status(500).json({error: "Database query for login failed"});
   }
 });
+
+// get order number for cashier view
+app.get("/api/orders", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT MAX(orderid) FROM \"order\";"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
