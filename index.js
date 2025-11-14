@@ -497,10 +497,16 @@ app.get('/api/login', async (req, res) => {
 });
 
 app.get('/api/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.json({ success: true });
+  req.session.destroy(err => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Logout failed");
+    }
+    res.clearCookie('connect.sid') // clears the cookie in browser
+    res.redirect('/index.html');
   });
 });
+
 
 // get order number for cashier view
 app.get("/api/orders", async (req, res) => {
