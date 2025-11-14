@@ -9,6 +9,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
+    "express-session": "^1.18.2",
     "pg": "^8.16.3"
   },
   "description": "Web App for Kung Fu Tea  \r Contributors: Claire Wu, Jayani Singh, Vaidehi Singhal, Sarah Muyshondt, Anna Williamson, Haajirah Siddiqi",
