@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "html"))); // Serve /html folder
+app.use(express.static(path.join(__dirname, "menuBoard")));
 
 // PostgreSQL connection
 const pool = new Pool({
