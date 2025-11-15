@@ -1,0 +1,146 @@
+/* Top section with steps 1-4 and logo */
+body {
+    font-family: "Times New Roman";
+    margin: 0;
+    background-color: #ffdbe2e1;
+}
+.top {
+    background-color: rgb(0, 0, 0);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 15px 20px 10px 20px;
+    color: #ffffff;
+}
+.topTitle {
+    font-size: 20px;
+    text-align: center;
+}
+.topTitle1 {
+    font-size: 20px;
+    text-align: center;
+    margin: 0 0 12px 0;
+}
+.topOptions {
+    padding: 0;
+    margin: 5px 0 0 0;
+    text-align: center;
+}
+.topColumn1 {
+    flex: 0 0 250px;
+    font-size: 20px;
+    margin: 0 5px;
+}
+.topColumn {
+    flex: 0 0 400px;
+    font-size: 18px;
+    margin: 0 5px;
+}
+.logo {
+    display: flex;
+    justify-content: center;
+}
+.logo img {
+    max-height: 140px;
+    text-align: center;
+    width: auto;
+    border-radius: 15px;
+    border: 3px solid #e24060;
+}
+
+/* Bottom section with drink categories and options */
+.bottom {
+    display: flex;
+    gap: 10px;
+    margin: 10px 15px;
+}
+.column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.horizontalRow {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+.container {
+    border-radius: 15px;
+    /*background-color: #ffdbe2e1;*/
+    background-color: #ffffffe1;
+    border: 3px solid #e24060;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+}
+h3 {
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 0px;
+}
+.items {
+    display: flex;
+    flex-direction: column;
+    margin: 5px 10px;
+}
+.item span {
+    display: block;
+    margin-top: 5px;
+    text-align: center;
+    width: 100%;
+    margin: 5px auto;
+}
+.row {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.itemsPunch,
+.itemsMilkTea,
+.itemsSlush,
+.itemsClassic,
+.itemsMilkCap,
+.itemsCoffee {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    width: 100%;
+}
+
+.itemsYogurt,
+.itemsMilkStrike,
+.itemsOatStrike {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    width: 100%;
+}
+
+
+.itemPics {
+    display: flex;
+    justify-content: center;
+    margin-right: 5px;
+}
+
+.itemPics img {
+    max-height: 130px;
+    text-align: center;
+    width: auto;
+    border-radius: 15px;
+    border: 3px solid #e24060;
+    
+}
+
+.column .container {
+    flex: 1;
+    width: 100%;
+}
+
+
+
