@@ -116,6 +116,7 @@ body{
 .login button:hover {
     background: black;
     color: white;
+    cursor: pointer; /* Changes cursor to a pointer on hover */
 }
 
 .login p {
