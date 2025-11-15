@@ -4,17 +4,23 @@ const express = require("express");
 const path = require("path");
 const { Pool } = require("pg"); //  importing PostgreSQL
 const cors = require("cors");
-
-// for local testing
-require('dotenv').config();
+const session = require('express-session'); // securing webpages before sign in
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "html"))); // Serve /html folder
-app.use(express.static(path.join(__dirname, "menuBoard")));
+
+// session middleware
+app.use(session({
+  secret: 'super_secret_key_change_this',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // set true if using HTTPS
+    maxAge: 1000 * 60 * 60 // 1 hour
+  }
+}));
 
 // PostgreSQL connection
 const pool = new Pool({
@@ -26,16 +32,20 @@ const pool = new Pool({
   // ssl: { rejectUnauthorized: false }, // needed for secure remote connections
 });
 
+function requireLogin(req, res, next) {
+  if (!req.session.user) {
+    return res.redirect('/index.html');
+  }
+  next();
+}
+
+app.use(express.static(path.join(__dirname, 'public'))); // serve login page
+
+
 // show inventory.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "html", "inventory.html"));
 });
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
 
 // API route to get inventory data
 app.get("/api/inventory", async (req, res) => {
@@ -462,20 +472,41 @@ app.get("/api/customer", async (req, res) => {
 });
 
 // login
-app.get("/api/login", async (req, res) => {
-  try {
-    const username = req.query.user;
-    const password = req.query.userPassword;
-    const result = await pool.query(
-      "SELECT firstName, lastName, employeeRole FROM employee WHERE username = $1 AND password = $2;",
-      [username, password]
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Database error: ", err);
-    res.status(500).json({error: "Database query for login failed"});
+app.get('/api/login', async (req, res) => {
+  const { user, userPassword } = req.query;
+
+  const result = await pool.query(
+    'SELECT firstname, lastname, employeerole FROM employee WHERE username=$1 AND password=$2',
+    [user, userPassword]
+  );
+
+  if (result.rows.length === 0) {
+    return res.json([]); // ALWAYS return array
   }
+
+  const userData = result.rows[0];
+
+  // create session
+  req.session.user = {
+    firstname: userData.firstname,
+    lastname: userData.lastname,
+    role: userData.employeerole
+  };
+
+  return res.json([userData]);
 });
+
+app.get('/api/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Logout failed");
+    }
+    res.clearCookie('connect.sid') // clears the cookie in browser
+    res.redirect('/index.html');
+  });
+});
+
 
 // get order number for cashier view
 app.get("/api/orders", async (req, res) => {
@@ -488,4 +519,11 @@ app.get("/api/orders", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Database query failed" });
   }
+});
+
+app.use(requireLogin, express.static(path.join(__dirname, "html")));
+
+// start server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
