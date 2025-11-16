@@ -65,7 +65,7 @@ function renderDrinks(drinks, menuRow) {
       <p class="menuItemP">${drink.itemdescrip}</p>
       <div style="display: flex; align-items: center;">
         <h1 class="menuItemH1">$${Number(drink.itemprice).toFixed(2)}</h1>
-        <button class="menuItemButton" data-id="${drink.menuid}" data-text="Opening modifications popup for ${drink.itemname}.">Add to Order</button>
+        <button class="menuItemButton" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.itemname}.">Add to Order</button>
       </div>
     `;
     menuRow.appendChild(itemDiv);
@@ -239,7 +239,7 @@ function speak(text) {
 
 //-------------------- CART FUNCTIONS --------------------//
 // THIS IS THE KEY CHANGE: Save to sessionStorage instead of local cart array
-document.getElementById("addItemToCart").addEventListener("click", () => {
+document.getElementById("addItemToCart").addEventListener("click", async () => {
   if (!currentDrink) return;
 
   // compute final price using YOUR working calculation
@@ -274,8 +274,11 @@ document.getElementById("addItemToCart").addEventListener("click", () => {
   sessionStorage.setItem("cartItems", JSON.stringify(cartItems));
 
   console.log("Added to cart:", cartItem);
+  if (ttsEnabled) {
+    await speak(`${currentDrink.itemname} added to cart!`);
+  }
   alert(`${currentDrink.itemname} added to cart!`);
-
+  
   // close popup after adding to cart
   closeModificationsPopup();
 });
@@ -338,22 +341,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-document.querySelectorAll(".tts-button").forEach(button => {
+document.querySelectorAll(".ttsButton").forEach(button => {
   button.addEventListener("click", async (e) => {
+    if (!ttsEnabled) {
+      return;
+    }
     e.preventDefault(); // stop navigation
     console.log("Raw clicked element:", e.target);
-    console.log("Closest .tts-button:", button);
+    console.log("Closest .ttsButton:", button);
     const text = button.dataset.text;
+    if (text == null) {
+      return;
+    }
     console.log("TTS enabled?", ttsEnabled, "Text:", text);
 
     const url = button.getAttribute("href");
 
     if (ttsEnabled && text) {
       await speak(text);
-      if (url) window.location.href = url;
-    }
-    else if (text) {
-      speak(text);
+      if (url) {
+        window.location.href = url;
+      }
     }
   });
 });
