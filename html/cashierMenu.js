@@ -8,6 +8,8 @@ let currentModifications = {
   toppings: []
 };
 let availableToppings = [];
+let ttsEnabled = JSON.parse(sessionStorage.getItem("ttsEnabled") || "false"); // get tts setting from storage or use default setting
+
 
 //-------------------- TOPPING HELPER FUNCTIONS --------------------//
 //----- get toppings from the databse //
@@ -63,15 +65,20 @@ function renderDrinks(drinks, menuRow) {
       <p class="menuItemP">${drink.itemdescrip}</p>
       <div style="display: flex; align-items: center;">
         <h1 class="menuItemH1">$${Number(drink.itemprice).toFixed(2)}</h1>
-        <button class="menuItemButton" data-id="${drink.menuid}">Add to Order</button>
+        <button class="menuItemButton" data-id="${drink.menuid}" data-text="Opening modifications popup for ${drink.itemname}.">Add to Order</button>
       </div>
     `;
     menuRow.appendChild(itemDiv);
 
     // event listeners
     const addDrinkToOrderButton = itemDiv.querySelector(".menuItemButton");
-    addDrinkToOrderButton.addEventListener("click", () => {
+    addDrinkToOrderButton.addEventListener("click", async e => {
       openModificationsPopup(drink);
+
+      if (ttsEnabled) {
+        const drinkNameText = e.currentTarget.dataset.text;
+        speak(drinkNameText);
+      }
     });
   }); 
 }
@@ -101,6 +108,9 @@ function openModificationsPopup(drink) {
   document.getElementById("itemDescription").textContent = drink.itemdescrip;
   document.getElementById("modifiedDrinkPrice").textContent = `$${currentBasePrice.toFixed(2)}`;
 
+  // TODO: add tts text
+  
+
   // populate drop menus
   populateToppingDropdowns();
 
@@ -113,6 +123,12 @@ function openModificationsPopup(drink) {
       btn.classList.add("selected");
       currentModifications.size = btn.dataset.size;
       calculateModifiedPrice(); 
+
+      // TODO: add tts for size modifications
+      // if (ttsEnabled) {
+      //   const modificationText = btn.currentTarget.dataset.text;
+      //   speak(modificationText);
+      // }
     };
   });
 
@@ -125,6 +141,8 @@ function openModificationsPopup(drink) {
         .map(sel => sel.value)
         .filter(v => v);
       calculateModifiedPrice();
+
+      // TODO: add tts for topping modifications
     };
   });
 
@@ -135,6 +153,8 @@ function openModificationsPopup(drink) {
         .forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       currentModifications.sweetness = btn.textContent.trim();
+
+      // TODO: add tts for sweetness modifications
     };
   });
 
@@ -145,6 +165,8 @@ function openModificationsPopup(drink) {
         .forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       currentModifications.ice = btn.textContent.trim();
+
+      // TODO: add tts for ice modifications
     };
   });
 
@@ -179,6 +201,40 @@ function calculateModifiedPrice() {
   // display / overwrite this new price 
   document.getElementById("modifiedDrinkPrice").textContent = `$${newPrice.toFixed(2)}`;
   return newPrice;
+}
+
+// tts function
+function speak(text) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch("http://localhost:3000/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+
+      if (!response.ok) throw new Error("TTS request failed");
+
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBlob = new Blob([arrayBuffer], { type: "audio/wav" });
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      const audio = new Audio(audioUrl);
+
+      audio.onended = () => {
+        resolve(); // resolve when audio finishes
+      };
+
+      audio.onerror = (err) => {
+        reject(err); // reject on error
+      };
+
+      audio.play();
+    } catch (err) {
+      console.error("Error during TTS:", err);
+      resolve(); // resolve anyway so navigation doesn't break
+    }
+  });
 }
 
 //-------------------- CART FUNCTIONS --------------------//
@@ -263,4 +319,41 @@ document.addEventListener("DOMContentLoaded", () => {
 // load employee name
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
+
+  const ttsToggle = document.getElementById("ttsToggle");
+  if (ttsToggle) {
+    ttsToggle.checked = ttsEnabled;
+
+    ttsToggle.addEventListener("change", async (e) => {
+      if (ttsToggle.checked) {
+        await speak("TSS enabled");
+      }
+      else {
+        await speak("TSS disabled");
+      }
+      
+      ttsEnabled = e.target.checked;
+      sessionStorage.setItem("ttsEnabled", JSON.stringify(ttsEnabled));
+    });
+  }
+});
+
+document.querySelectorAll(".tts-button").forEach(button => {
+  button.addEventListener("click", async (e) => {
+    e.preventDefault(); // stop navigation
+    console.log("Raw clicked element:", e.target);
+    console.log("Closest .tts-button:", button);
+    const text = button.dataset.text;
+    console.log("TTS enabled?", ttsEnabled, "Text:", text);
+
+    const url = button.getAttribute("href");
+
+    if (ttsEnabled && text) {
+      await speak(text);
+      if (url) window.location.href = url;
+    }
+    else if (text) {
+      speak(text);
+    }
+  });
 });
