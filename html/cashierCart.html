@@ -11,15 +11,15 @@
         <div class = logo>
             <img src = "https://cdn.vettedbiz.com/wp-content/uploads/2021/11/02114926/kung-fu-tea-logo.png" width = "75" height = "75">
         </div>
-            <a href="milkTeas.html">Back to Ordering</a>
-            <a href = "index.html">Logout</a>
+            <a href="milkTeas.html" class="tts-button" data-text="Back to ordering">Back to Ordering</a>
+            <a href = "index.html" class="tts-button" data-text="Log out">Logout</a>
         <div class = employeeName>
             <p id = "empName"></p>
         </div>
     </div>
 
     <div id="cartPage" style="margin-top: 6%;"></div>
-    <button id="checkoutButton" onclick="checkout()">Check Out</button>
+    <button id="checkoutButton" onclick="checkout()" class="tts-button" data-text="Check out">Check Out</button>
     <div id="paymentScreen"></div>
     
     <script src="cashierCart.js"></script>

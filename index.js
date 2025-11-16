@@ -5,6 +5,10 @@ const path = require("path");
 const { Pool } = require("pg"); //  importing PostgreSQL
 const cors = require("cors");
 const session = require('express-session'); // securing webpages before sign in
+const { createClient } = require("@deepgram/sdk");
+const fs = require("fs");
+
+const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,12 +17,12 @@ app.use(express.json());
 
 // session middleware
 app.use(session({
-  secret: 'super_secret_key_change_this',
+  secret: process.env.MIDDLEWARE_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: false, // set true if using HTTPS
-    maxAge: 1000 * 60 * 60 // 1 hour
+    maxAge: 1000 * 60 * 60 * 8 // 8 hours
   }
 }));
 
@@ -520,6 +524,47 @@ app.get("/api/orders", async (req, res) => {
     res.status(500).json({ error: "Database query failed" });
   }
 });
+
+app.post("/tts", async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: "Text is required" });
+
+    // Make request to Deepgram TTS
+    const response = await deepgram.speak.request(
+      { text },
+      {
+        model: "aura-2-thalia-en",
+        encoding: "linear16",
+        container: "wav",
+      }
+    );
+
+    const stream = await response.getStream();
+    const chunks = [];
+
+    const reader = stream.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+    }
+
+    const buffer = Buffer.concat(chunks.map(c => Buffer.from(c)));
+    
+    res.set({
+      "Content-Type": "audio/wav",
+      "Content-Length": buffer.length,
+    });
+
+    res.send(buffer);
+
+  } catch (err) {
+    console.error("TTS error:", err);
+    res.status(500).json({ error: "Failed to generate TTS" });
+  }
+});
+
 
 app.use(requireLogin, express.static(path.join(__dirname, "html")));
 
