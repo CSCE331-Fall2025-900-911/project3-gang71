@@ -207,7 +207,7 @@ function calculateModifiedPrice() {
 function speak(text) {
   return new Promise(async (resolve, reject) => {
     try {
-      const response = await fetch("http://localhost:3000/tts", {
+      const response = await fetch("/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text })
