@@ -108,8 +108,13 @@ function openModificationsPopup(drink) {
   document.getElementById("itemDescription").textContent = drink.itemdescrip;
   document.getElementById("modifiedDrinkPrice").textContent = `$${currentBasePrice.toFixed(2)}`;
 
-  // TODO: add tts text
-  
+  // add tts text for drink size
+  document.getElementById("smallDrinkButton").classList.add("ttsButton");
+  document.getElementById("smallDrinkButton").dataset.text = "Small drink size selected.";
+  document.getElementById("mediumDrinkButton").classList.add("ttsButton");
+  document.getElementById("mediumDrinkButton").dataset.text = "Medium drink size selected. The extra cost is $0.50.";
+  document.getElementById("largeDrinkButton").classList.add("ttsButton");
+  document.getElementById("largeDrinkButton").dataset.text = "Medium drink size selected. The extra cost is $0.50.";
 
   // populate drop menus
   populateToppingDropdowns();
@@ -124,25 +129,32 @@ function openModificationsPopup(drink) {
       currentModifications.size = btn.dataset.size;
       calculateModifiedPrice(); 
 
-      // TODO: add tts for size modifications
-      // if (ttsEnabled) {
-      //   const modificationText = btn.currentTarget.dataset.text;
-      //   speak(modificationText);
-      // }
+      if (ttsEnabled) {
+        const cupSizeText = btn.dataset.text;
+        speak(cupSizeText);
+      }
     };
   });
 
   // add topping listeners
   const toppingSelects = document.querySelectorAll('select[name="topping1"], select[name="topping2"]');
   toppingSelects.forEach(select => {
-    select.onchange = () => {
+    select.onchange = async () => {
       // store only currently selected toppings
       currentModifications.toppings = Array.from(toppingSelects)
         .map(sel => sel.value)
         .filter(v => v);
       calculateModifiedPrice();
 
-      // TODO: add tts for topping modifications
+      if (ttsEnabled) {
+        const newValue = select.value; // only capture the new value
+        const topping = availableToppings.find(t => String(t.menuid) === String(newValue)); // get topping for TTS
+
+        if (topping) {
+          const toppingText = "Topping selected: " + topping.itemname + ". The extra cost is $" + topping.itemprice;
+          await speak(toppingText);
+        }
+      }
     };
   });
 
@@ -154,7 +166,10 @@ function openModificationsPopup(drink) {
       btn.classList.add('selected');
       currentModifications.sweetness = btn.textContent.trim();
 
-      // TODO: add tts for sweetness modifications
+      if (ttsEnabled) {
+        const sweetnessText = btn.textContent.trim() + " sweetness selected";
+        speak(sweetnessText);
+      }
     };
   });
 
@@ -166,7 +181,10 @@ function openModificationsPopup(drink) {
       btn.classList.add('selected');
       currentModifications.ice = btn.textContent.trim();
 
-      // TODO: add tts for ice modifications
+      if (ttsEnabled) {
+        const iceText = btn.textContent.trim() + " ice selected";
+        speak(iceText);
+      }
     };
   });
 
@@ -175,7 +193,19 @@ function openModificationsPopup(drink) {
 }
 
 //----- closes popup and resets buttons 
-function closeModificationsPopup() {
+async function closeModificationsPopup() {
+    const modificationsPopupDiv = document.getElementById("modificationsPopup");
+    if (!modificationsPopupDiv) {
+        console.error("Modifications popup container not found!");
+        return;
+    }
+    if (ttsEnabled) {
+      await speak("Closing modifications popup");
+    }
+    modificationsPopupDiv.style.display = "none";
+}
+
+async function closeModificationsPopupNav() {
     const modificationsPopupDiv = document.getElementById("modificationsPopup");
     if (!modificationsPopupDiv) {
         console.error("Modifications popup container not found!");
@@ -278,9 +308,9 @@ document.getElementById("addItemToCart").addEventListener("click", async () => {
     await speak(`${currentDrink.itemname} added to cart!`);
   }
   alert(`${currentDrink.itemname} added to cart!`);
-  
+
   // close popup after adding to cart
-  closeModificationsPopup();
+  closeModificationsPopupNav(); // nav function reduces TTS if navigating to cart
 });
 
 

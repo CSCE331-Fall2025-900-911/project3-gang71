@@ -1,9 +1,6 @@
 let ttsEnabled = JSON.parse(sessionStorage.getItem("ttsEnabled") || "false"); // get tts setting from storage or use default setting
 
-// TODO: add tts for cancel button
-// TODO: add tts for add to cart button
-
-function checkout() {
+async function checkout() {
   // clear page
   document.getElementById("cartPage").innerHTML = "";
 
@@ -11,7 +8,40 @@ function checkout() {
   const totalPrice = calculateTotalPrice();
   showPaymentScreen(totalPrice);
   if (ttsEnabled) {
-    speak("The current price is $" + totalPrice);
+    await speak("The current price is $" + totalPrice);
+
+    // TTS for the full order
+    const cartItems = JSON.parse(sessionStorage.getItem("cartItems")) || [];
+    if (cartItems) {
+      speak("The items in your order are: ")
+
+      for (const item of cartItems) { // for of loop because for each loops do not wait for promises
+        let toppingString;
+
+        if (item.modifications.toppings[0] == undefined && item.modifications.toppings[1] == undefined) {
+          toppingString = "no toppings";
+        }
+        else if (item.modifications.toppings[0] == undefined && item.modifications.toppings[1]) {
+          toppingString = item.modifications.toppings[1].name;
+        }
+        else if (item.modifications.toppings[0] && item.modifications.toppings[1] == undefined) {
+          toppingString = item.modifications.toppings[0].name;
+        }
+        else {
+          toppingString = `${item.modifications.toppings[0].name} and ${item.modifications.toppings[1].name}`;
+        }
+
+        orderString = `A $${item.price.toFixed(2)} ${item.modifications.size} ${item.name} 
+          with ${item.modifications.sweetness} sweetness, 
+          ${item.modifications.ice} ice, 
+          and ${toppingString}`;
+
+        await speak(orderString);
+      };
+    }
+    else {
+      await speak("Your order is currently empty.")
+    }
   }
 }
 
@@ -192,9 +222,7 @@ window.addEventListener("DOMContentLoaded", () => {
       await speak(textToSpeak);
 
       const link = e.target.closest("a");
-      console.log(link);
       const url = link ? link.getAttribute("href") : null;
-      console.log(url);
       if (url) {
         console.log("here");
         window.location.href = url;
