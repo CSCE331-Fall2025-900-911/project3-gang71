@@ -2,8 +2,6 @@ let ttsEnabled = JSON.parse(sessionStorage.getItem("ttsEnabled") || "false"); //
 
 // TODO: add tts for cancel button
 // TODO: add tts for add to cart button
-// TODO: have the checkout part say the full order
-// TODO: add tts to checkout buttons
 
 function checkout() {
   // clear page
@@ -12,7 +10,9 @@ function checkout() {
   // total price before tip
   const totalPrice = calculateTotalPrice();
   showPaymentScreen(totalPrice);
-  speak("The price is $" + totalPrice);
+  if (ttsEnabled) {
+    speak("The current price is $" + totalPrice);
+  }
 }
 
 function showPaymentScreen(totalPrice) {
@@ -20,15 +20,15 @@ function showPaymentScreen(totalPrice) {
   checkoutButton.style.display = "none";
 
   document.getElementById("paymentScreen").innerHTML = `
-      <button>Card</button>
-      <button>Cash</button>
-      <input id="tipInputAmount" type="text" placeholder="Enter tip amount">
-      <button onclick="addTip()">Add Tip</button>
+      <button class="ttsButton" data-text="Pay with card">Card</button>
+      <button class="ttsButton" data-text="Pay with cash">Cash</button>
+      <input id="tipInputAmount" type="text" placeholder="Enter tip amount" class="ttsButton" data-text="Enter tip amount">
+      <button onclick="addTip()" class="ttsButton" data-text="Add tip">Add Tip</button>
       <h2 id="totalPriceH2">Total price: $${totalPrice}</h2>
       <a href="cashierCart.html" style="text-decoration: none; color: black;">
-          <button>Cancel</button>
+          <button class="ttsButton" data-text="Back to cart">Back to cart</button>
       </a>
-      <button onclick="showThankYouScreen()">Pay</button>
+      <button onclick="showThankYouScreen()" class="ttsButton" data-text="Pay">Pay</button>
   `;
 }
 
@@ -37,19 +37,28 @@ function showThankYouScreen() {
   sessionStorage.clear();
 
   document.getElementById("paymentScreen").innerHTML = "";
-  document.getElementById("paymentScreen").innerHTML = "<h1>Thank you for visiting!</h1>";
-  speak("Thank you for visiting!");
+  document.getElementById("paymentScreen").innerHTML = "<h1>Your order is placed. Thank you for visiting!</h1>";
+  if (ttsEnabled) {
+    speak("Your order is placed. Thank you for visiting!");
+  }
 }
 
 function addTip() {
   const tipAmount = Number(document.getElementById("tipInputAmount").value);
 
   if (isNaN(tipAmount) || tipAmount < 0) {
-      alert("Please enter a valid tip amount");
-      return;
+    alert("Please enter a valid tip amount");
+    if (ttsEnabled) {
+      speak("Please enter a valid tip amount");
+    }
+    return;
   }
 
   const totalPrice = calculateTotalPrice(tipAmount);
+  if ((!(isNaN(tipAmount) || tipAmount == 0)) && ttsEnabled) {
+    speak("A $" + tipAmount + " is added to the total. The new total is $" + totalPrice);
+  }
+
   const priceH2 = document.getElementById("totalPriceH2");
   priceH2.textContent = "Total price: $" + totalPrice;
 }
@@ -167,6 +176,31 @@ window.addEventListener("DOMContentLoaded", () => {
           location.reload(); // re-render cart
         });
     });
+
+  document.querySelectorAll(".ttsButton").forEach(btn => {
+    btn.addEventListener("click", async e => {
+      if (!ttsEnabled) {
+        return;
+      }
+
+      e.preventDefault();
+
+      const textToSpeak = btn.dataset.text;
+      if (textToSpeak == null) {
+        return;
+      }
+      await speak(textToSpeak);
+
+      const link = e.target.closest("a");
+      console.log(link);
+      const url = link ? link.getAttribute("href") : null;
+      console.log(url);
+      if (url) {
+        console.log("here");
+        window.location.href = url;
+      }
+    });
+  });
 });
 
 // load employee name
@@ -192,62 +226,27 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.getElementById("paymentScreen").addEventListener("click", async (e) => {
+  const button = e.target.closest(".ttsButton");
+  if (!ttsEnabled) {
+    return;
+  }
+
   e.preventDefault(); // stop navigation
   console.log("Raw clicked element:", e.target);
-  console.log("Closest .tts-button:", button);
-  const text = button.dataset.text;
-  console.log("TTS enabled?", ttsEnabled, "Text:", text);
-
-  const url = button.getAttribute("href");
-
-  if (ttsEnabled && text) {
-    // e.preventDefault();
-    await speak(text);
-    if (url) window.location.href = url;
+  console.log("Closest .ttsButton:", button);
+  const textToSpeak = button.dataset.text;
+  if (textToSpeak == null) {
+    return;
   }
-  else if (text) {
-    speak(text);
+
+  await speak(textToSpeak);
+
+  const link = e.target.closest("a");
+  console.log(link);
+  const url = link ? link.getAttribute("href") : null;
+  console.log(url);
+  if (url) {
+    console.log("here");
+    window.location.href = url;
   }
-});
-
-// document.getElementById("cartPage").addEventListener("click", async (e) => {
-//   e.preventDefault(); // stop navigation
-//   console.log("Raw clicked element:", e.target);
-//   console.log("Closest .tts-button:", button);
-//   const text = button.dataset.text;
-//   console.log("TTS enabled?", ttsEnabled, "Text:", text);
-
-//   const url = button.getAttribute("href");
-
-//   if (ttsEnabled && text) {
-//     // e.preventDefault();
-//     await speak(text);
-//     if (url) window.location.href = url;
-//   }
-//   else if (text) {
-//     speak(text);
-//   } 
-// });
-
-
-
-
-document.querySelectorAll(".tts-button").forEach(button => {
-  button.addEventListener("click", async (e) => {
-    e.preventDefault(); // stop navigation
-    console.log("Raw clicked element:", e.target);
-    console.log("Closest .tts-button:", button);
-    const text = button.dataset.text;
-    console.log("TTS enabled?", ttsEnabled, "Text:", text);
-
-    const url = button.getAttribute("href");
-
-    if (ttsEnabled && text) {
-      await speak(text);
-      if (url) window.location.href = url;
-    }
-    else if (text) {
-      await speak(text);
-    }
-  });
 });
