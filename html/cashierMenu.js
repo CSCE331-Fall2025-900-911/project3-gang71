@@ -114,7 +114,7 @@ function openModificationsPopup(drink) {
   document.getElementById("mediumDrinkButton").classList.add("ttsButton");
   document.getElementById("mediumDrinkButton").dataset.text = "Medium drink size selected. The extra cost is $0.50.";
   document.getElementById("largeDrinkButton").classList.add("ttsButton");
-  document.getElementById("largeDrinkButton").dataset.text = "Medium drink size selected. The extra cost is $0.50.";
+  document.getElementById("largeDrinkButton").dataset.text = "Large drink size selected. The extra cost is $1.00.";
 
   // populate drop menus
   populateToppingDropdowns();
