@@ -10,7 +10,7 @@ body {
     height: 10%;
     position: absolute;
 
-    background-color: #EB0C43;
+    background-color: #f39abc;
     color: black;
 }
 
@@ -87,8 +87,11 @@ body {
     width: 23%;
     text-align: center;
     background-color: #ffe9ec;
-    padding-bottom: 1%;
+    padding: 1rem;                 
+    border-radius: 12px;           
+    box-shadow: 0 4px 10px #f6bbd2;    
 }
+
 
 .menuItemImg {
     position: relative;
@@ -138,6 +141,9 @@ body {
     position: relative;
     border-style: none;
 }
+.menuItemButton:hover{
+    cursor: pointer;
+}
 
 
 /* modifications popup */
@@ -166,6 +172,7 @@ body {
 
 .modificationsPopup button {
     padding: 10px; 
+    border-radius: 6px;
 }
 
 .modificationsPopup button:focus {
@@ -296,4 +303,23 @@ body {
 .sidebarItemPrice {
     width: fit-content;
     margin: 0;
+}
+
+.bannerButtons {
+    display: inline-block;        /* lets padding work */
+    padding: 0.6rem;
+    margin-left: 15px;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+    font-family: poppins, sans-serif;
+    color: #363949;               /* text color */
+    background-color: #f6f6f9;    /* button background */
+    border-radius: 6px;
+    text-decoration: none;        /* remove underline */
+}
+
+.bannerButtons:hover {
+    background-color: black;
+    color: white;
+    cursor: pointer;
 }
