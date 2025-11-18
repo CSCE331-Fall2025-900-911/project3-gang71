@@ -1,4 +1,4 @@
-//loading inventory table from the database
+//loading customer table from the database
 document.addEventListener("DOMContentLoaded", () => {
   const tableBody = document.getElementById("customerBody");
 
@@ -55,3 +55,7 @@ function filterContent() {
   }
 }
 
+// load employee name
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
+});

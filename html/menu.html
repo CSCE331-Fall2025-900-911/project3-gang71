@@ -16,7 +16,7 @@
         <aside>
             <div class="top">
                 <div class="logo">
-                    <img src="Kung_Fu_Tea_Official_Logo.png" alt="Boba shop logo">
+                    <img src="Kung_Fu_Tea_Official_Logo.png" alt="Kung Fu Tea logo">
                     <h2>Kung Fu Tea</h2>
                 </div>
             </div>
@@ -28,7 +28,7 @@
                 </a>
                 <a href="customer.html">
                     <span class="material-icons-sharp">person_outline</span>
-                    <h3>Customer</h3>
+                    <h3>Customers</h3>
                 </a>
                 <a href="employee.html">
                     <span class="material-icons-sharp">supervisor_account</span>
@@ -53,61 +53,53 @@
             </div>
         </aside>
 
-        <!-- ----------------SALES & TRENDS-------------------- -->
         <main>
-            <h1>Sales & Trends</h1>
-            <div class="salesOptions">
-                <input type="date" id="startDate"/>
-            </div>
-            <div class="salesOptions">
-                <input type="date" id="endDate"/>
+            <h1>Full Store Menu</h1>
+
+            <!-- SEARCH BAR -->
+            <div class="search-container">
+                <input id="search-bar" type="text" onkeyup="filterContent()" placeholder="Search.." name="search" >
+                
+                <button type="button" id="openMenuBtn">Add Item</button>
+                <span class="addMenuPopup">
+                    <h2> Add an Item to Menu</h2>
+                    <input id="menu-name" type="text" placeholder="Enter item name">
+                    <input id="menu-price" type="text" placeholder="Enter menu item price">
+                    <input id="menu-category" type="text" placeholder="Enter menu category">
+                    <input id="menu-descrip" type="text" placeholder="Enter item description"><br>
+                    <button type="button" id="addMenuBtn">Add</button>
+                    <br><button type="button" id="closeMenuAddPopup">Close</button>
+                </span>
+                <button type="button" id="openMenuRemoveBtn">Remove Item</button>
+                <span class="removeMenuPopup">
+                    <h2> Remove an Item from Menu</h2>
+                    <input id="remove-menu-item-name" type="text" placeholder="Enter item name">
+                    <button type="button" id="removeMenuBtn">Remove</button>
+                    <button type="button" id="closeMenuRemovePopup">Close</button>
+                </span>
             </div>
 
-            <select class="salesOptions" id="reportTypeBox">
-                <option value="dailySales">Daily Sales</option>
-                <option value="weeklySales">Weekly Sales</option>
-                <option value="monthlySales">Monthly Sales</option>
-                <option value="yearlySales">Yearly Sales</option>
-                <option value="topSellingProducts">Top Selling Products</option>
-                <option value="restockReport">Restock Report</option>
-                <option value="employeePerformance">Employee Performance</option>
-                <option value="productUsageChart">Product Usage Chart</option>
-            </select>
-            <button class="salesOptions" id="generateReportTypeButton">Generate Report Type</button>
-            <button class="salesOptions" id="downloadReportButton">Download Report</button>
-    
-            <!-- ----------------TABLE-------------------- -->
-            <div class="sales-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody id="salesBody">
-                        <tr>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
-                        </tr>
-                    </tbody>
+            <div class="menu-table">
+                <table id="menuTable">
+                <thead>
+                    <tr>
+                    <th>Menu ID</th>
+                    <th>Item Name</th>
+                    <th>Price</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="menuBody">
+                    <!-- rows will be filled by JavaScript -->
+                </tbody>
                 </table>
             </div>
 
-            <!-- ----------------GRAPH-------------------- -->
-            <div class="sales-graph">
-                <h2>Sales Graph</h2>
-                <canvas id="salesChart"></canvas>
-            </div>
-            <!-- ----------------X & Z Reports-------------------- -->
-            <br>
-            <h2>X & Z Reports</h2>
-            <button class="salesOptions" id="downloadXReportButton">Download X Report</button>
-            <button class="salesOptions" id="downloadZReportButton">Download Z Report</button>
-            
+
         </main>
+        <!-- ---------------------END OF MAIN ---------------------------->
+
         <!-- TOP -->
         <div class="right">
             <div class="top">
@@ -120,8 +112,7 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="trends.js"></script>
+    <script src="menu.js"></script>
     <script>
         // Set active class on the correct sidebar link based on current page
         document.addEventListener('DOMContentLoaded', function() {

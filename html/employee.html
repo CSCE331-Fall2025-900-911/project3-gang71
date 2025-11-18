@@ -12,11 +12,11 @@
 
 <body>
     <div class="container">
-        <!-- ----------------SIDEBAR-------------------- -->
+        <!-- ----------------SIDEBAR NAVIGATION LINKS-------------------- -->
         <aside>
             <div class="top">
                 <div class="logo">
-                    <img src="Kung_Fu_Tea_Official_Logo.png" alt="Boba shop logo">
+                    <img src="Kung_Fu_Tea_Official_Logo.png" alt="Kung Fu Tea logo">
                     <h2>Kung Fu Tea</h2>
                 </div>
             </div>
@@ -28,7 +28,7 @@
                 </a>
                 <a href="customer.html">
                     <span class="material-icons-sharp">person_outline</span>
-                    <h3>Customer</h3>
+                    <h3>Customers</h3>
                 </a>
                 <a href="employee.html">
                     <span class="material-icons-sharp">supervisor_account</span>
@@ -53,62 +53,33 @@
             </div>
         </aside>
 
-        <!-- ----------------SALES & TRENDS-------------------- -->
         <main>
-            <h1>Sales & Trends</h1>
-            <div class="salesOptions">
-                <input type="date" id="startDate"/>
-            </div>
-            <div class="salesOptions">
-                <input type="date" id="endDate"/>
-            </div>
-
-            <select class="salesOptions" id="reportTypeBox">
-                <option value="dailySales">Daily Sales</option>
-                <option value="weeklySales">Weekly Sales</option>
-                <option value="monthlySales">Monthly Sales</option>
-                <option value="yearlySales">Yearly Sales</option>
-                <option value="topSellingProducts">Top Selling Products</option>
-                <option value="restockReport">Restock Report</option>
-                <option value="employeePerformance">Employee Performance</option>
-                <option value="productUsageChart">Product Usage Chart</option>
-            </select>
-            <button class="salesOptions" id="generateReportTypeButton">Generate Report Type</button>
-            <button class="salesOptions" id="downloadReportButton">Download Report</button>
-    
-            <!-- ----------------TABLE-------------------- -->
-            <div class="sales-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody id="salesBody">
-                        <tr>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
-                        </tr>
-                    </tbody>
+            <h1>Employees</h1>
+            
+            <!-- employees table from database -->
+            <div class="employees-table">
+                <table id="employeesTable">
+                <thead>
+                    <tr>
+                    <th>Employee ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Role</th>
+                    <th>Pay rate</th>
+                    <th>Hours Worked</th>
+                    </tr>
+                </thead>
+                <tbody id="employeesBody">
+                    <!-- rows will be filled by JavaScript -->
+                </tbody>
                 </table>
             </div>
 
-            <!-- ----------------GRAPH-------------------- -->
-            <div class="sales-graph">
-                <h2>Sales Graph</h2>
-                <canvas id="salesChart"></canvas>
-            </div>
-            <!-- ----------------X & Z Reports-------------------- -->
-            <br>
-            <h2>X & Z Reports</h2>
-            <button class="salesOptions" id="downloadXReportButton">Download X Report</button>
-            <button class="salesOptions" id="downloadZReportButton">Download Z Report</button>
-            
+
         </main>
-        <!-- TOP -->
+        <!-- ---------------------END OF MAIN ---------------------------->
+
+        <!-- TOP RIGHT -->
         <div class="right">
             <div class="top">
                 <div class="profile">
@@ -120,8 +91,7 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="trends.js"></script>
+    <script src="employee.js"></script>
     <script>
         // Set active class on the correct sidebar link based on current page
         document.addEventListener('DOMContentLoaded', function() {
