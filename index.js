@@ -4,17 +4,27 @@ const express = require("express");
 const path = require("path");
 const { Pool } = require("pg"); //  importing PostgreSQL
 const cors = require("cors");
+const session = require('express-session'); // securing webpages before sign in
+const { createClient } = require("@deepgram/sdk");
+const fs = require("fs");
 
-// for local testing
-require('dotenv').config();
+const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "html"))); // Serve /html folder
-app.use(express.static(path.join(__dirname, "menuBoard")));
+
+// session middleware
+app.use(session({
+  secret: process.env.MIDDLEWARE_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // set true if using HTTPS
+    maxAge: 1000 * 60 * 60 * 8 // 8 hours
+  }
+}));
 
 // PostgreSQL connection
 const pool = new Pool({
@@ -26,27 +36,57 @@ const pool = new Pool({
   // ssl: { rejectUnauthorized: false }, // needed for secure remote connections
 });
 
+function requireLogin(req, res, next) {
+  if (!req.session.user) {
+    return res.redirect('/index.html');
+  }
+  next();
+}
+
+app.use(express.static(path.join(__dirname, 'public'))); // serve login page
+
+
 // show inventory.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "html", "inventory.html"));
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
-
 // API route to get inventory data
 app.get("/api/inventory", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT supplyid, supplyname, unit, quantityonhand FROM inventory ORDER BY supplyid;"
+      "SELECT supplyid, supplyname, supplyprice, unit, quantityonhand FROM inventory ORDER BY supplyid;"
     );
     res.json(result.rows);
   } catch (err) {
     console.error("Database error:", err);
     res.status(500).json({ error: "Database query for inventory failed" });
+  }
+});
+
+// API route to get employee data
+app.get("/api/employee", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT employeeid, firstname, lastname, employeerole, payrate, hoursworked FROM employee ORDER BY employeeid;"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database query for employee failed" });
+  }
+});
+
+// API route to get all menu items
+app.get("/api/menu", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT menuid, itemname, itemprice, itemcategory, itemdescrip FROM menu ORDER BY menuid;"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database query for menu failed" });
   }
 });
 
@@ -67,17 +107,17 @@ app.get("/api/menu/:category", async (req, res) => {
   }
 });
 
-
+// API route to add an inventory item
 app.post("/api/inventory", async (req, res) => {
   try {
-    const { name, unit, quantity } = req.body;
-    if (!name || !unit || isNaN(quantity)) {
+    const { name, price, unit, quantity } = req.body;
+    if (!name || isNaN(price) || !unit || isNaN(quantity)) {
       return res.status(400).json({ error: "Invalid input" });
     }
 
     const result = await pool.query(
-      "INSERT INTO inventory (supplyname, unit, quantityonhand) VALUES ($1, $2, $3) RETURNING *",
-      [name, unit, quantity]
+      "INSERT INTO inventory (supplyname, supplyprice, unit, quantityonhand) VALUES ($1, $2, $3, $4) RETURNING *",
+      [name, price, unit, quantity]
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -86,7 +126,80 @@ app.post("/api/inventory", async (req, res) => {
   }
 });
 
+// API route to add a menu item
+app.post("/api/menu", async (req, res) => {
+  try {
+    const { name, price, category, description } = req.body;
+    if (!name || isNaN(price) || !category) {
+      return res.status(400).json({ error: "Invalid input" });
+    }
 
+    // Start a transaction
+    await pool.query('BEGIN');
+
+    // Get the next available menuid
+    const maxIdResult = await pool.query('SELECT MAX(menuid) FROM menu');
+    const nextId = (maxIdResult.rows[0].max || 0) + 1;
+
+    const result = await pool.query(
+      "INSERT INTO menu (menuid, itemname, itemprice, itemcategory, itemdescrip) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [nextId, name, price, category, description]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database insert failed" });
+  }
+});
+
+//API route to delete an inventory item
+app.delete("/api/inventory/:name", async (req, res) => {
+  try {
+    const name = req.params.name;
+    if (!name) {
+      return res.status(400).json({ error: "Name is required" });
+    }
+
+    const result = await pool.query(
+      "DELETE FROM inventory WHERE supplyname = $1 RETURNING *",
+      [name]
+    );
+    
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database delete failed" });
+  }
+});
+
+
+//API route to delete a menu item
+app.delete("/api/menu/:name", async (req, res) => {
+  try {
+    const name = req.params.name;
+    if (!name) {
+      return res.status(400).json({ error: "Name is required" });
+    }
+
+    const result = await pool.query(
+      "DELETE FROM menu WHERE itemname = $1 RETURNING *",
+      [name]
+    );
+    
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database delete failed" });
+  }
+});
 
 // API route to get daily sales
 app.get("/api/dailySales", async (req, res) => {
@@ -361,8 +474,6 @@ app.get("/api/customer", async (req, res) => {
     res.status(500).json({ error: "Database query for customer failed" });
   }
 });
-<<<<<<< Updated upstream
-=======
 
 // login
 app.get('/api/login', async (req, res) => {
@@ -462,4 +573,3 @@ app.use(express.static(path.join(__dirname, "menuBoard")));
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
->>>>>>> Stashed changes
