@@ -361,3 +361,105 @@ app.get("/api/customer", async (req, res) => {
     res.status(500).json({ error: "Database query for customer failed" });
   }
 });
+<<<<<<< Updated upstream
+=======
+
+// login
+app.get('/api/login', async (req, res) => {
+  const { user, userPassword } = req.query;
+
+  const result = await pool.query(
+    'SELECT firstname, lastname, employeerole FROM employee WHERE username=$1 AND password=$2',
+    [user, userPassword]
+  );
+
+  if (result.rows.length === 0) {
+    return res.json([]); // ALWAYS return array
+  }
+
+  const userData = result.rows[0];
+
+  // create session
+  req.session.user = {
+    firstname: userData.firstname,
+    lastname: userData.lastname,
+    role: userData.employeerole
+  };
+
+  return res.json([userData]);
+});
+
+app.get('/api/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Logout failed");
+    }
+    res.clearCookie('connect.sid') // clears the cookie in browser
+    res.redirect('/index.html');
+  });
+});
+
+
+// get order number for cashier view
+app.get("/api/orders", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT MAX(orderid) FROM \"order\";"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
+
+app.post("/tts", async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: "Text is required" });
+
+    // Make request to Deepgram TTS
+    const response = await deepgram.speak.request(
+      { text },
+      {
+        model: "aura-2-thalia-en",
+        encoding: "linear16",
+        container: "wav",
+      }
+    );
+
+    const stream = await response.getStream();
+    const chunks = [];
+
+    const reader = stream.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+    }
+
+    const buffer = Buffer.concat(chunks.map(c => Buffer.from(c)));
+    
+    res.set({
+      "Content-Type": "audio/wav",
+      "Content-Length": buffer.length,
+    });
+
+    res.send(buffer);
+
+  } catch (err) {
+    console.error("TTS error:", err);
+    res.status(500).json({ error: "Failed to generate TTS" });
+  }
+});
+
+
+app.use(requireLogin, express.static(path.join(__dirname, "html")));
+app.use(express.static(path.join(__dirname, "menuBoard")));
+
+// start server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+>>>>>>> Stashed changes
