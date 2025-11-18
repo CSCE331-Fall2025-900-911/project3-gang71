@@ -567,6 +567,7 @@ app.post("/tts", async (req, res) => {
 
 
 app.use(requireLogin, express.static(path.join(__dirname, "html")));
+app.use(express.static(path.join(__dirname, "menuBoard")));
 
 // start server
 app.listen(PORT, () => {
