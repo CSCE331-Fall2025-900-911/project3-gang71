@@ -55,7 +55,7 @@ function showPaymentScreen(totalPrice) {
       <input id="tipInputAmount" type="text" placeholder="Enter tip amount" class="ttsButton" data-text="Enter tip amount">
       <button onclick="addTip()" class="ttsButton" data-text="Add tip">Add Tip</button>
       <h2 id="totalPriceH2">Total price: $${totalPrice}</h2>
-      <a href="cashierCart.html" style="text-decoration: none; color: black;">
+      <a href="customerCart.html" style="text-decoration: none; color: black;">
           <button class="ttsButton" data-text="Back to cart">Back to cart</button>
       </a>
       <button onclick="showThankYouScreen()" class="ttsButton" data-text="Pay">Pay</button>
