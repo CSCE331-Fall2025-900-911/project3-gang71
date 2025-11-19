@@ -612,6 +612,17 @@ app.post("/api/translate", async (req, res) => {
   }
 });
 
+
+app.get('/weather', async (req, res) => {
+  const city = 'College Station';
+  const apiKey = process.env.OPENWEATHER_KEY;
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&appid=${apiKey}`;
+  const response = await fetch(url);
+  const data = await response.json();
+  res.json(data);
+});
+
+
 app.use(requireLogin, express.static(path.join(__dirname, "html")));
 app.use(express.static(path.join(__dirname, "menuBoard")));
 
