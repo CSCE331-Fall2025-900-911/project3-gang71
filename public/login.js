@@ -27,9 +27,9 @@ function loginUser() {
             );
 
             if (item.employeerole === "Cashier") {
-                window.location.href = "coldBrews.html";
+                window.location.href = "cashier/cashier.html";
             } else if (item.employeerole === "Manager") {
-                window.location.href = "manager.html";
+                window.location.href = "manager/manager.html";
             }
         })
         .catch((err) => {
