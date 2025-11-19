@@ -4,6 +4,7 @@
   <title>Menu</title>
   <link rel = "stylesheet" href = "cashierStyle.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+  <script src="translator.js"></script>
 </head>
 <body data-category="La Colombe Cold Brew">
   <div class = topPageBanner>
@@ -12,6 +13,10 @@
     </div>
     <a href="cashierCart.html" class="bannerButtons ttsButton" data-text="Cart">Cart</a>
     <a href = "/api/logout" class="bannerButtons ttsButton" data-text="Log out">Logout</a>
+    <label style="margin: 0 20px;">
+      <input type="checkbox" id="languageToggle" onchange="toggleLanguage(this)"/>
+        Español / Spanish
+    </label>
     <div class = employeeName>
       <p id = "empName"></p>
     </div>
@@ -101,7 +106,7 @@
     </div>
 
   <div class = menu>
-    <h1>La Colombe Cold Brews</h1>
+    <h1 data-translate>La Colombe Cold Brews</h1>
     <div class = menuRow>
     </div>
   </div>

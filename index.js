@@ -7,6 +7,7 @@ const cors = require("cors");
 const session = require('express-session'); // securing webpages before sign in
 const { createClient } = require("@deepgram/sdk");
 const fs = require("fs");
+const deepl = require('deepl-node');
 
 const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
 
@@ -565,6 +566,51 @@ app.post("/tts", async (req, res) => {
   }
 });
 
+// Translation endpoint using DeepL API
+app.post("/api/translate", async (req, res) => {
+  try {
+    const { text, targetLang } = req.body;
+    if (!text || !targetLang) {
+      return res.status(400).json({ error: "Missing text or targetLang" });
+    }
+
+    // Normalize target language to DeepL format (ES, EN)
+    const targetNormalized = (typeof targetLang === 'string')
+      ? (targetLang.length === 2 ? targetLang.toUpperCase() : targetLang.toUpperCase())
+      : 'ES';
+
+    const deeplApiKey = process.env.DEEPL_API_KEY;
+    // using deepl-node client
+    if (deeplApiKey) {
+      try {
+        const translator = new deepl.Translator(deeplApiKey);
+        const result = await translator.translateText(text, null, targetNormalized);
+        // deepl-node returns .text for single translation
+        const translated = result?.text                                 //if result.text exists use that  
+          || (result?.translations && result.translations[0]?.text)     //otherwise, if result.translations[0].text exists, use that
+          || text;                                                      //otherwise, fall back to the original text 
+
+        return res.json({ translatedText: translated });
+      } catch (clientErr) {
+        console.error("DeepL client error:", clientErr);
+        // fallthrough to mock fallback below
+      }
+    }
+
+    // ---------Fallback mock translations for development (no external API)------------------
+    // const mockDict = {
+    //   "La Colombe Cold Brews": "La Colombe Cold Brews",
+    //   "Cart": "Carrito",
+    //   "Log out": "Cerrar sesión",
+    //   // add more exact-match mappings for your menu items
+    // };
+    // return res.json({ translatedText: mockDict[text] || text });
+
+  } catch (err) {
+    console.error("Translation endpoint error:", err);
+    res.status(500).json({ error: "Translation request failed" });
+  }
+});
 
 app.use(requireLogin, express.static(path.join(__dirname, "html")));
 app.use(express.static(path.join(__dirname, "menuBoard")));
