@@ -8,6 +8,7 @@
     <title>Menu</title>
     <link rel = "stylesheet" href = "customerStyle.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 </head>
 
 <body data-category="Coffee">
@@ -112,7 +113,12 @@
     </div>
 
   <div class = menu id="menuContainer">
-    <h1>Coffees</h1>
+    <div class="menuHeader">
+      <h1 data-translate>Coffees</h1>
+      <div class="weather">
+        <div id="weather">Weather loading...</div>
+      </div>
+    </div>
 
     <div class = menuRow></div>
     <div class = menuRow></div>

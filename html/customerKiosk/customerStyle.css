@@ -25,7 +25,7 @@ body {
     position: relative;
     text-align: right;
     right: 7%;
-    bottom: 10%;
+    bottom: 50%;
 
     font-family: 'Courier New', Courier, monospace;
     font-size: 30;
@@ -322,4 +322,37 @@ body {
     background-color: black;
     color: white;
     cursor: pointer;
+}
+
+
+.menuHeader {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px;
+}
+.weather {
+    background: rgba(255, 229, 233, 0.808);
+    padding: .5rem 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 10px #f6bbd2;
+    font-size: .9rem;
+}
+.weatherRow {
+    display: flex;
+    align-items: center;
+    gap: 1.3rem;
+    margin-top: -6px;
+}
+.weatherColumn p {
+    margin: 0;
+    line-height: 1.4;
+}
+
+.weatherLocation {
+    font-size: 1.2rem;
+    display: block;
+    margin-bottom: 5px;
+}
+.material-symbols-outlined {
+    color: var(--color-dark-variant);
 }
