@@ -78,6 +78,10 @@
     </div>
     <script src="manager.js"></script>
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
+        });
+
         // Set active class on the correct sidebar link based on current page
         document.addEventListener('DOMContentLoaded', function() {
             // Get current page filename
