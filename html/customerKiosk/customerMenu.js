@@ -65,7 +65,7 @@ function renderDrinks(drinks, menuRow) {
       <p class="menuItemP">${drink.itemdescrip}</p>
       <div style="display: flex; align-items: center;">
         <h1 class="menuItemH1">$${Number(drink.itemprice).toFixed(2)}</h1>
-        <button class="menuItemButton" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.itemname}.">Add to Order</button>
+        <button class="menuItemButton" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.itemname}.">Customize</button>
       </div>
     `;
     menuRow.appendChild(itemDiv);
