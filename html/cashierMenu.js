@@ -365,3 +365,19 @@ document.querySelectorAll(".ttsButton").forEach(button => {
     }
   });
 });
+
+// Initialize language based on stored preference
+document.addEventListener('DOMContentLoaded', function() {
+  const toggle = document.getElementById('languageToggle');
+  if (toggle && pageTranslator.getCurrentLanguage() === 'es') {
+    toggle.checked = true;
+  }
+});
+
+function toggleLanguage(checkbox) {
+  if (checkbox.checked) {
+    pageTranslator.switchLanguage('es');
+  } else {
+    pageTranslator.switchLanguage('en');
+  }
+}
