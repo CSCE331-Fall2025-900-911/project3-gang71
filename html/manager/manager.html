@@ -8,6 +8,7 @@
     <title>Manager View</title>
     <link rel="stylesheet" href="managerStyle.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 </head>
 
 <body>
@@ -55,9 +56,12 @@
 
         <main>
             <h1>Dashboard</h1>
-            <div class="date">
-                <input type="date">
-            </div>
+            <a href="/menuBoard.html">
+                <span class="menuBoardLinks"> Menu Board First Screen </span>
+            </a>
+            <a href="/menuBoard2.html">
+                <span class="menuBoardLinks"> Menu Board Second Screen </span>
+            </a>
 
 
         </main>
@@ -73,15 +77,13 @@
                     </div>
                 </div>
             </div>
-            <a href="/menuBoard.html">Menu Board</a>
+            <div class="weather">
+                <div id="weather">Weather loading...</div>
+            </div>
         </div>
     </div>
     <script src="manager.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
-        });
-
         // Set active class on the correct sidebar link based on current page
         document.addEventListener('DOMContentLoaded', function() {
             // Get current page filename
@@ -99,6 +101,85 @@
                 }
             });
         });
+
+        // load employee name
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
+        });
+
+               document.addEventListener("DOMContentLoaded", () => {
+            getWeather();
+        });
+
+
+
+
+        async function getWeather() {
+            const res = await fetch('/weather');
+            const data = await res.json();
+
+
+
+
+            if (data.cod === 200) {
+                const resultDiv = document.getElementById('weather');
+                const weatherMain = data.weather[0].main;
+                let icon = 'partly_cloudy_day';
+
+
+
+
+                switch (weatherMain) {
+                    case 'Clear':
+                        icon = 'sunny';
+                        break;
+                    case 'Clouds':
+                        icon = 'cloud';
+                        break;
+                    case 'Rain':
+                        icon = 'rainy';
+                        break;
+                    case 'Drizzle':
+                        icon = 'rainy';
+                        break;
+                    case 'Thunderstorm':
+                        icon = 'thunderstorm';
+                        break;
+                    case 'Snow':
+                        icon = 'cloudy_snowing';
+                        break;
+                    case 'Mist':
+                        icon = 'rainy';
+                        break;
+                    case 'Fog':
+                        icon = 'foggy';
+                        break;
+                    case 'Haze':
+                        icon = 'foggy';
+                        break;
+                    default:
+                        icon = 'partly_cloudy_day';
+                    }
+
+
+
+
+                resultDiv.innerHTML = `
+                <span class="weatherLocation"> ${data.name} </span>
+                <div class = "weatherRow">
+                    <div class="weatherColumn">
+                        <i class="material-symbols-outlined" style="font-size:50px;">${icon}</i>
+                    </div>
+                    <div class="weatherColumn">
+                        <p>${data.main.temp}°F</p>
+                        <p>Feels like: ${data.main.feels_like}°F</p>
+                        <p>Wind: ${data.wind.speed} m/s</p>      
+                    </div>
+                  </div>
+                `;
+            }
+        }
+
     </script>
 </body>
 
