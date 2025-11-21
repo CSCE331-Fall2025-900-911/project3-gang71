@@ -201,7 +201,7 @@ function customerOAuth(email) {
             
             const item = data[0];
             sessionStorage.setItem('currentCustomer', `${item.firstname} ${item.lastname}`);
-            window.location.href = "customer/coldBrews.html";
+            window.location.href = "customerKiosk/coldBrews.html";
         })
         .catch((err) => {
             console.error("Error logging in:", err);
