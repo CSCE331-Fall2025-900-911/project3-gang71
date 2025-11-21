@@ -199,6 +199,7 @@ function customerOAuth(email) {
                 return;
             }
             
+            const item = data[0];
             sessionStorage.setItem('currentCustomer', `${item.firstname} ${item.lastname}`);
             window.location.href = "customer/coldBrews.html";
         })
