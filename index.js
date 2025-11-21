@@ -8,6 +8,7 @@ const session = require('express-session'); // securing webpages before sign in
 const { createClient } = require("@deepgram/sdk");
 const fs = require("fs");
 const deepl = require('deepl-node');
+const XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
 const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
 
@@ -604,7 +605,7 @@ app.get('/api/logout', (req, res) => {
       return res.status(500).send("Logout failed");
     }
     res.clearCookie('connect.sid') // clears the cookie in browser
-    res.redirect('/index.html');
+    res.redirect('public/index.html');
   });
 });
 
