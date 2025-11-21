@@ -476,8 +476,8 @@ app.get("/api/customer", async (req, res) => {
   }
 });
 
-// login
-app.get('/api/login', async (req, res) => {
+// login for employees
+app.get('/api/employeeLogin', async (req, res) => {
   const { user, userPassword } = req.query;
 
   const result = await pool.query(
@@ -499,6 +499,102 @@ app.get('/api/login', async (req, res) => {
   };
 
   return res.json([userData]);
+});
+
+// login for customers
+app.get("/api/customerlogin", async (req,res) => {
+  const phoneNumber = req.query.phone;
+  
+  const result = await pool.query(
+    "SELECT firstName, lastName FROM customer WHERE phoneNumber = $1;",
+    [phoneNumber]
+  );
+
+  if (result.rows.length === 0) {
+    return res.json([]);
+  }
+
+  const userData = result.rows[0];
+
+  req.session.user = {
+    firstname: userData.firstname,
+    lastname: userData.lastname,
+    role: "Customer"
+  };
+    
+  res.json([userData]);
+});
+
+// retrieve client id from .env file
+app.get("/api/clientid", async (req, res) =>{
+  res.json(process.env.OAUTH_CLIENT_ID);
+});
+
+// retrieve email from oauth
+app.get("/api/email", async (req, res) => {
+  try {
+    const accessToken = req.query.token;
+    var emailReq = new XMLHttpRequest();
+    emailReq.open('GET', 'https://www.googleapis.com/oauth2/v2/userinfo');
+    emailReq.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+
+    emailReq.onload = function() {
+      res.json(emailReq.responseText);
+    }
+
+    emailReq.send();
+  } catch(err) {
+    console.log(err);
+    console.log("Error acquiring OAuth email");
+  }
+});
+
+// check for employee with oauth email
+app.get("/api/employeeoauth", async (req, res) => {
+  const email = req.query.email;
+    
+  const result = await pool.query(
+    "SELECT firstName, lastName, employeeRole FROM employee WHERE email = $1;",
+    [email]
+  );
+
+  if (result.rows.length === 0) {
+    return res.json([]);
+  }
+
+  const userData = result.rows[0];
+
+  req.session.user = {
+    firstname: userData.firstname,
+    lastname: userData.lastname,
+    role: userData.role
+  };
+    
+  res.json([userData]);
+});
+
+// check for customer with oauth email
+app.get("/api/customeroauth", async (req, res) => {
+  const email = req.query.email;
+  
+  const result = await pool.query(
+    "SELECT firstName, lastName FROM customer WHERE email = $1;",
+    [email]
+  );
+
+  if (result.rows.length === 0) {
+    return res.json([]);
+  }
+
+  const userData = result.rows[0];
+
+  req.session.user = {
+    firstname: userData.firstname,
+    lastname: userData.lastname,
+    role: "Customer"
+  };
+    
+  res.json([userData]);
 });
 
 app.get('/api/logout', (req, res) => {

@@ -56,57 +56,131 @@ body{
 /*----------------------- LOGIN BOX ------------------------*/
 .logo img{
     position: absolute;
-    width: 25%;
-    height: 40%;
-    left: 38%;
-    top: 5%;
+    width: 20%;
+    height: 32%;
+    left: 40%;
     z-index: 1;
 }
 
 .login {
     position: absolute;
-    width: 50%;
-    height: 50%;
-    left: 25%;
-    top: 25%;
+    width: 75%;
+    height: 75%;
+    left: 12.5%;
+    top: 12.5%;
     background: var(--color-kf-pink);
+}
+
+.login .verticalLine {
+    position: relative;
+    top: 25%;
+    left: 49.5%;
+    width: 1%;
+    height: 70%;
+    background: black;
+}
+
+/*------------------------ CUSTOMER LOGIN ---------------------------*/
+.login .customerTitle h1 {
+    position: absolute;
+    left: 15%;
+    top: 25%;
+}
+
+.login .phoneNumber h2 {
+    position: absolute;
+    top: 40%;
+    left: 5%;
+}
+
+.login .phoneNumber input {
+    position: absolute;
+    width: 40%;
+    height: 8%;
+    left: 5%;
+    top: 46%;
+    font-size: 20px;
+    font-family: poppins, sans-serif;
+}
+
+.login .phoneNumber p {
+    position: absolute;
+    left: 5%;
+    top: 54%;
+}
+
+.login .phoneNumber button {
+    position: absolute;
+    width: 40%;
+    height: 8%;
+    left: 5%;
+    top: 58%;
+    background: var(--color-kf-red);
+}
+
+.login .customerOAuth h3 {
+    position: absolute;
+    left: 24%;
+    top: 68%;
+}
+
+.login .customerOAuth button {
+    position: absolute;
+    left: 5%;
+    top: 73%;
+    background: white;
+}
+
+.login .customerOAuth button:hover {
+    background: var(--color-info-light);
+    color: black;
+    cursor: pointer;
+}
+
+/*------------------------ EMPLOYEE LOGIN ---------------------------*/
+.login .employeeTitle h1 {
+    position: absolute;
+    top: 25%;
+    left: 65%;
 }
 
 .login .username h2 {
     position: absolute;
-    top: 30%;
-    left: 30%;
+    top: 35%;
+    left: 55%;
 }
 
 .login .username input {
     position: absolute;
-    width: 45%;
-    height: 10%;
-    top: 40%;
-    left: 30%;
+    width: 40%;
+    height: 8%;
+    top: 41%;
+    left: 55%;
+    font-size: 20px;
+    font-family: poppins, sans-serif;
 }
 
 .login .password h2 {
     position: absolute;
-    top: 55%;
-    left: 30%;
+    top: 52%;
+    left: 55%;
 }
 
 .login .password input {
     position: absolute;
-    width: 45%;
-    height: 10%;
-    top: 65%;
-    left: 30%;
-    font-size: 25px;
+    width: 40%;
+    height: 8%;
+    top: 58%;
+    left: 55%;
+    font-size: 20px;
 }
 
 .login button {
     position: absolute;
-    width: 25%;
-    height: 10%;
-    left: 38%;
-    top: 85%;
+    width: 40%;
+    height: 8%;
+    left: 55%;
+    top: 70%;
     background: var(--color-kf-red);
     font-size: 20px;
     font-family: poppings, sans-serif;
@@ -121,6 +195,27 @@ body{
 
 .login p {
     position: absolute;
-    left: 30%;
-    top: 75%;
+    left: 55%;
+    top: 66%;
+}
+
+.login .employeeOAuth h3 {
+    position: absolute;
+    left: 74%;
+    top: 80%;
+}
+
+.login .employeeOAuth button {
+    position: absolute;
+    width: 40%;
+    height: 8%;
+    left: 55%;
+    top: 85%;
+    background: white;
+}
+
+.login .employeeOAuth button:hover {
+    color: black;
+    background: var(--color-info-light);
+    cursor: pointer;
 }
