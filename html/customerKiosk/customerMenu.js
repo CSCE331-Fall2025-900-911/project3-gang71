@@ -351,7 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // load employee name
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
+  document.getElementById("custName").innerHTML = sessionStorage.getItem('currentCustomer');
 
   const ttsToggle = document.getElementById("ttsToggle");
   if (ttsToggle) {
