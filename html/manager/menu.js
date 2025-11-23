@@ -154,3 +154,8 @@ document.getElementById("removeMenuBtn").addEventListener("click", async () => {
     alert("Failed to remove menu item.");
   }
 });
+
+// load employee name
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
+});

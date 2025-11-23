@@ -8,8 +8,12 @@ const session = require('express-session'); // securing webpages before sign in
 const { createClient } = require("@deepgram/sdk");
 const fs = require("fs");
 const deepl = require('deepl-node');
+const XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
 const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
+
+const kitchenStatus = new Map(); // map to hold kitchen order statuses
+const kitchenBumped = new Set(); // set to hold bumped order IDs
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -476,8 +480,8 @@ app.get("/api/customer", async (req, res) => {
   }
 });
 
-// login
-app.get('/api/login', async (req, res) => {
+// login for employees
+app.get('/api/employeeLogin', async (req, res) => {
   const { user, userPassword } = req.query;
 
   const result = await pool.query(
@@ -501,6 +505,102 @@ app.get('/api/login', async (req, res) => {
   return res.json([userData]);
 });
 
+// login for customers
+app.get("/api/customerlogin", async (req,res) => {
+  const phoneNumber = req.query.phone;
+  
+  const result = await pool.query(
+    "SELECT firstName, lastName FROM customer WHERE phoneNumber = $1;",
+    [phoneNumber]
+  );
+
+  if (result.rows.length === 0) {
+    return res.json([]);
+  }
+
+  const userData = result.rows[0];
+
+  req.session.user = {
+    firstname: userData.firstname,
+    lastname: userData.lastname,
+    role: "Customer"
+  };
+    
+  res.json([userData]);
+});
+
+// retrieve client id from .env file
+app.get("/api/clientid", async (req, res) =>{
+  res.json(process.env.OAUTH_CLIENT_ID);
+});
+
+// retrieve email from oauth
+app.get("/api/email", async (req, res) => {
+  try {
+    const accessToken = req.query.token;
+    var emailReq = new XMLHttpRequest();
+    emailReq.open('GET', 'https://www.googleapis.com/oauth2/v2/userinfo');
+    emailReq.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+
+    emailReq.onload = function() {
+      res.json(emailReq.responseText);
+    }
+
+    emailReq.send();
+  } catch(err) {
+    console.log(err);
+    console.log("Error acquiring OAuth email");
+  }
+});
+
+// check for employee with oauth email
+app.get("/api/employeeoauth", async (req, res) => {
+  const email = req.query.email;
+    
+  const result = await pool.query(
+    "SELECT firstName, lastName, employeeRole FROM employee WHERE email = $1;",
+    [email]
+  );
+
+  if (result.rows.length === 0) {
+    return res.json([]);
+  }
+
+  const userData = result.rows[0];
+
+  req.session.user = {
+    firstname: userData.firstname,
+    lastname: userData.lastname,
+    role: userData.role
+  };
+    
+  res.json([userData]);
+});
+
+// check for customer with oauth email
+app.get("/api/customeroauth", async (req, res) => {
+  const email = req.query.email;
+  
+  const result = await pool.query(
+    "SELECT firstName, lastName FROM customer WHERE email = $1;",
+    [email]
+  );
+
+  if (result.rows.length === 0) {
+    return res.json([]);
+  }
+
+  const userData = result.rows[0];
+
+  req.session.user = {
+    firstname: userData.firstname,
+    lastname: userData.lastname,
+    role: "Customer"
+  };
+    
+  res.json([userData]);
+});
+
 app.get('/api/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) {
@@ -508,7 +608,7 @@ app.get('/api/logout', (req, res) => {
       return res.status(500).send("Logout failed");
     }
     res.clearCookie('connect.sid') // clears the cookie in browser
-    res.redirect('/index.html');
+    res.redirect('public/index.html');
   });
 });
 
@@ -612,8 +712,101 @@ app.post("/api/translate", async (req, res) => {
   }
 });
 
+
+app.get('/weather', async (req, res) => {
+  const city = 'College Station';
+  const apiKey = process.env.OPENWEATHER_KEY;
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&appid=${apiKey}`;
+  const response = await fetch(url);
+  const data = await response.json();
+  res.json(data);
+});
+
+// api route to get kitchen order statuses
+app.get("/api/kitchen/orders", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        o.orderid,
+        o.orderdate,
+        o.ordertime,
+        COALESCE(c.firstname || ' ' || c.lastname, ' ') AS customername,
+        d.drinkid,
+        d.quantity,
+        m.itemname
+      FROM "order" o
+      JOIN drinks d ON o.orderid = d.orderid
+      JOIN menu m ON d.menuid = m.menuid
+      LEFT JOIN customer c ON o.customerid = c.customerid
+      WHERE o.orderdate = CURRENT_DATE
+      ORDER BY o.orderdate, o.ordertime, o.orderid, d.drinkid;
+      `);
+      
+      const rows = result.rows;
+      const ordersMap = new Map();
+
+      rows.forEach(r => {
+        if (kitchenBumped.has(r.orderid)) {
+          return; // skip bumped orders
+        }
+
+        if (!ordersMap.has(r.orderid)) {
+          ordersMap.set(r.orderid, {
+            orderid: r.orderid,
+            orderdate: r.orderdate,
+            ordertime: r.ordertime,
+            customername: r.customername,
+            status: kitchenStatus.get(r.orderid) || "New",
+            items: [],
+          });
+        }
+
+        ordersMap.get(r.orderid).items.push({
+          drinkid: r.drinkid,
+          name: r.itemname,
+          quantity: r.quantity,
+        });
+      });
+
+      res.json(Array.from(ordersMap.values()));
+  } catch (err) {
+    console.error("Database error (kitchen orders):", err);
+    res.status(500).json({error: "Database query for kitchen orders failed" });
+  }
+});
+
+// order status update (new -> in progress -> done)
+app.patch("/api/kitchen/orders/:id/status", async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { status } = req.body;
+
+  if (!status || !["New", "In Progress", "Done"].includes(status)) {
+    return res.status(400).json({error: "Invalid Status"});
+  }
+
+  kitchenStatus.set(id, status);
+  kitchenBumped.delete(id); // un-bump if previously bumped
+
+  res.json({ orderid: id, status });
+});
+
+// bump an order (remove from kitchen view)
+app.delete("/api/kitchen/orders/:id", (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  kitchenBumped.add(id);
+  kitchenStatus.delete(id); // remove status tracking
+  res.status(204).send();
+});
+
+
 app.use(requireLogin, express.static(path.join(__dirname, "html")));
 app.use(express.static(path.join(__dirname, "menuBoard")));
+
+// kitchen view
+app.use("/kitchenView", requireLogin, express.static(path.join(__dirname, "kitchenView")));
+app.get("/kitchen", requireLogin, (req, res) => {
+  res.redirect("/kitchenView/kitchen.html");
+})
 
 // start server
 app.listen(PORT, () => {

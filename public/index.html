@@ -16,6 +16,30 @@
     </div>
 
     <div class = "login">
+        <div class = "verticalLine"></div>
+
+        <div class = "customerTitle">
+            <h1>Customer Login</h1>
+        </div>
+
+        <div class = "phoneNumber">
+            <h2>Phone Number</h2>
+            <input id = "phoneNumber">
+            <p id = "failedCustomerLogin" hidden = true>No account with that phone number was found. Please try again.</p>
+            <button onclick = "customerLogin()">Sign in</button>
+        </div>
+
+        <div class = "customerOAuth">
+            <h3>OR</h3>
+            <button onclick = "customerOAuthButton()">Sign in with Google</button>
+        </div>
+
+        <!-- Employee Login -->
+
+        <div class = "employeeTitle">
+            <h1>Employee Login</h1>
+        </div>
+
         <div class = "username">
             <h2>Username</h2>
             <input id = "username">
@@ -26,12 +50,16 @@
             <input type = "password" id = "password">
         </div>
 
-        <p id = "failedLogin" hidden = true >Invalid username or password. Please try again.</p>
+        <p id = "failedEmployeeLogin" hidden = true >Invalid username or password. Please try again.</p>
 
-        <button onclick = "loginUser()">Login</button>
+        <button onclick = "employeeLogin()">Sign in</button>
+
+        <div class = "employeeOAuth">
+            <h3>OR</h3>
+            <button onclick = "employeeOAuthButton()">Sign in with Google</button>
+        </div>
     </div>
 
     <script src = "login.js"></script>
-    <script src = "cashierMenu.js"></script>
 </body>
 </html>

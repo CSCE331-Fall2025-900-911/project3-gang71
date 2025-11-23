@@ -1,11 +1,48 @@
-/* need to fix color scheme to match rest of app */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* --------------ROOT VARIABLES----------------- */
+:root{
+    --color-primary:#ec73a1;
+    --color-danger:#fc4c5b;
+    --color-success:#41f1b6;
+    --color-warning:#f0b051;
+    --color-white:#fff;
+    --color-info-dark: #2c333b;
+    --color-info-light: #dce1eb;
+    --color-dark: #363949;
+    --color-light: rgba(132,139,200,0.18);
+    --color-background: #f6f6f9;
+    --color-dark-variant: #677483;
+    --color-primary-variant: #111e88;
+    --color-kf-red: #eb0c43;
+
+    --card-border-radius: 2rem;
+    --border-radius-1: 0.4rem;
+    --border-radius-2: 0.8rem;
+    --border-radius-3: 1.2rem;
+
+    --card-padding: 1.8rem;
+    --padding-1: 1.2rem;
+
+    --box-shadow: 0 2rem 3rem var(--color-light);
+}
 
 /* --- BASIC LAYOUT --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+  font-size: 14px;
+}
+
 body {
-  font-family: "Segoe UI", sans-serif;
+  font-family: "Poppins", sans-serif;
   margin: 0;
-  background: #121212;
-  color: white;
+  background: var(--color-background);
+  color: var(--color-dark);
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -16,76 +53,157 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #222;
-  padding: 10px 20px;
+  background: var(--color-white);
+  padding: 1rem 1.5rem;
   font-size: 1.2rem;
-  border-bottom: 2px solid #444;
+  border-bottom: 1px solid var(--color-light);
+  box-shadow: var(--box-shadow);
+}
+
+.header h1 {
+    font-size: 1.4rem;
+    font-weight: 600;
 }
 
 #clock{
     font-size: 1rem;
+    color: var(--color-dark-variant);
 }
 
 /* MAIN ORDER GRID */
 #order-board {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-  padding: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.2rem;
+  padding: 1.5rem;
   overflow-y: auto;
 }
 
 /* ORDER CARD */
 .order-card {
-  background: #1e1e1e;
-  border-radius: 10px;
-  padding: 16px;
+  background: var(--color-white);
+  border-radius: var(--border-radius-2);
+  padding: 1rem 1.2rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border: 2px solid #333;
-  transition: transform 0.2s;
+  box-shadow: var(--box-shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .order-card:hover {
-    transform: scale(1.05);
+    transform: translateY(-3px);
+    box-shadow: 0 1.4rem 2.4rem var(--color-light);
 }
 
 .order-header {
     display:flex;
     justify-content: space-between;
     align-items: center;
-    font-weight: bold;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+}
+
+.order-meta {
+    font-size: 0.85rem;
+    color: var(--color-dark-variant);
+    display: flex;
+    justify-content: space-between;
 }
 
 .order-items {
-    margin: 10px 0;
+    margin: 0.6rem 0 0.8rem 0;
     list-style: none;
     padding: 0;
 }
 
 .order-items li {
-    padding: 4px 0;
-    border-bottom: 1px solid #333;
+    padding: 0.3rem 0;
+    border-bottom: 1px dashed var(--color-light);
+    font-size: 0.9rem;
+}
+
+.order-items li:last-child {
+    border-bottom: none;
+}
+
+/* STATUS */
+.order-status {
+  display: inline-block;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 /* BUTTONS */
-.order-actions button {
-  font-size: 1.1rem;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 8px;
-  margin-right: 8px;
-  cursor: pointer;
+.order-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
 }
 
-button.start { background: #2b8a3e; color: white; }
-button.done { background: #0078d7; color: white; }
-button.bump { background: #d72638; color: white; } /* bump button is for when order is completed to delete */
+.order-actions button {
+  flex: 1;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.6rem;
+  border: none;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+button.start {
+  background: var(--color-warning); 
+  color: var(--color-white); 
+}
+
+button.done {
+  background: var(--color-success); 
+  color: var(--color-white); 
+}
+
+button.bump { /* bump button is for when order is completed to delete */
+  background: var(--color-danger); 
+  color: var(--color-white); 
+}
 
 .footer {
-  background: #222;
+  background: var(--color-white);
   text-align: center;
-  padding: 10px;
+  padding: 0.7rem 1rem;
+  border-top: 1px solid var(--color-light);
+}
+
+#refreshButton {
+  padding: 0.4rem 0.9 rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-info-light);
+  background: var(--color-background);
+  color: var(--color-dark-variant);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+/* status tinting on cards */
+.order-card[data-status="New"] {
+  border-left: 4px solid var(--color-primary);
+}
+
+.order-card[data-status="In Progress"] {
+  border-left: 4px solid var(--color-warning);
+}
+
+.order-card[data-status="Done"] {
+  border-left: 4px solid var(--color-success);
+}
+
+/* large tap targets on touch */
+@media (hover: coarse) {
+  .order-actions button {
+    padding: 0.7rem 0.6rem;
+    font-size: 1rem;
+  }
 }
