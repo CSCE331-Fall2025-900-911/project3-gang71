@@ -66,62 +66,29 @@
 
         <main></main>
 
-        <aside>
-            <h1 id = "orderNumber"></h1>
-            <div class = "basket">
-                <div class = "basketItem">
-                    <button><span class="material-icons-sharp">edit</span></button>
-                    <h2>Item Name</h2>
-                    <p>Size: Medium</p>
-                    <p>Ice Level: 100%</p>
-                    <p>Sugar Level: 100%</p>
-                    <input type = "number" value = 0>
-                    <h3>$-----</h3>
-                </div>
+    <aside>
+        <h1 id = "orderNumber"></h1>
+        <div class = "basket">
+            <!-- remove placeholders since they are dynamically added -->
+        </div>
 
-                <div class = "basketItem">
-                    <button><span class="material-icons-sharp">edit</span></button>
-                    <h2>Item Name</h2>
-                    <p>Size: Medium</p>
-                    <p>Ice Level: 100%</p>
-                    <p>Sugar Level: 100%</p>
-                    <input type = "number" value = 0>
-                    <h3>$-----</h3>
-                </div>
+        <div class = "price">
+            <h3>Subtotal</h3>
+            <p>$-----</p>
+            <h3>Tax</h3>
+            <p>$-----</p>
+            <h3>Total</h3>
+            <p>$-----</p>
+        </div>
 
-                <div class = "basketItem">
-                    <button><span class="material-icons-sharp">edit</span></button>
-                    <h2>Item Name</h2>
-                    <p>Size: Medium</p>
-                    <p>Ice Level: 100%</p>
-                    <p>Sugar Level: 100%</p>
-                    <input type = "number" value = 0>
-                    <h3>$-----</h3>
-                </div>
+        <!-- Add these payment buttons -->
+        <div class="payment-buttons">
+            <button id="cardPaymentBtn" class="payment-btn">Card</button>
+            <button id="cashPaymentBtn" class="payment-btn">Cash</button>
+        </div>
 
-                <div class = "basketItem">
-                    <button><span class="material-icons-sharp">edit</span></button>
-                    <h2>Item Name</h2>
-                    <p>Size: Medium</p>
-                    <p>Ice Level: 100%</p>
-                    <p>Sugar Level: 100%</p>
-                    <input type = "number" value = 0>
-                    <h3>$-----</h3>
-                </div>
-            </div>
-
-            <div class = price>
-                <h3>Subtotal</h3>
-                <p>$-----</p>
-                <h3>Tax</h3>
-                <p>$-----</p>
-                <h3>Total</h3>
-                <p>$-----</p>
-            </div>
-
-            <button>Place Order</button>
-        </aside>
-    </div>
+        <button id="placeOrderBtn">Place Order</button>
+    </aside>
 
 
     <!-- Modifications popup -->
