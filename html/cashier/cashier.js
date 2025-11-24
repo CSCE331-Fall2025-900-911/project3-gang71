@@ -8,6 +8,8 @@ let currentModifications = {
   toppings: []
 };
 let availableToppings = [];
+let cartItems = []; // Store cart items in memory
+let editingItemIndex = null; // Track if we're editing an existing item
 
 //-------------------- TOPPING HELPER FUNCTIONS --------------------//
 //----- get toppings from the databse //
@@ -26,6 +28,9 @@ async function loadToppings() {
 function populateToppingDropdowns() {
   const topping1Select = document.querySelector('select[name="topping1"]');
   const topping2Select = document.querySelector('select[name="topping2"]');
+  
+  // Only populate if selects exist (they're in the popup)
+  if (!topping1Select || !topping2Select) return;
   
   // clear selected toppings
   [topping1Select, topping2Select].forEach(select => {
@@ -51,13 +56,16 @@ function populateToppingDropdowns() {
 }
 
 //-------------------- MENU + DRINK FUNCTIONS --------------------//
-//----- dynamically displays menu drinks, and gives each drink a add to order buttoon that triggers a popup
+//----- dynamically displays menu drinks, and gives each drink a add to order button that triggers a popup
 document.addEventListener("DOMContentLoaded", () => {
   const menu = document.querySelector("main");
   const category = document.body.dataset.category;
 
-  if (menu.length === 0) {
-    console.error("No elements with class 'menu' found in the DOM.");
+  // load toppings at startup
+  loadToppings();
+
+  if (!menu) {
+    console.error("No main element found in the DOM.");
     return;
   }
 
@@ -90,32 +98,105 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(err => {
       console.error("Error loading drinks:", err);
     });
+    
+  // Load the current order number
+  fetch('/api/orders')
+    .then((response) => response.json())
+    .then(orders => {
+      const orderNumber = document.getElementById("orderNumber");
+      if (orderNumber) {
+        orders.forEach(orderNum => {
+          orderNumber.innerHTML = "Order #" + (orderNum.max + 1);
+        });
+      }
+    })
+    .catch(err => {
+      console.error("Error loading order number:", err);
+    });
 });
 
 //----- shows the pop up that allows the customer to make modifications to their drink before adding to the cart
-function openModificationsPopup(drink) {
+function openModificationsPopup(drink, existingModifications = null, itemIndex = null) {
   currentDrink = drink;
   currentBasePrice = Number(drink.itemprice);
+  editingItemIndex = itemIndex; // Store if we're editing an existing item
 
-  // reset modifications UI (size, sweetness, ice, toppings)
-  document.getElementById("smallDrinkButton").dataset.selected = "false";
-  document.getElementById("mediumDrinkButton").dataset.selected = "false";
-  document.getElementById("largeDrinkButton").dataset.selected = "false";
-  document.querySelectorAll(".threeModificationChoices button, .fourModificationChoices button").forEach(btn => btn.classList.remove("selected"));
+  // Check if popup exists
+  const popup = document.getElementById("modificationsPopup");
+  if (!popup) {
+    alert("Modifications popup not found. Please add the popup HTML to your page.");
+    return;
+  }
+
+  // If editing existing item, load its modifications
+  if (existingModifications) {
+    currentModifications = {
+      size: existingModifications.size,
+      sweetness: existingModifications.sweetness,
+      ice: existingModifications.ice,
+      toppings: existingModifications.toppings ? [...existingModifications.toppings] : []
+    };
+  } else {
+    // reset modification values for new item
+    currentModifications = {
+      size: 'small',
+      sweetness: '100%',
+      ice: '100%',
+      toppings: []
+    };
+  }
+
+  // Reset all buttons first
+  document.querySelectorAll(".threeModificationChoices button").forEach(btn => btn.classList.remove("selected"));
+  document.querySelectorAll(".fourModificationChoices button").forEach(btn => btn.classList.remove("selected"));
+  
+  // Set size button based on current modifications
+  const smallBtn = document.getElementById("smallDrinkButton");
+  const mediumBtn = document.getElementById("mediumDrinkButton");
+  const largeBtn = document.getElementById("largeDrinkButton");
+  
+  if (currentModifications.size === 'small' && smallBtn) smallBtn.classList.add("selected");
+  else if (currentModifications.size === 'medium' && mediumBtn) mediumBtn.classList.add("selected");
+  else if (currentModifications.size === 'large' && largeBtn) largeBtn.classList.add("selected");
+  
+  // Set sweetness button
+  const sweetnessButtons = document.querySelectorAll('.modification:nth-of-type(3) .fourModificationChoices button');
+  sweetnessButtons.forEach(btn => {
+    if (btn.textContent.trim() === currentModifications.sweetness) {
+      btn.classList.add("selected");
+    }
+  });
+  
+  // Set ice button
+  const iceButtons = document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button');
+  iceButtons.forEach(btn => {
+    if (btn.textContent.trim() === currentModifications.ice) {
+      btn.classList.add("selected");
+    }
+  });
+  
+  // Set toppings - reset first
   document.querySelectorAll("select").forEach(sel => sel.selectedIndex = 0);
-  // reset modification values in code
-  currentModifications = {
-    size: 'small',
-    sweetness: '100%',
-    ice: '100%',
-    toppings: []
-  };
+  if (existingModifications && existingModifications.toppings && existingModifications.toppings.length > 0) {
+    const toppingSelects = document.querySelectorAll('select[name="topping1"], select[name="topping2"]');
+    existingModifications.toppings.forEach((topping, index) => {
+      if (toppingSelects[index] && topping.id) {
+        toppingSelects[index].value = topping.id;
+      }
+    });
+  }
 
   // put in drink info
-  document.getElementById("itemImage").src = drink.itemphoto;
-  document.getElementById("itemName").textContent = drink.itemname;
-  document.getElementById("itemDescription").textContent = drink.itemdescrip;
-  document.getElementById("modifiedDrinkPrice").textContent = `$${currentBasePrice.toFixed(2)}`;
+  const itemImage = document.getElementById("itemImage");
+  const itemName = document.getElementById("itemName");
+  const itemDescription = document.getElementById("itemDescription");
+  
+  if (itemImage) itemImage.src = drink.itemphoto;
+  if (itemName) itemName.textContent = drink.itemname;
+  if (itemDescription) itemDescription.textContent = drink.itemdescrip;
+  
+  // Calculate and display price
+  calculateModifiedPrice();
 
   // populate drop menus
   populateToppingDropdowns();
@@ -124,7 +205,6 @@ function openModificationsPopup(drink) {
   const sizeButtons = document.querySelectorAll(".size-button");
   sizeButtons.forEach(btn => {
     btn.onclick = () => {
-      // clear selection visuals
       sizeButtons.forEach(b => b.classList.remove("selected"));
       btn.classList.add("selected");
       currentModifications.size = btn.dataset.size;
@@ -136,10 +216,16 @@ function openModificationsPopup(drink) {
   const toppingSelects = document.querySelectorAll('select[name="topping1"], select[name="topping2"]');
   toppingSelects.forEach(select => {
     select.onchange = () => {
-      // store only currently selected toppings
-      currentModifications.toppings = Array.from(toppingSelects)
+      // Get topping IDs from selects and convert to full details
+      const toppingIds = Array.from(toppingSelects)
         .map(sel => sel.value)
         .filter(v => v);
+      
+      currentModifications.toppings = toppingIds.map(toppingId => {
+        const topping = availableToppings.find(t => String(t.menuid) === String(toppingId));
+        return topping ? { id: toppingId, name: topping.itemname, price: topping.itemprice } : null;
+      }).filter(t => t !== null);
+      
       calculateModifiedPrice();
     };
   });
@@ -164,8 +250,14 @@ function openModificationsPopup(drink) {
     };
   });
 
+  // Update the Add to Cart button text if editing
+  const addButton = document.getElementById("addItemToCart");
+  if (addButton) {
+    addButton.textContent = editingItemIndex !== null ? "Update Item" : "Add to Cart";
+  }
+
   // show popup
-  document.getElementById("modificationsPopup").style.display = "block";
+  popup.style.display = "block";
 }
 
 //----- closes popup and resets buttons 
@@ -176,117 +268,189 @@ function closeModificationsPopup() {
         return;
     }
     modificationsPopupDiv.style.display = "none";
+    editingItemIndex = null; // Reset editing index
 }
 
 //----- calculate order price and update onto popup realtime as modifications are made 
 function calculateModifiedPrice() {
   let newPrice = currentBasePrice;
 
-  // just do a single re-calc instead of running sum
+  // add size fees
   if (currentModifications.size === "medium") newPrice += 0.50;
   else if (currentModifications.size === "large") newPrice += 1.00;
 
   // add topping fees
-  currentModifications.toppings.forEach(toppingId => {
-    const topping = availableToppings.find(t => String(t.menuid) === String(toppingId));
-    if (topping) newPrice += parseFloat(topping.itemprice);
-  });
+  if (currentModifications.toppings && currentModifications.toppings.length > 0) {
+    currentModifications.toppings.forEach(topping => {
+      if (topping && topping.price) {
+        newPrice += parseFloat(topping.price);
+      }
+    });
+  }
 
   // display / overwrite this new price 
-  document.getElementById("modifiedDrinkPrice").textContent = `$${newPrice.toFixed(2)}`;
+  const priceElement = document.getElementById("modifiedDrinkPrice");
+  if (priceElement) {
+    priceElement.textContent = `$${newPrice.toFixed(2)}`;
+  }
   return newPrice;
 }
 
 //-------------------- CART FUNCTIONS --------------------//
-// THIS IS THE KEY CHANGE: Save to sessionStorage instead of local cart array
-/*document.getElementById("addItemToCart").addEventListener("click", () => {
+// Add item to cart (or update existing item)
+document.getElementById("addItemToCart").addEventListener("click", () => {
   if (!currentDrink) return;
 
-  // compute final price using YOUR working calculation
+  // compute final price
   const finalPrice = calculateModifiedPrice();
-
-  // Get topping names for display (not just IDs)
-  const toppingDetails = currentModifications.toppings.map(toppingId => {
-    const topping = availableToppings.find(t => String(t.menuid) === String(toppingId));
-    return topping ? { id: toppingId, name: topping.itemname, price: topping.itemprice } : null;
-  }).filter(t => t !== null);
 
   // Create cart item with proper structure
   const cartItem = {
     name: currentDrink.itemname,
+    basePrice: currentBasePrice,
     price: finalPrice,
     url: currentDrink.itemphoto,
+    quantity: 1,
     modifications: {
       size: currentModifications.size,
       sweetness: currentModifications.sweetness,
       ice: currentModifications.ice,
-      toppings: toppingDetails // Store full topping info, not just IDs
+      toppings: currentModifications.toppings ? [...currentModifications.toppings] : []
     }
   };
 
-  // Get existing cart from sessionStorage
-  const cartItems = JSON.parse(sessionStorage.getItem("cartItems")) || [];
-  
-  // Add new item
-  cartItems.push(cartItem);
-  
-  // Save back to sessionStorage
-  sessionStorage.setItem("cartItems", JSON.stringify(cartItems));
+  // If editing existing item, update it
+  if (editingItemIndex !== null) {
+    cartItems[editingItemIndex] = cartItem;
+    editingItemIndex = null;
+  } else {
+    // Add new item
+    cartItems.push(cartItem);
+  }
 
-  console.log("Added to cart:", cartItem);
-  alert(`${currentDrink.itemname} added to cart!`);
+  // Update cart display
+  renderCart();
 
   // close popup after adding to cart
   closeModificationsPopup();
-});*/
+});
 
+// Render the cart in the sidebar
+function renderCart() {
+  const basket = document.querySelector(".basket");
+  if (!basket) return;
 
-//----- get menu items from database using API
-function tempName() {
-  const menuRows = document.querySelectorAll(".menuRow");
-  const category = document.body.dataset.category;
+  // Clear existing items
+  basket.innerHTML = "";
 
-  // load toppings at startup
-  loadToppings();
-
-  if (menuRows.length === 0) {
-    console.error("No elements with class 'menuRow' found in the DOM.");
+  // If cart is empty, show a message
+  if (cartItems.length === 0) {
+    basket.innerHTML = "<p style='text-align: center; color: #666; padding: 20px;'>Cart is empty</p>";
+    updateCartTotals();
     return;
   }
 
-  fetch(`/api/menu/${encodeURIComponent(category)}`)
-    .then(res => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
-    })
-    .then(drinks => {
-      let startingIndex = 0;
-      menuRows.forEach(menuRow => {
-        menuRow.innerHTML = "";
-        const chunk = drinks.slice(startingIndex, startingIndex + 4);
-        startingIndex += 4;
-        renderDrinks(chunk, menuRow);
-      });
-    })
-    .catch(err => {
-      console.error("Error loading drinks:", err);
-      menuRows.forEach(menuRow => {
-        menuRow.innerHTML = "<p>Failed to load menu items</p>";
-      });
+  // Render each cart item
+  cartItems.forEach((item, index) => {
+    const basketItem = document.createElement("div");
+    basketItem.classList.add("basketItem");
+
+    // Build toppings display
+    let toppingsText = "";
+    if (item.modifications.toppings && item.modifications.toppings.length > 0) {
+      toppingsText = "<p>Toppings: " + item.modifications.toppings.map(t => t.name).join(", ") + "</p>";
+    }
+
+    basketItem.innerHTML = `
+      <button class="edit-btn"><span class="material-icons-sharp">edit</span></button>
+      <img src="${item.url}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin: 10px 0;">
+      <h2>${item.name}</h2>
+      <p>Size: ${item.modifications.size.charAt(0).toUpperCase() + item.modifications.size.slice(1)}</p>
+      <p>Ice Level: ${item.modifications.ice}</p>
+      <p>Sugar Level: ${item.modifications.sweetness}</p>
+      ${toppingsText}
+      <div class="quantity-controls" style="display: flex; align-items: center; gap: 10px; justify-content: center; margin: 10px 0;">
+        <button class="qty-btn minus-btn" style="width: 30px; height: 30px; font-size: 18px; cursor: pointer;">-</button>
+        <span style="font-size: 16px; font-weight: bold; min-width: 30px; text-align: center;">${item.quantity}</span>
+        <button class="qty-btn plus-btn" style="width: 30px; height: 30px; font-size: 18px; cursor: pointer;">+</button>
+      </div>
+      <h3>${(item.price * item.quantity).toFixed(2)}</h3>
+    `;
+
+    basket.appendChild(basketItem);
+
+    // Add event listener for edit button
+    const editBtn = basketItem.querySelector(".edit-btn");
+    editBtn.addEventListener("click", () => {
+      openModificationsPopup(
+        { 
+          itemname: item.name, 
+          itemprice: item.basePrice, 
+          itemphoto: item.url,
+          itemdescrip: "" 
+        },
+        item.modifications,
+        index
+      );
     });
+
+    // Add event listeners for quantity buttons
+    const minusBtn = basketItem.querySelector(".minus-btn");
+    const plusBtn = basketItem.querySelector(".plus-btn");
+    const qtyDisplay = basketItem.querySelector(".quantity-controls span");
+
+    minusBtn.addEventListener("click", () => {
+      if (item.quantity > 1) {
+        item.quantity--;
+        qtyDisplay.textContent = item.quantity;
+        basketItem.querySelector("h3").textContent = `${(item.price * item.quantity).toFixed(2)}`;
+        updateCartTotals();
+      } else {
+        // Remove item if quantity would be 0
+        if (confirm("Remove this item from cart?")) {
+          cartItems.splice(index, 1);
+          renderCart();
+        }
+      }
+    });
+
+    plusBtn.addEventListener("click", () => {
+      item.quantity++;
+      qtyDisplay.textContent = item.quantity;
+      basketItem.querySelector("h3").textContent = `${(item.price * item.quantity).toFixed(2)}`;
+      updateCartTotals();
+    });
+  });
+
+  // Update totals
+  updateCartTotals();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const orderNumber = document.getElementById("orderNumber");
+// Update cart totals (subtotal, tax, total)
+function updateCartTotals() {
+  const priceDiv = document.querySelector(".price");
+  if (!priceDiv) return;
 
-  fetch('/api/orders')
-    .then((response) => response.json())
-    .then(orders => {
-      orders.forEach(orderNum => {
-        orderNumber.innerHTML = "Order #" + orderNum.max;
-      });
-    })
-    .catch(err => {
-      console.error("Error loading drinks:", err);
-    });
+  // Calculate subtotal
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  
+  // Calculate tax (assuming 8.25% - adjust as needed)
+  const taxRate = 0.0825;
+  const tax = subtotal * taxRate;
+  
+  // Calculate total
+  const total = subtotal + tax;
+
+  // Update the display
+  const pTags = priceDiv.querySelectorAll("p");
+  if (pTags.length >= 3) {
+    pTags[0].textContent = `$${subtotal.toFixed(2)}`;
+    pTags[1].textContent = `$${tax.toFixed(2)}`;
+    pTags[2].textContent = `$${total.toFixed(2)}`;
+  }
+}
+
+// Initialize cart on page load
+document.addEventListener("DOMContentLoaded", () => {
+  renderCart();
 });
