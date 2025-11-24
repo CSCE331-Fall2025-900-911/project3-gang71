@@ -928,15 +928,15 @@ app.delete("/api/kitchen/orders/:id", (req, res) => {
   res.status(204).send();
 });
 
-
-app.use(requireLogin, express.static(path.join(__dirname, "html")));
-app.use(express.static(path.join(__dirname, "menuBoard")));
-
 // kitchen view
+app.use("/manager", requireLogin, express.static(path.join(__dirname, "html", "manager")));
 app.use("/kitchenView", requireLogin, express.static(path.join(__dirname, "html", "kitchenView")));
 app.get("/kitchen", requireLogin, (req, res) => {
   res.redirect("/kitchenView/kitchen.html");
 })
+
+app.use(requireLogin, express.static(path.join(__dirname, "html")));
+app.use(express.static(path.join(__dirname, "menuBoard")));
 
 // start server
 app.listen(PORT, () => {
