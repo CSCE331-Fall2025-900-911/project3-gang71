@@ -143,9 +143,9 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(response => response.json())
             .then(data => {
                 if(sessionStorage.getItem("oauthType") === "Customer") {
-                    customerOAuth(JSON.parse(data).email);
+                    customerOAuth(data.email);
                 } else if (sessionStorage.getItem("oauthType") === "Employee") {
-                    employeeOAuth(JSON.parse(data).email);
+                    employeeOAuth(data.email);
                 }
             })
             .catch((err) => {
