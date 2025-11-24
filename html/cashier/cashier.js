@@ -146,6 +146,18 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
     };
   }
 
+  // put in drink info
+  const itemImage = document.getElementById("itemImage");
+  const itemName = document.getElementById("itemName");
+  const itemDescription = document.getElementById("itemDescription");
+  
+  if (itemImage) itemImage.src = drink.itemphoto;
+  if (itemName) itemName.textContent = drink.itemname;
+  if (itemDescription) itemDescription.textContent = drink.itemdescrip;
+  
+  // populate drop menus FIRST before setting topping values
+  populateToppingDropdowns();
+
   // Reset all buttons first
   document.querySelectorAll(".threeModificationChoices button").forEach(btn => btn.classList.remove("selected"));
   document.querySelectorAll(".fourModificationChoices button").forEach(btn => btn.classList.remove("selected"));
@@ -175,31 +187,23 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
     }
   });
   
-  // Set toppings - reset first
-  document.querySelectorAll("select").forEach(sel => sel.selectedIndex = 0);
+  // Get topping selects - DECLARE ONCE HERE
+  const toppingSelectElements = document.querySelectorAll('select[name="topping1"], select[name="topping2"]');
+  
+  // Set toppings AFTER dropdowns are populated
+  toppingSelectElements.forEach(sel => sel.selectedIndex = 0); // Reset first
+  
   if (existingModifications && existingModifications.toppings && existingModifications.toppings.length > 0) {
-    const toppingSelects = document.querySelectorAll('select[name="topping1"], select[name="topping2"]');
     existingModifications.toppings.forEach((topping, index) => {
-      if (toppingSelects[index] && topping.id) {
-        toppingSelects[index].value = topping.id;
+      if (toppingSelectElements[index]) {
+        // Set by menuid/id
+        toppingSelectElements[index].value = topping.id;
       }
     });
   }
 
-  // put in drink info
-  const itemImage = document.getElementById("itemImage");
-  const itemName = document.getElementById("itemName");
-  const itemDescription = document.getElementById("itemDescription");
-  
-  if (itemImage) itemImage.src = drink.itemphoto;
-  if (itemName) itemName.textContent = drink.itemname;
-  if (itemDescription) itemDescription.textContent = drink.itemdescrip;
-  
   // Calculate and display price
   calculateModifiedPrice();
-
-  // populate drop menus
-  populateToppingDropdowns();
 
   // add event listeners for modifications to recalc order price 
   const sizeButtons = document.querySelectorAll(".size-button");
@@ -213,11 +217,10 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
   });
 
   // add topping listeners
-  const toppingSelects = document.querySelectorAll('select[name="topping1"], select[name="topping2"]');
-  toppingSelects.forEach(select => {
+  toppingSelectElements.forEach(select => {
     select.onchange = () => {
       // Get topping IDs from selects and convert to full details
-      const toppingIds = Array.from(toppingSelects)
+      const toppingIds = Array.from(toppingSelectElements)
         .map(sel => sel.value)
         .filter(v => v);
       
@@ -304,13 +307,18 @@ document.getElementById("addItemToCart").addEventListener("click", () => {
   // compute final price
   const finalPrice = calculateModifiedPrice();
 
+  // Preserve quantity if editing, otherwise start at 1
+  const preservedQuantity = (editingItemIndex !== null && cartItems[editingItemIndex]) 
+    ? cartItems[editingItemIndex].quantity 
+    : 1;
+
   // Create cart item with proper structure
   const cartItem = {
     name: currentDrink.itemname,
     basePrice: currentBasePrice,
     price: finalPrice,
     url: currentDrink.itemphoto,
-    quantity: 1,
+    quantity: preservedQuantity,
     modifications: {
       size: currentModifications.size,
       sweetness: currentModifications.sweetness,
@@ -358,23 +366,27 @@ function renderCart() {
     // Build toppings display
     let toppingsText = "";
     if (item.modifications.toppings && item.modifications.toppings.length > 0) {
-      toppingsText = "<p>Toppings: " + item.modifications.toppings.map(t => t.name).join(", ") + "</p>";
+      toppingsText = "<p style='margin: 2px 0;'>Toppings: " + item.modifications.toppings.map(t => t.name).join(", ") + "</p>";
     }
 
     basketItem.innerHTML = `
       <button class="edit-btn"><span class="material-icons-sharp">edit</span></button>
-      <img src="${item.url}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin: 10px 0;">
-      <h2>${item.name}</h2>
-      <p>Size: ${item.modifications.size.charAt(0).toUpperCase() + item.modifications.size.slice(1)}</p>
-      <p>Ice Level: ${item.modifications.ice}</p>
-      <p>Sugar Level: ${item.modifications.sweetness}</p>
-      ${toppingsText}
-      <div class="quantity-controls" style="display: flex; align-items: center; gap: 10px; justify-content: center; margin: 10px 0;">
-        <button class="qty-btn minus-btn" style="width: 30px; height: 30px; font-size: 18px; cursor: pointer;">-</button>
-        <span style="font-size: 16px; font-weight: bold; min-width: 30px; text-align: center;">${item.quantity}</span>
-        <button class="qty-btn plus-btn" style="width: 30px; height: 30px; font-size: 18px; cursor: pointer;">+</button>
+      <div style="display: flex; gap: 15px; align-items: flex-start; margin: 10px 0;">
+        <img src="${item.url}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">
+        <div style="flex: 1;">
+          <h2 style="margin: 0 0 5px 0;">${item.name}</h2>
+          <p style="margin: 2px 0;">Size: ${item.modifications.size.charAt(0).toUpperCase() + item.modifications.size.slice(1)}</p>
+          <p style="margin: 2px 0;">Ice Level: ${item.modifications.ice}</p>
+          <p style="margin: 2px 0;">Sugar Level: ${item.modifications.sweetness}</p>
+          ${toppingsText}
+        </div>
       </div>
-      <h3>${(item.price * item.quantity).toFixed(2)}</h3>
+      <div class="quantity-controls" style="display: flex; align-items: center; gap: 5px; justify-content: center; margin: 10px 0;">
+        <button class="qty-btn minus-btn" style="width: 35px; height: 35px; font-size: 20px; cursor: pointer; background-color: #FFB6C1; border: none; border-radius: 5px; color: white; font-weight: bold; transition: background-color 0.2s;">-</button>
+        <span style="font-size: 18px; font-weight: bold; min-width: 40px; text-align: center; background-color: #FFF0F5; padding: 5px 10px; border-radius: 5px;">${item.quantity}</span>
+        <button class="qty-btn plus-btn" style="width: 35px; height: 35px; font-size: 20px; cursor: pointer; background-color: #FFB6C1; border: none; border-radius: 5px; color: white; font-weight: bold; transition: background-color 0.2s;">+</button>
+      </div>
+      <h3>$${(item.price * item.quantity).toFixed(2)}</h3>
     `;
 
     basket.appendChild(basketItem);
@@ -400,10 +412,14 @@ function renderCart() {
     const qtyDisplay = basketItem.querySelector(".quantity-controls span");
 
     minusBtn.addEventListener("click", () => {
+      // Add visual feedback
+      minusBtn.style.backgroundColor = "#FF69B4";
+      setTimeout(() => minusBtn.style.backgroundColor = "#FFB6C1", 150);
+      
       if (item.quantity > 1) {
         item.quantity--;
         qtyDisplay.textContent = item.quantity;
-        basketItem.querySelector("h3").textContent = `${(item.price * item.quantity).toFixed(2)}`;
+        basketItem.querySelector("h3").textContent = `$${(item.price * item.quantity).toFixed(2)}`;
         updateCartTotals();
       } else {
         // Remove item if quantity would be 0
@@ -415,9 +431,13 @@ function renderCart() {
     });
 
     plusBtn.addEventListener("click", () => {
+      // Add visual feedback
+      plusBtn.style.backgroundColor = "#FF69B4";
+      setTimeout(() => plusBtn.style.backgroundColor = "#FFB6C1", 150);
+      
       item.quantity++;
       qtyDisplay.textContent = item.quantity;
-      basketItem.querySelector("h3").textContent = `${(item.price * item.quantity).toFixed(2)}`;
+      basketItem.querySelector("h3").textContent = `$${(item.price * item.quantity).toFixed(2)}`;
       updateCartTotals();
     });
   });
@@ -451,6 +471,162 @@ function updateCartTotals() {
 }
 
 // Initialize cart on page load
+let selectedPaymentMethod = null; // Move to global scope so it can be reset
+
 document.addEventListener("DOMContentLoaded", () => {
   renderCart();
+  
+  // Get and display employee name from sessionStorage
+  displayEmployeeName();
+  
+  // Add event listeners for payment buttons
+  const cardBtn = document.getElementById("cardPaymentBtn");
+  const cashBtn = document.getElementById("cashPaymentBtn");
+  
+  if (cardBtn) {
+    cardBtn.addEventListener("click", () => {
+      selectedPaymentMethod = "card";
+      cardBtn.classList.add("selected");
+      cashBtn.classList.remove("selected");
+    });
+  }
+  
+  if (cashBtn) {
+    cashBtn.addEventListener("click", () => {
+      selectedPaymentMethod = "cash";
+      cashBtn.classList.add("selected");
+      cardBtn.classList.remove("selected");
+    });
+  }
+  
+  // Add event listener for Place Order button
+  const placeOrderBtn = document.getElementById("placeOrderBtn");
+  if (placeOrderBtn) {
+    placeOrderBtn.addEventListener("click", handlePlaceOrder);
+  }
+  
+  // Add event listener for Logout button
+  const logoutBtn = document.querySelector(".pageTitle button");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", handleLogout);
+  }
 });
+
+// Display employee name from sessionStorage
+function displayEmployeeName() {
+  const employeeName = sessionStorage.getItem("currentEmployee");
+  const empNameElement = document.getElementById("empName");
+  
+  if (empNameElement) {
+    if (employeeName) {
+      empNameElement.textContent = employeeName;
+    } else {
+      // Not logged in, redirect to login page
+      window.location.href = '/index.html';
+    }
+  }
+}
+
+// Handle logout
+function handleLogout() {
+  // Clear session storage
+  sessionStorage.removeItem("currentEmployee");
+  // Redirect to logout endpoint which will clear server session
+  window.location.href = '/api/logout';
+}
+
+// Handle placing the order
+async function handlePlaceOrder() {
+  // Check if cart is empty
+  if (cartItems.length === 0) {
+    alert("Your cart is empty! Please add items before placing an order.");
+    return;
+  }
+
+  // Check if payment method is selected
+  if (!selectedPaymentMethod) {
+    alert("Please select a payment method before placing the order.");
+    return;
+  }
+
+  try {
+    // Get current order number
+    const orderNumElement = document.getElementById("orderNumber");
+    const currentOrderText = orderNumElement ? orderNumElement.textContent : "Order #1";
+    const currentOrderNum = parseInt(currentOrderText.replace("Order #", "")) || 1;
+
+    // Calculate totals
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const taxRate = 0.0825;
+    const tax = subtotal * taxRate;
+    const total = subtotal + tax;
+
+    // Prepare order data for database
+    const orderData = {
+      orderNumber: currentOrderNum,
+      paymentMethod: selectedPaymentMethod,
+      subtotal: subtotal.toFixed(2),
+      tax: tax.toFixed(2),
+      total: total.toFixed(2),
+      items: cartItems.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        modifications: item.modifications
+      })),
+      timestamp: new Date().toISOString()
+    };
+
+    // Send order to database
+    const response = await fetch('/api/orders/place', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to place order: ${response.status}`);
+    }
+
+    // Success!
+    alert(`Thank you! Order #${currentOrderNum} placed successfully!\n\nPayment Method: ${selectedPaymentMethod.toUpperCase()}\nTotal: ${total.toFixed(2)}`);
+
+    // Clear the cart
+    cartItems = [];
+    renderCart();
+
+    // Reset payment buttons
+    selectedPaymentMethod = null;
+    updatePaymentButtonStyles();
+
+    // Update order number
+    if (orderNumElement) {
+      orderNumElement.textContent = `Order #${currentOrderNum + 1}`;
+    }
+
+  } catch (error) {
+    console.error("Error placing order:", error);
+    alert("Error placing order. Please try again.");
+  }
+}
+
+
+document.getElementById("cardBtn").addEventListener("click", () => {
+    selectedPaymentMethod = "card";
+    updatePaymentButtonStyles();
+});
+
+document.getElementById("cashBtn").addEventListener("click", () => {
+    selectedPaymentMethod = "cash";
+    updatePaymentButtonStyles();
+});
+
+function updatePaymentButtonStyles() {
+    const cardBtn = document.getElementById("cardPaymentBtn");
+    const cashBtn = document.getElementById("cashPaymentBtn");
+
+    cardBtn.classList.toggle("selected", selectedPaymentMethod === "card");
+    cashBtn.classList.toggle("selected", selectedPaymentMethod === "cash");
+}
