@@ -155,14 +155,20 @@ class PageTranslator {
 const pageTranslator = new PageTranslator();
 window.pageTranslator = pageTranslator; // expose globally if other scripts call it
 
+// Initialize language based on stored preference
+document.addEventListener('DOMContentLoaded', function () {
+  const languageToggle = document.getElementById('languageToggle');
+  if (languageToggle && pageTranslator.getCurrentLanguage() === 'ES') {
+    toggle.checked = true;
+  }
+});
+
 // Global function for checkbox onchange handler
 function toggleLanguage(checkbox) {
   console.log('toggleLanguage called, checked:', checkbox.checked);
   if (checkbox.checked) {
-    console.log('Switching to Spanish');
     pageTranslator.switchLanguage('es');
   } else {
-    console.log('Switching to English');
     pageTranslator.switchLanguage('en');
   }
 }

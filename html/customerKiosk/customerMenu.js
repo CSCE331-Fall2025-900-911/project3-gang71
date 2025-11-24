@@ -400,13 +400,7 @@ document.querySelectorAll(".ttsButton").forEach(button => {
   });
 });
 
-// Initialize language based on stored preference
-document.addEventListener('DOMContentLoaded', function () {
-  const languageToggle = document.getElementById('languageToggle');
-  if (languageToggle && pageTranslator.getCurrentLanguage() === 'ES') {
-    toggle.checked = true;
-  }
-});
+
 
 
 

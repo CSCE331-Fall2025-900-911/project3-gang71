@@ -9,6 +9,7 @@
     <link rel = "stylesheet" href = "customerStyle.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script src="translator.js"></script>
 </head>
 
 <body data-category="Punch">
@@ -16,8 +17,12 @@
     <div class = logo>
       <img src = "https://cdn.vettedbiz.com/wp-content/uploads/2021/11/02114926/kung-fu-tea-logo.png" width = "75" height = "75">
     </div>
-    <a href="customerCart.html" class="bannerButtons ttsButton" data-text="Cart">Cart</a>
-    <a href = "/api/logout" class="bannerButtons ttsButton" data-text="Log out">Logout</a>
+    <a href="customerCart.html" class="bannerButtons ttsButton" data-text="Cart" data-translate>Cart </a>
+    <a href = "/api/logout" class="bannerButtons ttsButton" data-text="Log out" data-translate>Logout</a>
+    <label style="margin: 0 20px;">
+      <input type="checkbox" id="languageToggle" onchange="toggleLanguage(this)"/>
+        Español / Spanish
+    </label>
     <div class = customerName>
       <p id = "custName"></p>
     </div>
@@ -28,17 +33,17 @@
       <label>
         <input type="checkbox" id="ttsToggle"/>Enable TTS
       </label>
-      <li><a href = "coldBrews.html" class="ttsButton" data-text="La Colombe Cold Brews">La Colombe Cold Brews</a></li>
-      <li><a href = "milkTeas.html" class="ttsButton" data-text="Milk Teas">Milk Teas</a></li>
-      <li><a href = "matcha.html" class="ttsButton" data-text="Matcha">Matcha</a></li>
-      <li><a href = "slushes.html" class="ttsButton" data-text="Slushes">Slushes</a></li>
-      <li><a href = "classics.html" class="ttsButton" data-text="Classics">Classics</a></li>
-      <li><a href = "punches.html" style = "color: #EB0C43;" class="ttsButton" data-text="Punches">Punches</a></li>
-      <li><a href = "milkStrikes.html" class="ttsButton" data-text="Milk Strikes">Milk Strikes</a></li>
-      <li><a href = "oatStrikes.html" class="ttsButton" data-text="Oat Strikes">Oat Strikes</a></li>
-      <li><a href = "milkCaps.html" class="ttsButton" data-text="Milk Caps">Milk Caps</a></li>
-      <li><a href = "coffees.html" class="ttsButton" data-text="Coffees">Coffees</a></li>
-      <li><a href = "yogurts.html" class="ttsButton" data-text="Yogurts">Yogurts</a></li>
+      <li><a href = "coldBrews.html" class="ttsButton" data-text="La Colombe Cold Brews" data-translate>La Colombe Cold Brews</a></li>
+      <li><a href = "milkTeas.html" class="ttsButton" data-text="Milk Teas" data-translate>Milk Teas</a></li>
+      <li><a href = "matcha.html" class="ttsButton" data-text="Matcha" data-translate>Matcha</a></li>
+      <li><a href = "slushes.html" class="ttsButton" data-text="Slushes" data-translate>Slushes</a></li>
+      <li><a href = "classics.html" class="ttsButton" data-text="Classics" data-translate>Classics</a></li>
+      <li><a href = "punches.html" style = "color: #EB0C43;" class="ttsButton" data-text="Punches" data-translate>Punches</a></li>
+      <li><a href = "milkStrikes.html" class="ttsButton" data-text="Milk Strikes" data-translate>Milk Strikes</a></li>
+      <li><a href = "oatStrikes.html" class="ttsButton" data-text="Oat Strikes" data-translate>Oat Strikes</a></li>
+      <li><a href = "milkCaps.html" class="ttsButton" data-text="Milk Caps" data-translate>Milk Caps</a></li>
+      <li><a href = "coffees.html" class="ttsButton" data-text="Coffees" data-translate>Coffees</a></li>
+      <li><a href = "yogurts.html" class="ttsButton" data-text="Yogurts" data-translate>Yogurts</a></li>
     </ul>
   </div>
 
