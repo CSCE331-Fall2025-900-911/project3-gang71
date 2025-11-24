@@ -4,16 +4,23 @@
  */
 class PageTranslator {
     constructor() {
-        this.currentLanguage = localStorage.getItem('currentLanguage') || 'en-US';
+        this.currentLanguage = localStorage.getItem('currentLanguage') || 'EN';
         this.originalContent = {}; // map element id -> original text
-        // translationCache keyed by original text (trimmed) -> { es: '...', fr: '...' }
+
+        // translationCache keyed by original text (trimmed) -> { ES: '...', FR: '...' }
         this.translationCache = JSON.parse(localStorage.getItem('translationCache') || '{}');
     }
 
     // Translate a single text string, with client-side cache check
+    /**
+   * Translate a single text string
+   * @param {string} text - Text to translate
+   * @param {string} targetLang - Target language code (e.g., 'ES' for Spanish)
+   * @returns  Translated text
+   */
     async translate(text) {
         try {
-            const targetLang = 'es'; // always Spanish
+            const targetLang = 'ES'; // always Spanish
             const key = text.trim();
             if (this.translationCache[key] && this.translationCache[key][targetLang]) {
                 return this.translationCache[key][targetLang];
@@ -22,7 +29,7 @@ class PageTranslator {
             const resp = await fetch('/api/translate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: key, targetLang })
+                body: JSON.stringify({ text: key,  targetLang: targetLang, })
             });
 
             if (!resp.ok) {
@@ -39,9 +46,10 @@ class PageTranslator {
             localStorage.setItem('translationCache', JSON.stringify(this.translationCache));
 
             return translated;
+
         } catch (err) {
             console.error('Translation fetch error:', err);
-            return text;
+            return text;        // Return original text if translation fails
         }
     }
 
@@ -60,8 +68,11 @@ class PageTranslator {
         return gen;
     }
 
-    async translatePage(targetLang = 'es') {
+    async translatePage(targetLang = 'ES') {
         try {
+            // Normalize target language to uppercase
+            targetLang = targetLang.toUpperCase(); 
+
             const elements = Array.from(document.querySelectorAll('[data-translate]'));
             if (elements.length === 0) return;
 
@@ -103,9 +114,13 @@ class PageTranslator {
     }
 
     async switchLanguage(lang) {
-        if (lang === 'es') {
-            await this.translatePage('es');
+        const normalizedLang = lang.toUpperCase();
+        console.log('switchLanguage called with:', lang, 'normalized to:', normalizedLang);
+        if (normalizedLang === 'ES') {
+            console.log('Calling translatePage with ES');
+            await this.translatePage('ES');
         } else {
+            console.log('Calling switchToEnglish');
             this.switchToEnglish();
         }
     }
@@ -113,11 +128,22 @@ class PageTranslator {
     switchToEnglish() {
         const elements = document.querySelectorAll('[data-translate]');
         elements.forEach(el => {
-            if (el.id && this.originalContent[el.id]) {
-                el.textContent = this.originalContent[el.id];
+            let elementKey = el.id;
+            if (!elementKey) {
+                // Try to find it in originalContent by checking the text match
+                for (const key in this.originalContent) {
+                    if (el.textContent === this.originalContent[key]) {
+                        elementKey = key;
+                        break;
+                    }
+                }
+            }
+
+            if (elementKey && this.originalContent[elementKey]) {
+                el.textContent = this.originalContent[elementKey];
             }
         });
-        this.currentLanguage = 'en-US';
+        this.currentLanguage = 'EN';
         localStorage.setItem('currentLanguage', this.currentLanguage);
     }
 
@@ -128,3 +154,15 @@ class PageTranslator {
 
 const pageTranslator = new PageTranslator();
 window.pageTranslator = pageTranslator; // expose globally if other scripts call it
+
+// Global function for checkbox onchange handler
+function toggleLanguage(checkbox) {
+  console.log('toggleLanguage called, checked:', checkbox.checked);
+  if (checkbox.checked) {
+    console.log('Switching to Spanish');
+    pageTranslator.switchLanguage('es');
+  } else {
+    console.log('Switching to English');
+    pageTranslator.switchLanguage('en');
+  }
+}

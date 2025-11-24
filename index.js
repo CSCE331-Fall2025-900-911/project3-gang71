@@ -884,6 +884,7 @@ app.post("/api/translate", async (req, res) => {
       : 'ES';
 
     const originalKey = text.trim();
+    // const cacheKey = `${targetNormalized}:${originalKey}`;
     const cacheKey = `${targetNormalized}:${originalKey}`;
 
     // Check server-side cache first
@@ -924,7 +925,7 @@ app.post("/api/translate", async (req, res) => {
       'Coffees': 'Cafés',
       'Yogurts': 'Yogures',
       'Cart': 'Carrito',
-      'Log out': 'Cerrar Sesión',
+      'Logout': 'Cerrar Sesión',
       'Enable TTS': 'Habilitar TTS',
       'Cup Size:': 'Tamaño de Taza:',
       'Small': 'Pequeño',
