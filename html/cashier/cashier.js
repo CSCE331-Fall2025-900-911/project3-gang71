@@ -27,6 +27,9 @@ function populateToppingDropdowns() {
   const topping1Select = document.querySelector('select[name="topping1"]');
   const topping2Select = document.querySelector('select[name="topping2"]');
   
+  // Only populate if selects exist (they're in the popup)
+  if (!topping1Select || !topping2Select) return;
+  
   // clear selected toppings
   [topping1Select, topping2Select].forEach(select => {
     while (select.options.length > 1) {
@@ -51,13 +54,16 @@ function populateToppingDropdowns() {
 }
 
 //-------------------- MENU + DRINK FUNCTIONS --------------------//
-//----- dynamically displays menu drinks, and gives each drink a add to order buttoon that triggers a popup
+//----- dynamically displays menu drinks, and gives each drink a add to order button that triggers a popup
 document.addEventListener("DOMContentLoaded", () => {
   const menu = document.querySelector("main");
   const category = document.body.dataset.category;
 
-  if (menu.length === 0) {
-    console.error("No elements with class 'menu' found in the DOM.");
+  // load toppings at startup
+  loadToppings();
+
+  if (!menu) {
+    console.error("No main element found in the DOM.");
     return;
   }
 
@@ -90,32 +96,105 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(err => {
       console.error("Error loading drinks:", err);
     });
+    
+  // Load the current order number
+  fetch('/api/orders')
+    .then((response) => response.json())
+    .then(orders => {
+      const orderNumber = document.getElementById("orderNumber");
+      if (orderNumber) {
+        orders.forEach(orderNum => {
+          orderNumber.innerHTML = "Order #" + (orderNum.max + 1);
+        });
+      }
+    })
+    .catch(err => {
+      console.error("Error loading order number:", err);
+    });
 });
 
 //----- shows the pop up that allows the customer to make modifications to their drink before adding to the cart
-function openModificationsPopup(drink) {
+function openModificationsPopup(drink, existingModifications = null, itemIndex = null) {
   currentDrink = drink;
   currentBasePrice = Number(drink.itemprice);
+  editingItemIndex = itemIndex; // Store if we're editing an existing item
 
-  // reset modifications UI (size, sweetness, ice, toppings)
-  document.getElementById("smallDrinkButton").dataset.selected = "false";
-  document.getElementById("mediumDrinkButton").dataset.selected = "false";
-  document.getElementById("largeDrinkButton").dataset.selected = "false";
-  document.querySelectorAll(".threeModificationChoices button, .fourModificationChoices button").forEach(btn => btn.classList.remove("selected"));
+  // Check if popup exists
+  const popup = document.getElementById("modificationsPopup");
+  if (!popup) {
+    alert("Modifications popup not found. Please add the popup HTML to your page.");
+    return;
+  }
+
+  // If editing existing item, load its modifications
+  if (existingModifications) {
+    currentModifications = {
+      size: existingModifications.size,
+      sweetness: existingModifications.sweetness,
+      ice: existingModifications.ice,
+      toppings: existingModifications.toppings ? [...existingModifications.toppings] : []
+    };
+  } else {
+    // reset modification values for new item
+    currentModifications = {
+      size: 'small',
+      sweetness: '100%',
+      ice: '100%',
+      toppings: []
+    };
+  }
+
+  // Reset all buttons first
+  document.querySelectorAll(".threeModificationChoices button").forEach(btn => btn.classList.remove("selected"));
+  document.querySelectorAll(".fourModificationChoices button").forEach(btn => btn.classList.remove("selected"));
+  
+  // Set size button based on current modifications
+  const smallBtn = document.getElementById("smallDrinkButton");
+  const mediumBtn = document.getElementById("mediumDrinkButton");
+  const largeBtn = document.getElementById("largeDrinkButton");
+  
+  if (currentModifications.size === 'small' && smallBtn) smallBtn.classList.add("selected");
+  else if (currentModifications.size === 'medium' && mediumBtn) mediumBtn.classList.add("selected");
+  else if (currentModifications.size === 'large' && largeBtn) largeBtn.classList.add("selected");
+  
+  // Set sweetness button
+  const sweetnessButtons = document.querySelectorAll('.modification:nth-of-type(3) .fourModificationChoices button');
+  sweetnessButtons.forEach(btn => {
+    if (btn.textContent.trim() === currentModifications.sweetness) {
+      btn.classList.add("selected");
+    }
+  });
+  
+  // Set ice button
+  const iceButtons = document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button');
+  iceButtons.forEach(btn => {
+    if (btn.textContent.trim() === currentModifications.ice) {
+      btn.classList.add("selected");
+    }
+  });
+  
+  // Set toppings - reset first
   document.querySelectorAll("select").forEach(sel => sel.selectedIndex = 0);
-  // reset modification values in code
-  currentModifications = {
-    size: 'small',
-    sweetness: '100%',
-    ice: '100%',
-    toppings: []
-  };
+  if (existingModifications && existingModifications.toppings && existingModifications.toppings.length > 0) {
+    const toppingSelects = document.querySelectorAll('select[name="topping1"], select[name="topping2"]');
+    existingModifications.toppings.forEach((topping, index) => {
+      if (toppingSelects[index] && topping.id) {
+        toppingSelects[index].value = topping.id;
+      }
+    });
+  }
 
   // put in drink info
-  document.getElementById("itemImage").src = drink.itemphoto;
-  document.getElementById("itemName").textContent = drink.itemname;
-  document.getElementById("itemDescription").textContent = drink.itemdescrip;
-  document.getElementById("modifiedDrinkPrice").textContent = `$${currentBasePrice.toFixed(2)}`;
+  const itemImage = document.getElementById("itemImage");
+  const itemName = document.getElementById("itemName");
+  const itemDescription = document.getElementById("itemDescription");
+  
+  if (itemImage) itemImage.src = drink.itemphoto;
+  if (itemName) itemName.textContent = drink.itemname;
+  if (itemDescription) itemDescription.textContent = drink.itemdescrip;
+  
+  // Calculate and display price
+  calculateModifiedPrice();
 
   // populate drop menus
   populateToppingDropdowns();
@@ -124,7 +203,6 @@ function openModificationsPopup(drink) {
   const sizeButtons = document.querySelectorAll(".size-button");
   sizeButtons.forEach(btn => {
     btn.onclick = () => {
-      // clear selection visuals
       sizeButtons.forEach(b => b.classList.remove("selected"));
       btn.classList.add("selected");
       currentModifications.size = btn.dataset.size;
@@ -136,10 +214,16 @@ function openModificationsPopup(drink) {
   const toppingSelects = document.querySelectorAll('select[name="topping1"], select[name="topping2"]');
   toppingSelects.forEach(select => {
     select.onchange = () => {
-      // store only currently selected toppings
-      currentModifications.toppings = Array.from(toppingSelects)
+      // Get topping IDs from selects and convert to full details
+      const toppingIds = Array.from(toppingSelects)
         .map(sel => sel.value)
         .filter(v => v);
+      
+      currentModifications.toppings = toppingIds.map(toppingId => {
+        const topping = availableToppings.find(t => String(t.menuid) === String(toppingId));
+        return topping ? { id: toppingId, name: topping.itemname, price: topping.itemprice } : null;
+      }).filter(t => t !== null);
+      
       calculateModifiedPrice();
     };
   });
@@ -165,7 +249,7 @@ function openModificationsPopup(drink) {
   });
 
   // show popup
-  document.getElementById("modificationsPopup").style.display = "block";
+  popup.style.display = "block";
 }
 
 //----- closes popup and resets buttons 
@@ -182,18 +266,24 @@ function closeModificationsPopup() {
 function calculateModifiedPrice() {
   let newPrice = currentBasePrice;
 
-  // just do a single re-calc instead of running sum
+  // add size fees
   if (currentModifications.size === "medium") newPrice += 0.50;
   else if (currentModifications.size === "large") newPrice += 1.00;
 
   // add topping fees
-  currentModifications.toppings.forEach(toppingId => {
-    const topping = availableToppings.find(t => String(t.menuid) === String(toppingId));
-    if (topping) newPrice += parseFloat(topping.itemprice);
-  });
+  if (currentModifications.toppings && currentModifications.toppings.length > 0) {
+    currentModifications.toppings.forEach(topping => {
+      if (topping && topping.price) {
+        newPrice += parseFloat(topping.price);
+      }
+    });
+  }
 
   // display / overwrite this new price 
-  document.getElementById("modifiedDrinkPrice").textContent = `$${newPrice.toFixed(2)}`;
+  const priceElement = document.getElementById("modifiedDrinkPrice");
+  if (priceElement) {
+    priceElement.textContent = `$${newPrice.toFixed(2)}`;
+  }
   return newPrice;
 }
 
