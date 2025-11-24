@@ -53,7 +53,7 @@ function populateToppingDropdowns() {
 }
 
 //-------------------- MENU + DRINK FUNCTIONS --------------------//
-//----- dynamically displays menu drinks, and gives each drink a add to order buttoon that triggers a popup
+//----- dynamically displays menu drinks, and gives each drink a add to order button that triggers a popup
 function renderDrinks(drinks, menuRow) {
   drinks.forEach(drink => {
     const itemDiv = document.createElement("div");
@@ -61,11 +61,11 @@ function renderDrinks(drinks, menuRow) {
 
     itemDiv.innerHTML = `
       <img src="${drink.itemphoto}" alt="${drink.itemname}" class="menuItemImg">
-      <h2 class="menuItemH2">${drink.itemname}</h2>
-      <p class="menuItemP">${drink.itemdescrip}</p>
+      <h2 class="menuItemH2" data-translate>${drink.itemname}</h2>
+      <p class="menuItemP" data-translate>${drink.itemdescrip}</p>
       <div style="display: flex; align-items: center;">
         <h1 class="menuItemH1">$${Number(drink.itemprice).toFixed(2)}</h1>
-        <button class="menuItemButton" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.itemname}.">Customize</button>
+        <button class="menuItemButton" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.itemname}." data-translate>Customize</button>
       </div>
     `;
     menuRow.appendChild(itemDiv);
@@ -81,6 +81,8 @@ function renderDrinks(drinks, menuRow) {
       }
     });
   }); 
+  // Translate the newly added elements
+  pageTranslator.translatePage(pageTranslator.currentLanguage);
 }
 
 //----- shows the pop up that allows the customer to make modifications to their drink before adding to the cart

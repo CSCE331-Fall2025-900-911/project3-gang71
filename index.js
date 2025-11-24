@@ -3,13 +3,15 @@ require('dotenv').config();
 const express = require("express");
 const path = require("path");
 const { Pool } = require("pg"); //  importing PostgreSQL
-const cors = require("cors");
 const session = require('express-session'); // securing webpages before sign in
 const { createClient } = require("@deepgram/sdk");
-const fs = require("fs");
 const deepl = require('deepl-node');
-const XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
+// const XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+const fetch = require('node-fetch');
+
+// Simple in-memory server-side cache to avoid repeated DeepL calls
+const translationCacheServer = new Map(); // key => translatedText, key format: `${targetLang}:${text}`
 const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
 
 const kitchenStatus = new Map(); // map to hold kitchen order statuses
@@ -535,21 +537,42 @@ app.get("/api/clientid", async (req, res) =>{
 });
 
 // retrieve email from oauth
+// app.get("/api/email", async (req, res) => {
+//   try {
+//     const accessToken = req.query.token;
+//     var emailReq = new XMLHttpRequest();
+//     emailReq.open('GET', 'https://www.googleapis.com/oauth2/v2/userinfo');
+//     emailReq.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+
+//     emailReq.onload = function() {
+//       res.json(emailReq.responseText);
+//     }
+
+//     emailReq.send();
+//   } catch(err) {
+//     console.log(err);
+//     console.log("Error acquiring OAuth email");
+//   }
+// });
 app.get("/api/email", async (req, res) => {
   try {
     const accessToken = req.query.token;
-    var emailReq = new XMLHttpRequest();
-    emailReq.open('GET', 'https://www.googleapis.com/oauth2/v2/userinfo');
-    emailReq.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+    const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
 
-    emailReq.onload = function() {
-      res.json(emailReq.responseText);
+    if (!response.ok) {
+      return res.status(response.status).json({ error: 'Failed to fetch email' });
     }
 
-    emailReq.send();
-  } catch(err) {
-    console.log(err);
-    console.log("Error acquiring OAuth email");
+    const data = await response.json();
+    res.json(data);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error acquiring OAuth email' });
   }
 });
 
@@ -796,7 +819,58 @@ app.post("/tts", async (req, res) => {
   }
 });
 
-// Translation endpoint using DeepL API
+// // Translation endpoint using DeepL API
+// app.post("/api/translate", async (req, res) => {
+//   try {
+//     const { text, targetLang } = req.body;
+//     if (!text || !targetLang) {
+//       return res.status(400).json({ error: "Missing text or targetLang" });
+//     }
+
+//     // Normalize target language to DeepL format (ES, EN)
+//     const targetNormalized = (typeof targetLang === 'string')
+//       ? (targetLang.length === 2 ? targetLang.toUpperCase() : targetLang.toUpperCase())
+//       : 'ES';
+
+//     const deeplApiKey = process.env.DEEPL_API_KEY;
+//     // using deepl-node client
+//     if (deeplApiKey) {
+//       try {
+//         const translator = new deepl.Translator(deeplApiKey);
+//         const result = await translator.translateText(text, null, targetNormalized);
+//         // deepl-node returns .text for single translation
+//         const translated = result?.text                                 //if result.text exists use that  
+//           || (result?.translations && result.translations[0]?.text)     //otherwise, if result.translations[0].text exists, use that
+//           || text;                                                      //otherwise, fall back to the original text 
+
+//         return res.json({ translatedText: translated });
+//       } catch (clientErr) {
+//         console.error("DeepL client error:", clientErr);
+//         // fallthrough to mock fallback below
+//       }
+//     }
+
+//     // ---------Fallback mock translations for development (no external API)------------------
+//     const mockDict = {
+//       "La Colombe Cold Brews": "La Colombe Cold Brews", 
+//       "Cart": "Carrito",
+//       "Log out": "Cerrar sesión",
+//       "Add to order": "Añadir al pedido",
+//       "Seasonal Specials": "Especiales de temporada"
+//     };
+
+//     // Check if text exists in dictionary
+//     if (mockDict[text]) {
+//       return res.json({ translatedText: mockDict[text] });
+//     }
+
+//   } catch (err) {
+//     console.error("Translation endpoint error:", err);
+//     res.status(500).json({ error: "Translation request failed" });
+//   }
+// });
+
+// Translation endpoint using DeepL API with server-side cache
 app.post("/api/translate", async (req, res) => {
   try {
     const { text, targetLang } = req.body;
@@ -809,16 +883,25 @@ app.post("/api/translate", async (req, res) => {
       ? (targetLang.length === 2 ? targetLang.toUpperCase() : targetLang.toUpperCase())
       : 'ES';
 
+    const originalKey = text.trim();
+    const cacheKey = `${targetNormalized}:${originalKey}`;
+
+    // Check server-side cache first
+    if (translationCacheServer.has(cacheKey)) {
+      const cached = translationCacheServer.get(cacheKey);
+      return res.json({ translatedText: cached });
+    }
+
     const deeplApiKey = process.env.DEEPL_API_KEY;
-    // using deepl-node client
+    // using deepl-node client when key is present
     if (deeplApiKey) {
       try {
         const translator = new deepl.Translator(deeplApiKey);
-        const result = await translator.translateText(text, null, targetNormalized);
-        // deepl-node returns .text for single translation
-        const translated = result?.text                                 //if result.text exists use that  
-          || (result?.translations && result.translations[0]?.text)     //otherwise, if result.translations[0].text exists, use that
-          || text;                                                      //otherwise, fall back to the original text 
+        const result = await translator.translateText(originalKey, null, targetNormalized);
+        const translated = result?.text || (result?.translations && result.translations[0]?.text) || originalKey;
+
+        // cache the result
+        translationCacheServer.set(cacheKey, translated);
 
         return res.json({ translatedText: translated });
       } catch (clientErr) {
@@ -827,14 +910,48 @@ app.post("/api/translate", async (req, res) => {
       }
     }
 
-    // ---------Fallback mock translations for development (no external API)------------------
-    // const mockDict = {
-    //   "La Colombe Cold Brews": "La Colombe Cold Brews",
-    //   "Cart": "Carrito",
-    //   "Log out": "Cerrar sesión",
-    //   // add more exact-match mappings for your menu items
-    // };
-    // return res.json({ translatedText: mockDict[text] || text });
+    // Fallback mock translations for development (no external API)
+    const mockDict = {
+      'La Colombe Cold Brews': 'Cervezas Frías La Colombe',
+      'Milk Teas': 'Tés con Leche',
+      'Matcha': 'Matcha',
+      'Slushes': 'Granizados',
+      'Classics': 'Clásicos',
+      'Punches': 'Ponches',
+      'Milk Strikes': 'Golpes de Leche',
+      'Oat Strikes': 'Golpes de Avena',
+      'Milk Caps': 'Gorras de Leche',
+      'Coffees': 'Cafés',
+      'Yogurts': 'Yogures',
+      'Cart': 'Carrito',
+      'Log out': 'Cerrar Sesión',
+      'Enable TTS': 'Habilitar TTS',
+      'Cup Size:': 'Tamaño de Taza:',
+      'Small': 'Pequeño',
+      'Medium (+$0.50)': 'Mediano (+$0.50)',
+      'Large (+$1.00)': 'Grande (+$1.00)',
+      'Sweetness:': 'Dulzura:',
+      'Ice:': 'Hielo:',
+      'Toppings:': 'Coberturas:',
+      'Topping 1': 'Cobertura 1',
+      'Topping 2': 'Cobertura 2',
+      'Boba': 'Boba',
+      'Crystal Boba': 'Boba de Cristal',
+      'Pudding': 'Pudín',
+      'Grass Jelly': 'Gelatina de Hierba',
+      'Cancel': 'Cancelar',
+      'Add to Cart': 'Añadir al Carrito',
+      '0%': '0%',
+      '50%': '50%',
+      '75%': '75%',
+      '100%': '100%',
+      '120%': '120%'
+    };
+
+    const fallback = mockDict[originalKey] || originalKey;
+    // cache fallback as well to avoid repeated failed API attempts
+    translationCacheServer.set(cacheKey, fallback);
+    return res.json({ translatedText: fallback });
 
   } catch (err) {
     console.error("Translation endpoint error:", err);

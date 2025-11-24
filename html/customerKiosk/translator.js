@@ -4,52 +4,53 @@
  */
 class PageTranslator {
     constructor() {
-        this.currentLanguage = 'en';
-        this.originalContent = {}; // map id -> original text
+        this.currentLanguage = localStorage.getItem('currentLanguage') || 'en-US';
+        this.originalContent = {}; // map element id -> original text
+        // translationCache keyed by original text (trimmed) -> { es: '...', fr: '...' }
         this.translationCache = JSON.parse(localStorage.getItem('translationCache') || '{}');
-        // this.translationCache = {};     // id -> { es: "...", fr: "..." }
-            // translationCache = {
-                // "translate-abc123": { es: "Añadir al pedido" },
-                // "translate-f9k20l3": { es: "Cerrar sesión" }
-                // }
     }
 
-    // Translate a single text string
-    async translate(text, targetLang = 'es') {
+    // Translate a single text string, with client-side cache check
+    async translate(text) {
         try {
+            const targetLang = 'es'; // always Spanish
+            const key = text.trim();
+            if (this.translationCache[key] && this.translationCache[key][targetLang]) {
+                return this.translationCache[key][targetLang];
+            }
+
             const resp = await fetch('/api/translate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text, targetLang })
+                body: JSON.stringify({ text: key, targetLang })
             });
+
             if (!resp.ok) {
                 console.error('Translate API response not ok', resp.status);
                 return text;
             }
+
             const data = await resp.json();
-            return data.translatedText || text;
+            const translated = data.translatedText || text;
+
+            // store in client cache keyed by original text
+            if (!this.translationCache[key]) this.translationCache[key] = {};
+            this.translationCache[key][targetLang] = translated;
+            localStorage.setItem('translationCache', JSON.stringify(this.translationCache));
+
+            return translated;
         } catch (err) {
             console.error('Translation fetch error:', err);
-            return text;          //return original text if translation fails
+            return text;
         }
     }
 
-    // Translate multiple texts in batch
+    // Translate multiple texts in batch. translate() itself checks client cache so this
+    // will call the server only for uncached originals.
     async translateBatch(texts, targetLang = 'es') {
-        const results = await Promise.allSettled(
-            texts.map(text => this.translate(text, targetLang))
-        );
-
-        return results.map((res, i) => {
-            if (res.status === "fulfilled") {
-                return res.value;               // translated text
-            } else {
-                console.error("Translation failed for:", texts[i], res.reason);
-                return texts[i];                // fallback → original text
-            }
-        });
+        const promises = texts.map(t => this.translate(t, targetLang));
+        return Promise.all(promises);
     }
-
 
     // ensure element has an id we can use as a key
     ensureElementId(el) {
@@ -64,46 +65,34 @@ class PageTranslator {
             const elements = Array.from(document.querySelectorAll('[data-translate]'));
             if (elements.length === 0) return;
 
-            const texts = elements.map(el => {
-                const id = this.ensureElementId(el);
+            // Collect original texts (one per element) but avoid duplicates
+            const originals = [];
+            const elToOriginal = [];
 
-                //store original english text once (to revert back to english without calling translation api)
+            elements.forEach(el => {
+                const id = this.ensureElementId(el);
                 if (!this.originalContent[id]) {
                     this.originalContent[id] = el.textContent.trim();
                 }
-                // if (!Object.prototype.hasOwnProperty.call(this.originalContent, id)) {
-                //     this.originalContent[id] = el.textContent.trim();
-                // }
-                // return this.originalContent[id];
                 const original = this.originalContent[id];
-
-                // cache check ----------------------
-                if (this.translationCache[id] && this.translationCache[id][targetLang]){
-                    return this.translationCache[id][targetLang];       //already translated
-                }
-
-                //no cached translation means translate original
-                return original
+                elToOriginal.push({ el, original });
+                originals.push(original);
             });
 
-            const translations = await this.translateBatch(texts, targetLang);
+            // Remove duplicates to minimize requests
+            const uniqueOriginals = Array.from(new Set(originals));
 
-            elements.forEach((el, i) => {
-                const id = el.id;
-                const original = this.originalContent[id];
-                const translated = translations[i] ?? original;
+            // Translate all unique originals (translate() will skip already-cached ones)
+            const translatedMap = {};
+            const translations = await this.translateBatch(uniqueOriginals, targetLang);
+            uniqueOriginals.forEach((orig, i) => {
+                translatedMap[orig] = translations[i] || orig;
+            });
+
+            // Apply translations to elements and update client cache
+            elToOriginal.forEach(({ el, original }) => {
+                const translated = translatedMap[original] || original;
                 el.textContent = translated;
-
-                // el.textContent = translations[i] ?? this.originalContent[el.id];
-
-                //save to cache -------------------------------
-                if (!this.translationCache[id]) {
-                    this.translationCache[id] = {};
-                }
-                this.translationCache[id][targetLang] = translated;
-                
-                // SAVE cache to localStorage
-                localStorage.setItem('translationCache', JSON.stringify(this.translationCache));
             });
 
             this.currentLanguage = targetLang;
@@ -128,7 +117,7 @@ class PageTranslator {
                 el.textContent = this.originalContent[el.id];
             }
         });
-        this.currentLanguage = 'en';
+        this.currentLanguage = 'en-US';
         localStorage.setItem('currentLanguage', this.currentLanguage);
     }
 
