@@ -8,7 +8,7 @@ let currentModifications = {
   toppings: []
 };
 let availableToppings = [];
-let cartItems = []; // Store cart items in memory
+let cartItems = JSON.parse(sessionStorage.getItem('cartItems')) || []; // Load cart from sessionStorage
 let editingItemIndex = null; // Track if we're editing an existing item
 
 //-------------------- TOPPING HELPER FUNCTIONS --------------------//
@@ -336,6 +336,9 @@ document.getElementById("addItemToCart").addEventListener("click", () => {
     cartItems.push(cartItem);
   }
 
+  // Save cart to sessionStorage
+  sessionStorage.setItem('cartItems', JSON.stringify(cartItems));
+
   // Update cart display
   renderCart();
 
@@ -419,12 +422,17 @@ function renderCart() {
       if (item.quantity > 1) {
         item.quantity--;
         qtyDisplay.textContent = item.quantity;
-        basketItem.querySelector("h3").textContent = `$${(item.price * item.quantity).toFixed(2)}`;
+        basketItem.querySelector("h3").textContent = `${(item.price * item.quantity).toFixed(2)}`;
+        
+        // Save to sessionStorage
+        sessionStorage.setItem('cartItems', JSON.stringify(cartItems));
         updateCartTotals();
       } else {
         // Remove item if quantity would be 0
         if (confirm("Remove this item from cart?")) {
           cartItems.splice(index, 1);
+          // Save to sessionStorage
+          sessionStorage.setItem('cartItems', JSON.stringify(cartItems));
           renderCart();
         }
       }
@@ -437,7 +445,10 @@ function renderCart() {
       
       item.quantity++;
       qtyDisplay.textContent = item.quantity;
-      basketItem.querySelector("h3").textContent = `$${(item.price * item.quantity).toFixed(2)}`;
+      basketItem.querySelector("h3").textContent = `${(item.price * item.quantity).toFixed(2)}`;
+      
+      // Save to sessionStorage
+      sessionStorage.setItem('cartItems', JSON.stringify(cartItems));
       updateCartTotals();
     });
   });
@@ -595,6 +606,7 @@ async function handlePlaceOrder() {
 
     // Clear the cart
     cartItems = [];
+    sessionStorage.removeItem("cartItems");
     renderCart();
 
     // Reset payment buttons
