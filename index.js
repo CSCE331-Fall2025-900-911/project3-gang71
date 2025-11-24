@@ -12,9 +12,6 @@ const XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
 const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
 
-const kitchenStatus = new Map(); // map to hold kitchen order statuses
-const kitchenBumped = new Set(); // set to hold bumped order IDs
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -626,6 +623,137 @@ app.get("/api/orders", async (req, res) => {
   }
 });
 
+// Place order endpoint - add this after your existing /api/orders GET endpoint
+app.post('/api/orders/place', async (req, res) => {
+  const { orderNumber, paymentMethod, subtotal, tax, total, items, timestamp } = req.body;
+  
+  try {
+    // Get current date and time
+    const orderDateTime = new Date(timestamp);
+    const orderDate = orderDateTime.toISOString().split('T')[0]; // YYYY-MM-DD
+    const orderTime = orderDateTime.toTimeString().split(' ')[0]; // HH:MM:SS
+    
+    // Get the employeeID from session
+    // You'll need to modify your login to also store employeeID in the session
+    // For now, we'll query it based on the employee name in session
+    const employeeName = req.session.user ? `${req.session.user.firstname} ${req.session.user.lastname}` : null;
+    
+    if (!employeeName) {
+      return res.status(401).json({ error: 'Not logged in' });
+    }
+    
+    // Get employeeID from the employee table
+    const empResult = await pool.query(
+      'SELECT employeeid FROM employee WHERE firstname = $1 AND lastname = $2',
+      [req.session.user.firstname, req.session.user.lastname]
+    );
+    
+    if (empResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+    
+    const employeeID = empResult.rows[0].employeeid;
+    
+    // Insert the order into the order table
+    const orderQuery = `
+      INSERT INTO "order" (orderid, orderprice, salestax, orderdate, ordertime, tips, employeeid)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING orderid
+    `;
+    
+    await pool.query(orderQuery, [
+      orderNumber,
+      parseFloat(total),
+      parseFloat(tax),
+      orderDate,
+      orderTime,
+      0, // tips - starts at 0
+      employeeID
+    ]);
+    
+    // Now insert each drink into the drinks table
+    // Get the current max drinkID to generate new IDs
+    const maxDrinkIdResult = await pool.query('SELECT COALESCE(MAX(drinkid), 0) as maxid FROM drinks');
+    let currentDrinkId = maxDrinkIdResult.rows[0].maxid;
+    
+    for (const item of items) {
+      // For each quantity of the same drink
+      for (let i = 0; i < item.quantity; i++) {
+        currentDrinkId++;
+        
+        // Get the menuID for the drink by name
+        const menuIdResult = await pool.query(
+          'SELECT menuid FROM menu WHERE itemname = $1',
+          [item.name]
+        );
+        
+        if (menuIdResult.rows.length === 0) {
+          console.error(`Menu item not found: ${item.name}`);
+          continue;
+        }
+        
+        const menuID = menuIdResult.rows[0].menuid;
+        
+        // Map size to menuID (you may need to adjust these based on your actual menu table)
+        let cupSize = null;
+        if (item.modifications.size === 'small') {
+          const sizeResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE '%small%' LIMIT 1");
+          cupSize = sizeResult.rows.length > 0 ? sizeResult.rows[0].menuid : null;
+        } else if (item.modifications.size === 'medium') {
+          const sizeResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE '%medium%' LIMIT 1");
+          cupSize = sizeResult.rows.length > 0 ? sizeResult.rows[0].menuid : null;
+        } else if (item.modifications.size === 'large') {
+          const sizeResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE '%large%' LIMIT 1");
+          cupSize = sizeResult.rows.length > 0 ? sizeResult.rows[0].menuid : null;
+        }
+        
+        // Map sugar level to menuID
+        let sugarLevel = null;
+        const sugarResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE $1 LIMIT 1", [`%${item.modifications.sweetness}%sugar%`]);
+        sugarLevel = sugarResult.rows.length > 0 ? sugarResult.rows[0].menuid : null;
+        
+        // Map ice amount to menuID
+        let iceAmount = null;
+        const iceResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE $1 LIMIT 1", [`%${item.modifications.ice}%ice%`]);
+        iceAmount = iceResult.rows.length > 0 ? iceResult.rows[0].menuid : null;
+        
+        // Get topping menuIDs
+        const topping1 = item.modifications.toppings[0] ? parseInt(item.modifications.toppings[0].id) : null;
+        const topping2 = item.modifications.toppings[1] ? parseInt(item.modifications.toppings[1].id) : null;
+        
+        // Insert the drink
+        const drinkQuery = `
+          INSERT INTO drinks (drinkid, orderid, menuid, cupsize, sugarlevel, iceamount, topping1, topping2, totaldrinkprice)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `;
+        
+        await pool.query(drinkQuery, [
+          currentDrinkId,
+          orderNumber,
+          menuID,
+          cupSize,
+          sugarLevel,
+          iceAmount,
+          topping1,
+          topping2,
+          parseFloat(item.price)
+        ]);
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      orderId: orderNumber,
+      orderNumber: orderNumber 
+    });
+    
+  } catch (error) {
+    console.error('Error placing order:', error);
+    res.status(500).json({ error: 'Failed to place order', details: error.message });
+  }
+});
+
+
 app.post("/tts", async (req, res) => {
   try {
     const { text } = req.body;
@@ -722,91 +850,9 @@ app.get('/weather', async (req, res) => {
   res.json(data);
 });
 
-// api route to get kitchen order statuses
-app.get("/api/kitchen/orders", async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT
-        o.orderid,
-        o.orderdate,
-        o.ordertime,
-        COALESCE(c.firstname || ' ' || c.lastname, ' ') AS customername,
-        d.drinkid,
-        d.quantity,
-        m.itemname
-      FROM "order" o
-      JOIN drinks d ON o.orderid = d.orderid
-      JOIN menu m ON d.menuid = m.menuid
-      LEFT JOIN customer c ON o.customerid = c.customerid
-      WHERE o.orderdate = CURRENT_DATE
-      ORDER BY o.orderdate, o.ordertime, o.orderid, d.drinkid;
-      `);
-      
-      const rows = result.rows;
-      const ordersMap = new Map();
-
-      rows.forEach(r => {
-        if (kitchenBumped.has(r.orderid)) {
-          return; // skip bumped orders
-        }
-
-        if (!ordersMap.has(r.orderid)) {
-          ordersMap.set(r.orderid, {
-            orderid: r.orderid,
-            orderdate: r.orderdate,
-            ordertime: r.ordertime,
-            customername: r.customername,
-            status: kitchenStatus.get(r.orderid) || "New",
-            items: [],
-          });
-        }
-
-        ordersMap.get(r.orderid).items.push({
-          drinkid: r.drinkid,
-          name: r.itemname,
-          quantity: r.quantity,
-        });
-      });
-
-      res.json(Array.from(ordersMap.values()));
-  } catch (err) {
-    console.error("Database error (kitchen orders):", err);
-    res.status(500).json({error: "Database query for kitchen orders failed" });
-  }
-});
-
-// order status update (new -> in progress -> done)
-app.patch("/api/kitchen/orders/:id/status", async (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const { status } = req.body;
-
-  if (!status || !["New", "In Progress", "Done"].includes(status)) {
-    return res.status(400).json({error: "Invalid Status"});
-  }
-
-  kitchenStatus.set(id, status);
-  kitchenBumped.delete(id); // un-bump if previously bumped
-
-  res.json({ orderid: id, status });
-});
-
-// bump an order (remove from kitchen view)
-app.delete("/api/kitchen/orders/:id", (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  kitchenBumped.add(id);
-  kitchenStatus.delete(id); // remove status tracking
-  res.status(204).send();
-});
-
 
 app.use(requireLogin, express.static(path.join(__dirname, "html")));
 app.use(express.static(path.join(__dirname, "menuBoard")));
-
-// kitchen view
-app.use("/kitchenView", requireLogin, express.static(path.join(__dirname, "kitchenView")));
-app.get("/kitchen", requireLogin, (req, res) => {
-  res.redirect("/kitchenView/kitchen.html");
-})
 
 // start server
 app.listen(PORT, () => {
