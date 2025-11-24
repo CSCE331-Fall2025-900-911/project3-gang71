@@ -8,6 +8,8 @@ let currentModifications = {
   toppings: []
 };
 let availableToppings = [];
+let cartItems = []; // Store cart items in memory
+let editingItemIndex = null; // Track if we're editing an existing item
 
 //-------------------- TOPPING HELPER FUNCTIONS --------------------//
 //----- get toppings from the databse //
@@ -248,6 +250,12 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
     };
   });
 
+  // Update the Add to Cart button text if editing
+  const addButton = document.getElementById("addItemToCart");
+  if (addButton) {
+    addButton.textContent = editingItemIndex !== null ? "Update Item" : "Add to Cart";
+  }
+
   // show popup
   popup.style.display = "block";
 }
@@ -260,6 +268,7 @@ function closeModificationsPopup() {
         return;
     }
     modificationsPopupDiv.style.display = "none";
+    editingItemIndex = null; // Reset editing index
 }
 
 //----- calculate order price and update onto popup realtime as modifications are made 
@@ -288,95 +297,160 @@ function calculateModifiedPrice() {
 }
 
 //-------------------- CART FUNCTIONS --------------------//
-// THIS IS THE KEY CHANGE: Save to sessionStorage instead of local cart array
-/*document.getElementById("addItemToCart").addEventListener("click", () => {
+// Add item to cart (or update existing item)
+document.getElementById("addItemToCart").addEventListener("click", () => {
   if (!currentDrink) return;
 
-  // compute final price using YOUR working calculation
+  // compute final price
   const finalPrice = calculateModifiedPrice();
-
-  // Get topping names for display (not just IDs)
-  const toppingDetails = currentModifications.toppings.map(toppingId => {
-    const topping = availableToppings.find(t => String(t.menuid) === String(toppingId));
-    return topping ? { id: toppingId, name: topping.itemname, price: topping.itemprice } : null;
-  }).filter(t => t !== null);
 
   // Create cart item with proper structure
   const cartItem = {
     name: currentDrink.itemname,
+    basePrice: currentBasePrice,
     price: finalPrice,
     url: currentDrink.itemphoto,
+    quantity: 1,
     modifications: {
       size: currentModifications.size,
       sweetness: currentModifications.sweetness,
       ice: currentModifications.ice,
-      toppings: toppingDetails // Store full topping info, not just IDs
+      toppings: currentModifications.toppings ? [...currentModifications.toppings] : []
     }
   };
 
-  // Get existing cart from sessionStorage
-  const cartItems = JSON.parse(sessionStorage.getItem("cartItems")) || [];
-  
-  // Add new item
-  cartItems.push(cartItem);
-  
-  // Save back to sessionStorage
-  sessionStorage.setItem("cartItems", JSON.stringify(cartItems));
+  // If editing existing item, update it
+  if (editingItemIndex !== null) {
+    cartItems[editingItemIndex] = cartItem;
+    editingItemIndex = null;
+  } else {
+    // Add new item
+    cartItems.push(cartItem);
+  }
 
-  console.log("Added to cart:", cartItem);
-  alert(`${currentDrink.itemname} added to cart!`);
+  // Update cart display
+  renderCart();
 
   // close popup after adding to cart
   closeModificationsPopup();
-});*/
+});
 
+// Render the cart in the sidebar
+function renderCart() {
+  const basket = document.querySelector(".basket");
+  if (!basket) return;
 
-//----- get menu items from database using API
-function tempName() {
-  const menuRows = document.querySelectorAll(".menuRow");
-  const category = document.body.dataset.category;
+  // Clear existing items
+  basket.innerHTML = "";
 
-  // load toppings at startup
-  loadToppings();
-
-  if (menuRows.length === 0) {
-    console.error("No elements with class 'menuRow' found in the DOM.");
+  // If cart is empty, show a message
+  if (cartItems.length === 0) {
+    basket.innerHTML = "<p style='text-align: center; color: #666; padding: 20px;'>Cart is empty</p>";
+    updateCartTotals();
     return;
   }
 
-  fetch(`/api/menu/${encodeURIComponent(category)}`)
-    .then(res => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
-    })
-    .then(drinks => {
-      let startingIndex = 0;
-      menuRows.forEach(menuRow => {
-        menuRow.innerHTML = "";
-        const chunk = drinks.slice(startingIndex, startingIndex + 4);
-        startingIndex += 4;
-        renderDrinks(chunk, menuRow);
-      });
-    })
-    .catch(err => {
-      console.error("Error loading drinks:", err);
-      menuRows.forEach(menuRow => {
-        menuRow.innerHTML = "<p>Failed to load menu items</p>";
-      });
+  // Render each cart item
+  cartItems.forEach((item, index) => {
+    const basketItem = document.createElement("div");
+    basketItem.classList.add("basketItem");
+
+    // Build toppings display
+    let toppingsText = "";
+    if (item.modifications.toppings && item.modifications.toppings.length > 0) {
+      toppingsText = "<p>Toppings: " + item.modifications.toppings.map(t => t.name).join(", ") + "</p>";
+    }
+
+    basketItem.innerHTML = `
+      <button class="edit-btn"><span class="material-icons-sharp">edit</span></button>
+      <img src="${item.url}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin: 10px 0;">
+      <h2>${item.name}</h2>
+      <p>Size: ${item.modifications.size.charAt(0).toUpperCase() + item.modifications.size.slice(1)}</p>
+      <p>Ice Level: ${item.modifications.ice}</p>
+      <p>Sugar Level: ${item.modifications.sweetness}</p>
+      ${toppingsText}
+      <div class="quantity-controls" style="display: flex; align-items: center; gap: 10px; justify-content: center; margin: 10px 0;">
+        <button class="qty-btn minus-btn" style="width: 30px; height: 30px; font-size: 18px; cursor: pointer;">-</button>
+        <span style="font-size: 16px; font-weight: bold; min-width: 30px; text-align: center;">${item.quantity}</span>
+        <button class="qty-btn plus-btn" style="width: 30px; height: 30px; font-size: 18px; cursor: pointer;">+</button>
+      </div>
+      <h3>${(item.price * item.quantity).toFixed(2)}</h3>
+    `;
+
+    basket.appendChild(basketItem);
+
+    // Add event listener for edit button
+    const editBtn = basketItem.querySelector(".edit-btn");
+    editBtn.addEventListener("click", () => {
+      openModificationsPopup(
+        { 
+          itemname: item.name, 
+          itemprice: item.basePrice, 
+          itemphoto: item.url,
+          itemdescrip: "" 
+        },
+        item.modifications,
+        index
+      );
     });
+
+    // Add event listeners for quantity buttons
+    const minusBtn = basketItem.querySelector(".minus-btn");
+    const plusBtn = basketItem.querySelector(".plus-btn");
+    const qtyDisplay = basketItem.querySelector(".quantity-controls span");
+
+    minusBtn.addEventListener("click", () => {
+      if (item.quantity > 1) {
+        item.quantity--;
+        qtyDisplay.textContent = item.quantity;
+        basketItem.querySelector("h3").textContent = `${(item.price * item.quantity).toFixed(2)}`;
+        updateCartTotals();
+      } else {
+        // Remove item if quantity would be 0
+        if (confirm("Remove this item from cart?")) {
+          cartItems.splice(index, 1);
+          renderCart();
+        }
+      }
+    });
+
+    plusBtn.addEventListener("click", () => {
+      item.quantity++;
+      qtyDisplay.textContent = item.quantity;
+      basketItem.querySelector("h3").textContent = `${(item.price * item.quantity).toFixed(2)}`;
+      updateCartTotals();
+    });
+  });
+
+  // Update totals
+  updateCartTotals();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const orderNumber = document.getElementById("orderNumber");
+// Update cart totals (subtotal, tax, total)
+function updateCartTotals() {
+  const priceDiv = document.querySelector(".price");
+  if (!priceDiv) return;
 
-  fetch('/api/orders')
-    .then((response) => response.json())
-    .then(orders => {
-      orders.forEach(orderNum => {
-        orderNumber.innerHTML = "Order #" + orderNum.max;
-      });
-    })
-    .catch(err => {
-      console.error("Error loading drinks:", err);
-    });
+  // Calculate subtotal
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  
+  // Calculate tax (assuming 8.25% - adjust as needed)
+  const taxRate = 0.0825;
+  const tax = subtotal * taxRate;
+  
+  // Calculate total
+  const total = subtotal + tax;
+
+  // Update the display
+  const pTags = priceDiv.querySelectorAll("p");
+  if (pTags.length >= 3) {
+    pTags[0].textContent = `$${subtotal.toFixed(2)}`;
+    pTags[1].textContent = `$${tax.toFixed(2)}`;
+    pTags[2].textContent = `$${total.toFixed(2)}`;
+  }
+}
+
+// Initialize cart on page load
+document.addEventListener("DOMContentLoaded", () => {
+  renderCart();
 });

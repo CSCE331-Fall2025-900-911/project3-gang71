@@ -337,3 +337,85 @@ aside button:hover {
     background: black;
     color: white;
 }
+
+/*---------------------- MODIFICATIONS POPUP ------------------------*/
+#modificationsPopup .popup-content {
+    background: #ffe9ec !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.modification h3 {
+    color: var(--color-dark);
+    margin: 15px 0 10px 0;
+}
+
+.modification select {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    background: white;
+    border: 2px solid #FFB6C1;
+    border-radius: 5px;
+    font-family: poppins, sans-serif;
+    cursor: pointer;
+}
+
+.modification select:focus {
+    outline: none;
+    border-color: var(--color-kf-red);
+}
+
+.threeModificationChoices button,
+.fourModificationChoices button {
+    background: white;
+    color: var(--color-dark);
+    border: 2px solid #FFB6C1;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: poppins, sans-serif;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.threeModificationChoices button:hover,
+.fourModificationChoices button:hover {
+    background: #FFF0F5;
+    border-color: var(--color-kf-red);
+}
+
+.threeModificationChoices button.selected,
+.fourModificationChoices button.selected {
+    background: var(--color-kf-red);
+    color: white;
+    border-color: var(--color-kf-red);
+}
+
+#addItemToCart {
+    background: var(--color-kf-red) !important;
+    color: white !important;
+    padding: 12px 30px !important;
+    border-radius: 5px !important;
+    font-family: poppins, sans-serif !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    margin-top: 20px !important;
+}
+
+#addItemToCart:hover {
+    background: black !important;
+    transform: scale(1.05);
+}
+
+.close {
+    color: var(--color-kf-red);
+    font-size: 35px;
+    font-weight: bold;
+}
+
+.close:hover {
+    color: black;
+}
