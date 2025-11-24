@@ -361,10 +361,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ttsToggle.addEventListener("change", async (e) => {
       if (ttsToggle.checked) {
-        await speak("TSS enabled");
+        await speak("TTS enabled");
       }
       else {
-        await speak("TSS disabled");
+        await speak("TTS disabled");
       }
       
       ttsEnabled = e.target.checked;
