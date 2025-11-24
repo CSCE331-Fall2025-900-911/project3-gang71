@@ -946,7 +946,23 @@ app.post("/api/translate", async (req, res) => {
       '50%': '50%',
       '75%': '75%',
       '100%': '100%',
-      '120%': '120%'
+      '120%': '120%',
+      'Customize': 'Personalizar',
+      'Small drink size selected.': 'Tamaño pequeño seleccionado.',
+      'Medium drink size selected. The extra cost is $0.50.': 'Tamaño mediano seleccionado. El costo adicional es $0.50.',
+      'Large drink size selected. The extra cost is $1.00.': 'Tamaño grande seleccionado. El costo adicional es $1.00.',
+      '0% sweetness selected': '0% dulzura seleccionada',
+      '50% sweetness selected': '50% dulzura seleccionada',
+      '75% sweetness selected': '75% dulzura seleccionada',
+      '100% sweetness selected': '100% dulzura seleccionada',
+      '0% ice selected': '0% hielo seleccionado',
+      '50% ice selected': '50% hielo seleccionado',
+      '100% ice selected': '100% hielo seleccionado',
+      '120% ice selected': '120% hielo seleccionado',
+      'TTS enabled': 'TTS habilitado',
+      'TTS disabled': 'TTS deshabilitado',
+      'Closing modifications popup': 'Cerrando ventana emergente de modificaciones',
+      'added to cart!': '¡añadido al carrito!'
     };
 
     const fallback = mockDict[originalKey] || originalKey;
