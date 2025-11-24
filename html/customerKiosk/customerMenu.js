@@ -28,7 +28,7 @@ async function loadToppings() {
 function populateToppingDropdowns() {
   const topping1Select = document.querySelector('select[name="topping1"]');
   const topping2Select = document.querySelector('select[name="topping2"]');
-  
+
   // clear selected toppings
   [topping1Select, topping2Select].forEach(select => {
     while (select.options.length > 1) {
@@ -46,7 +46,7 @@ function populateToppingDropdowns() {
     option1.dataset.price = topping.itemprice;
     option1.dataset.name = topping.itemname;
     topping1Select.appendChild(option1);
-    
+
     const option2 = option1.cloneNode(true);
     topping2Select.appendChild(option2);
   });
@@ -80,9 +80,11 @@ function renderDrinks(drinks, menuRow) {
         speak(drinkNameText);
       }
     });
-  }); 
-  // Translate the newly added elements
-  pageTranslator.translatePage(pageTranslator.currentLanguage);
+  });
+  // Only re-translate if user has already switched to Spanish (don't auto-translate on first load)
+  if (pageTranslator.currentLanguage === 'ES') {
+    pageTranslator.translatePage('ES');
+  }
 }
 
 //----- shows the pop up that allows the customer to make modifications to their drink before adding to the cart
@@ -129,7 +131,7 @@ function openModificationsPopup(drink) {
       sizeButtons.forEach(b => b.classList.remove("selected"));
       btn.classList.add("selected");
       currentModifications.size = btn.dataset.size;
-      calculateModifiedPrice(); 
+      calculateModifiedPrice();
 
       if (ttsEnabled) {
         const cupSizeText = btn.dataset.text;
@@ -196,24 +198,24 @@ function openModificationsPopup(drink) {
 
 //----- closes popup and resets buttons 
 async function closeModificationsPopup() {
-    const modificationsPopupDiv = document.getElementById("modificationsPopup");
-    if (!modificationsPopupDiv) {
-        console.error("Modifications popup container not found!");
-        return;
-    }
-    if (ttsEnabled) {
-      await speak("Closing modifications popup");
-    }
-    modificationsPopupDiv.style.display = "none";
+  const modificationsPopupDiv = document.getElementById("modificationsPopup");
+  if (!modificationsPopupDiv) {
+    console.error("Modifications popup container not found!");
+    return;
+  }
+  if (ttsEnabled) {
+    await speak("Closing modifications popup");
+  }
+  modificationsPopupDiv.style.display = "none";
 }
 
 async function closeModificationsPopupNav() {
-    const modificationsPopupDiv = document.getElementById("modificationsPopup");
-    if (!modificationsPopupDiv) {
-        console.error("Modifications popup container not found!");
-        return;
-    }
-    modificationsPopupDiv.style.display = "none";
+  const modificationsPopupDiv = document.getElementById("modificationsPopup");
+  if (!modificationsPopupDiv) {
+    console.error("Modifications popup container not found!");
+    return;
+  }
+  modificationsPopupDiv.style.display = "none";
 }
 
 //----- calculate order price and update onto popup realtime as modifications are made 
@@ -298,10 +300,10 @@ document.getElementById("addItemToCart").addEventListener("click", async () => {
 
   // Get existing cart from sessionStorage
   const cartItems = JSON.parse(sessionStorage.getItem("cartItems")) || [];
-  
+
   // Add new item
   cartItems.push(cartItem);
-  
+
   // Save back to sessionStorage
   sessionStorage.setItem("cartItems", JSON.stringify(cartItems));
 
@@ -355,7 +357,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("custName").innerHTML = sessionStorage.getItem('currentCustomer');
 
-  const ttsToggle = document.getElementById("ttsToggle");
+const ttsToggle = document.getElementById("ttsToggle");
   if (ttsToggle) {
     ttsToggle.checked = ttsEnabled;
 
@@ -366,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
       else {
         await speak("TTS disabled");
       }
-      
+
       ttsEnabled = e.target.checked;
       sessionStorage.setItem("ttsEnabled", JSON.stringify(ttsEnabled));
     });
@@ -398,73 +400,60 @@ document.querySelectorAll(".ttsButton").forEach(button => {
   });
 });
 
-// Initialize language based on stored preference
-document.addEventListener('DOMContentLoaded', function() {
-  const toggle = document.getElementById('languageToggle');
-  if (toggle && pageTranslator.getCurrentLanguage() === 'es') {
-    toggle.checked = true;
-  }
+
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  getWeather();
 });
 
-function toggleLanguage(checkbox) {
-  if (checkbox.checked) {
-    pageTranslator.switchLanguage('es');
-  } else {
-    pageTranslator.switchLanguage('en');
-  }
-}
+
+async function getWeather() {
+  const res = await fetch('/weather');
+  const data = await res.json();
 
 
-        document.addEventListener("DOMContentLoaded", () => {
-            getWeather();
-        });
+  if (data.cod === 200) {
+    const resultDiv = document.getElementById('weather');
+    const weatherMain = data.weather[0].main;
+    let icon = 'partly_cloudy_day';
 
 
-        async function getWeather() {
-            const res = await fetch('/weather');
-            const data = await res.json();
+    switch (weatherMain) {
+      case 'Clear':
+        icon = 'sunny';
+        break;
+      case 'Clouds':
+        icon = 'cloud';
+        break;
+      case 'Rain':
+        icon = 'rainy';
+        break;
+      case 'Drizzle':
+        icon = 'rainy';
+        break;
+      case 'Thunderstorm':
+        icon = 'thunderstorm';
+        break;
+      case 'Snow':
+        icon = 'cloudy_snowing';
+        break;
+      case 'Mist':
+        icon = 'rainy';
+        break;
+      case 'Fog':
+        icon = 'foggy';
+        break;
+      case 'Haze':
+        icon = 'foggy';
+        break;
+      default:
+        icon = 'partly_cloudy_day';
+    }
 
 
-            if (data.cod === 200) {
-                const resultDiv = document.getElementById('weather');
-                const weatherMain = data.weather[0].main;
-                let icon = 'partly_cloudy_day';
-
-
-                switch (weatherMain) {
-                    case 'Clear':
-                        icon = 'sunny';
-                        break;
-                    case 'Clouds':
-                        icon = 'cloud';
-                        break;
-                    case 'Rain':
-                        icon = 'rainy';
-                        break;
-                    case 'Drizzle':
-                        icon = 'rainy';
-                        break;
-                    case 'Thunderstorm':
-                        icon = 'thunderstorm';
-                        break;
-                    case 'Snow':
-                        icon = 'cloudy_snowing';
-                        break;
-                    case 'Mist':
-                        icon = 'rainy';
-                        break;
-                    case 'Fog':
-                        icon = 'foggy';
-                        break;
-                    case 'Haze':
-                        icon = 'foggy';
-                        break;
-                    default:
-                        icon = 'partly_cloudy_day';
-                    }
-
-
-                resultDiv.innerHTML = `
+    resultDiv.innerHTML = `
                 <span class="weatherLocation"> ${data.name} </span>
                 <div class = "weatherRow">
                     <div class="weatherColumn">
@@ -477,5 +466,5 @@ function toggleLanguage(checkbox) {
                     </div>
                   </div>
                 `;
-            }
-        }
+  }
+}
