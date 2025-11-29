@@ -467,4 +467,78 @@ async function getWeather() {
                   </div>
                 `;
   }
+  
+  let category = getWeatherCategory(data.main.feels_like);
+  getDrinkRec(category); // get drink recommendations based on weather category
+}
+
+function getWeatherCategory(feelsLikeTemp) {
+  if (feelsLikeTemp >= 85) return "hot";
+  if (feelsLikeTemp >= 70) return "warm";
+  if (feelsLikeTemp >= 55) return "cool";
+  if (feelsLikeTemp >= 40) return "cold";
+  return "cold"; // below 40°F
+}
+
+function fetchDrinkOptions(weather) {
+  const keywordMap = {
+    "hot": ["Slush", "Coconut", "Winter Melon", "Green Tea", "Delight", "Snow", "Mania", "Flurry", "Breeze", "Bliss", "Yogurt"],
+    "warm": ["Rose", "Lavender", "Taro", "Strawberry", "Honeydew", "Mango", "Rosehip", "Peach", "Lemonade", "Longan", "Passion Fruit", "Lychee", "Dragonfruit", "Pineapple", "Grapefruit", "Punch", "Guava", "Orange"],
+    "neutral": [],
+    "cool": ["Pumpkin", "Caramel", "Apple", "Chai", "Cocoa", "Mocha"],
+    "cold": ["Hot", "Pistachio"]
+  }
+
+  let keywords = keywordMap[weather];
+
+  const promises = keywords.map(keyword =>
+    fetch(`/api/menu?search=${encodeURIComponent(keyword)}`)
+      .then(res => res.json())
+      .then(data => {
+      if (!data || data.length === 0) {
+        console.log("No drinks found for " + keyword);
+        return [];
+      }
+
+      return data.map(drink => drink.itemname); // extract names
+    })
+      .catch(err => {
+        console.error("Error fetching drink recommendation options:", err);
+        return [];
+      })
+  );
+
+  // return promise to show that all keywords were processes
+  return Promise.all(promises).then(results => results.flat());
+}
+
+function selectRandomDrinks(options, count = 2) { // default 2 drink recs
+  const shuffled = options.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
+async function getDrinkRec(weatherCategory) {
+  const storedDrinks = sessionStorage.getItem('drinkRecommendations');
+  
+  let drinks;
+  if (storedDrinks) {
+    drinks = JSON.parse(storedDrinks); // use existing recommendations
+  } else {
+    const options = await fetchDrinkOptions(weatherCategory); // Generate new recommendations
+    drinks = selectRandomDrinks(options);
+    // Store for future pages
+    sessionStorage.setItem('drinkRecommendations', JSON.stringify(drinks));
+  }
+  
+  // Add to HTML page
+  const drinkRecSectionElement = document.getElementById("drinkRecSectionDiv");
+  if (drinkRecSectionElement) {
+    drinkRecSectionElement.innerHTML = `
+      <p id="drinkRecTitle">Based on the weather, we recommend:<p>
+      <ul class="drinksList">
+        <li><p>${drinks[0]}</p></li>
+        <li><p>${drinks[1]}</p></li>
+      </ul>
+    `;
+  }
 }
