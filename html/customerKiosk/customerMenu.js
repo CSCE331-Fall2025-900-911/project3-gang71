@@ -484,7 +484,7 @@ function fetchDrinkOptions(weather) {
   const keywordMap = {
     "hot": ["Slush", "Coconut", "Winter Melon", "Green Tea", "Delight", "Snow", "Mania", "Flurry", "Breeze", "Bliss", "Yogurt"],
     "warm": ["Rose", "Lavender", "Taro", "Strawberry", "Honeydew", "Mango", "Rosehip", "Peach", "Lemonade", "Longan", "Passion Fruit", "Lychee", "Dragonfruit", "Pineapple", "Grapefruit", "Punch", "Guava", "Orange"],
-    "neutral": [],
+    "neutral": ["Milk Tea", "Thai", "Oolong", "Latte", "Mocha", "Cappuccino", "Macchiato", "Matcha Milk", "Chai", "Cap", "Honey", "Lychee", "Almond", "Coffee"],
     "cool": ["Pumpkin", "Caramel", "Apple", "Chai", "Cocoa", "Mocha"],
     "cold": ["Hot", "Pistachio"]
   }
@@ -524,9 +524,9 @@ async function getDrinkRec(weatherCategory) {
   if (storedDrinks) {
     drinks = JSON.parse(storedDrinks); // use existing recommendations
   } else {
-    const options = await fetchDrinkOptions(weatherCategory); // Generate new recommendations
+    const options = await fetchDrinkOptions(weatherCategory);
     drinks = selectRandomDrinks(options);
-    // Store for future pages
+    // store for other pages
     sessionStorage.setItem('drinkRecommendations', JSON.stringify(drinks));
   }
   

@@ -87,10 +87,6 @@ app.get("/api/employee", async (req, res) => {
 // API route to get all menu items
 app.get("/api/menu", async (req, res) => {
   try {
-    // const result = await pool.query(
-    //   "SELECT menuid, itemname, itemprice, itemcategory, itemdescrip FROM menu ORDER BY menuid;"
-    // );
-
     const search = req.query.search || ""; // get the search keyword or default to empty string
 
     // ILIKE for case-insensitive matching
