@@ -310,7 +310,8 @@ body {
     margin-left: 15px;
     margin-top: 10px;
     transition: all 0.3s ease;
-    font-family: poppins, sans-serif;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
     color: #363949;               /* text color */
     background-color: #f6f6f9;    /* button background */
     border-radius: 6px;
@@ -370,6 +371,9 @@ body {
     display: block;
     margin-top: 0;
     margin-bottom: 5px;
+}
+.drinksList {
+    margin-top: 0;
 }
 .drinksList p {
     margin: 0;

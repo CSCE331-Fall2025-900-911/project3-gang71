@@ -484,7 +484,7 @@ function fetchDrinkOptions(weather) {
   const keywordMap = {
     "hot": ["Slush", "Coconut", "Winter Melon", "Green Tea", "Delight", "Snow", "Mania", "Flurry", "Breeze", "Bliss", "Yogurt"],
     "warm": ["Rose", "Lavender", "Taro", "Strawberry", "Honeydew", "Mango", "Rosehip", "Peach", "Lemonade", "Longan", "Passion Fruit", "Lychee", "Dragonfruit", "Pineapple", "Grapefruit", "Punch", "Guava", "Orange"],
-    "neutral": ["Milk Tea", "Thai", "Oolong", "Latte", "Mocha", "Cappuccino", "Macchiato", "Matcha Milk", "Chai", "Cap", "Honey", "Lychee", "Almond", "Coffee"],
+    "neutral": ["Milk Tea", "Thai", "Oolong", "Latte", "Mocha", "Black Tea", "Cappuccino", "Macchiato", "Chai", "Matcha", "Honey", "Almond", "Coffee"],
     "cool": ["Pumpkin", "Caramel", "Apple", "Chai", "Cocoa", "Mocha"],
     "cold": ["Hot", "Pistachio"]
   }
