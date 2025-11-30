@@ -355,3 +355,23 @@ body {
 .material-symbols-outlined {
     color: var(--color-dark-variant);
 }
+
+#drinkRecSectionDiv {
+    background: rgba(255, 229, 233, 0.808);
+    padding: .5rem 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 10px #f6bbd2;
+    font-size: .9rem;
+    width: 16%;
+    margin-right: 2%;
+}
+#drinkRecTitle {
+    font-size: 1.2rem;
+    display: block;
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+.drinksList p {
+    margin: 0;
+    line-height: 1.4;
+}
