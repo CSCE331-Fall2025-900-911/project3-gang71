@@ -19,11 +19,12 @@ body {
 .topTitle1 {
     font-size: 20px;
     text-align: center;
-    margin: 0 0 12px 0;
+    
 }
 .topOptions {
     padding: 0;
     margin: 5px 0 0 0;
+    font-size: 18px;
     text-align: center;
 }
 .topColumn1 {
@@ -41,7 +42,7 @@ body {
     justify-content: center;
 }
 .logo img {
-    max-height: 140px;
+    max-height: 100px;
     text-align: center;
     width: auto;
     border-radius: 15px;
@@ -79,7 +80,8 @@ body {
 h3 {
     font-size: 20px;
     text-align: center;
-    margin-bottom: 0px;
+    margin-bottom: 3px;
+    margin-top: 5px;
 }
 .items {
     display: flex;
@@ -105,18 +107,19 @@ h3 {
 .itemsSlush,
 .itemsClassic,
 .itemsMilkCap,
-.itemsCoffee {
+.itemsYogurt,
+.itemsMilkStrike,
+.itemsCoffee,
+.itemsOatStrike {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 4px;
     width: 100%;
 }
 
-.itemsYogurt,
-.itemsMilkStrike,
-.itemsOatStrike {
+.itemsToppings{
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(8, 1fr);
     gap: 4px;
     width: 100%;
 }
@@ -142,5 +145,32 @@ h3 {
     width: 100%;
 }
 
+.containerToppings{
+    border-radius: 15px;
+    /*background-color: #ffdbe2e1;*/
+    background-color: #ffffffe1;
+    border: 3px solid #e24060;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    margin: 10px 15px;
+}
 
+.column .containerToppings {
+    flex: 1;
+    width: 100%;
+}
 
+.menuNavigation {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin: 10px 0;
+}
+.arrow {
+    font-size: 25px;
+    color: #e24060;
+    text-decoration: none;
+    padding: 0px 10px;
+}
