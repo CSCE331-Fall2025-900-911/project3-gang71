@@ -527,10 +527,23 @@ function fetchDrinkOptions(weather) {
 }
 
 function selectRandomDrinks(result, count = 2) { // default 2 drink recs
+  // flatten all drinks and categories into single arrays
+  let allDrinks = [];
+  let allCategories = [];
+  
+  result.forEach(r => {
+    if (r.drinks && r.categories) {
+      r.drinks.forEach((drink, index) => {
+        allDrinks.push(drink);
+        allCategories.push(r.categories[index]);
+      });
+    }
+  });
+  
   // get 2 random indices
   let indices = [];
   while (indices.length < count) {
-    let randomIndex = Math.floor(Math.random() * result.length);
+    let randomIndex = Math.floor(Math.random() * allDrinks.length);
     if (!indices.includes(randomIndex)) { // no duplicate recs
       indices.push(randomIndex);
     }
@@ -538,8 +551,8 @@ function selectRandomDrinks(result, count = 2) { // default 2 drink recs
   console.log(indices);
 
   // extract drinks and categories using the same indices
-  let drinks = indices.map(i => result[i].drink);
-  let categories = indices.map(i => result[i].category);
+  let drinks = indices.map(i => allDrinks[i]);
+  let categories = indices.map(i => allCategories[i]);
   return { drinks, categories };
 }
 
