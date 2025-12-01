@@ -35,6 +35,17 @@ function populateToppingDropdowns() {
       select.remove(1);
     }
   });
+
+  // add "No Topping" option at the top
+  [topping1Select, topping2Select].forEach(select => {
+    const noToppingOption = document.createElement('option');
+    noToppingOption.value = "";
+    noToppingOption.textContent = "No Topping";
+    noToppingOption.dataset.price = "0";
+    noToppingOption.dataset.name = "No Topping";
+    select.appendChild(noToppingOption);
+  });
+
   // for the user - sort them in alphabetical order before displaying in dropdowns
   availableToppings.sort((a, b) => a.itemname.localeCompare(b.itemname, undefined, { sensitivity: 'base' }));
 
