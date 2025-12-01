@@ -495,9 +495,9 @@ function fetchDrinkOptions(weather) {
   const keywordMap = {
     "hot": ["Slush", "Coconut", "Winter Melon", "Green Tea", "Delight", "Snow", "Mania", "Flurry", "Breeze", "Bliss", "Yogurt"],
     "warm": ["Rose", "Lavender", "Taro", "Strawberry", "Honeydew", "Mango", "Rosehip", "Peach", "Lemonade", "Longan", "Passion Fruit", "Lychee", "Dragonfruit", "Pineapple", "Grapefruit", "Punch", "Guava", "Orange"],
-    "neutral": ["Milk Tea", "Thai", "Oolong", "Latte", "Mocha", "Black Tea", "Cappuccino", "Macchiato", "Chai", "Matcha", "Honey", "Almond", "Coffee"],
+    "neutral": ["Milk Tea", "Thai", "Oolong", "Latte", "Mocha", "Black Tea", "Cappuccino", "Macchiato", "Matcha", "Honey", "Almond", "Coffee"],
     "cool": ["Pumpkin", "Caramel", "Apple", "Chai", "Cocoa", "Mocha"],
-    "cold": ["Hot", "Pistachio"]
+    "cold": ["Hot", "Pistachio", "Brown Sugar", "Chai", "Cocoa"]
   }
 
   let keywords = keywordMap[weather];
@@ -511,7 +511,10 @@ function fetchDrinkOptions(weather) {
         return [];
       }
 
-      return data.map(drink => drink.itemname); // extract names
+      // extract names and categories
+      let drink = data.map(drink => drink.itemname);
+      let category = data.map(drink => drink.itemcategory);
+      return { drink, category };
     })
       .catch(err => {
         console.error("Error fetching drink recommendation options:", err);
@@ -523,32 +526,44 @@ function fetchDrinkOptions(weather) {
   return Promise.all(promises).then(results => results.flat());
 }
 
-function selectRandomDrinks(options, count = 2) { // default 2 drink recs
-  const shuffled = options.sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
+function selectRandomDrinks(result, count = 2) { // default 2 drink recs
+  // get 2 random indices
+  let indices = [];
+  while (indices.length < count) {
+    let randomIndex = Math.floor(Math.random() * result.length);
+    if (!indices.includes(randomIndex)) { // no duplicate recs
+      indices.push(randomIndex);
+    }
+  }
+
+  // extract drinks and categories using the same indices
+  let drinks = indices.map(i => result[i].drink);
+  let categories = indices.map(i => result[i].category);
+  return { drinks, categories };
 }
 
 async function getDrinkRec(weatherCategory) {
   const storedDrinks = sessionStorage.getItem('drinkRecommendations');
   
-  let drinks;
+  let randomResult;
   if (storedDrinks) {
-    drinks = JSON.parse(storedDrinks); // use existing recommendations
+    randomResult = JSON.parse(storedDrinks); // use existing recommendations
+
   } else {
-    const options = await fetchDrinkOptions(weatherCategory);
-    drinks = selectRandomDrinks(options);
+    const result = await fetchDrinkOptions(weatherCategory);
+    randomResult = selectRandomDrinks(result);
     // store for other pages
-    sessionStorage.setItem('drinkRecommendations', JSON.stringify(drinks));
+    sessionStorage.setItem('drinkRecommendations', JSON.stringify(randomResult));
   }
   
-  // Add to HTML page
+  // add to HTML page
   const drinkRecSectionElement = document.getElementById("drinkRecSectionDiv");
   if (drinkRecSectionElement) {
     drinkRecSectionElement.innerHTML = `
       <p id="drinkRecTitle">Based on the weather, we recommend:<p>
       <ul class="drinksList">
-        <li><p>${drinks[0]}</p></li>
-        <li><p>${drinks[1]}</p></li>
+        <li><p>${randomResult.drinks[0]} (${randomResult.categories[0]})</p></li>
+        <li><p>${randomResult.drinks[1]} (${randomResult.categories[1]})</p></li>
       </ul>
     `;
   }
