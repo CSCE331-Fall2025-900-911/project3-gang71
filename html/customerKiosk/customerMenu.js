@@ -535,6 +535,7 @@ function selectRandomDrinks(result, count = 2) { // default 2 drink recs
       indices.push(randomIndex);
     }
   }
+  console.log(indices);
 
   // extract drinks and categories using the same indices
   let drinks = indices.map(i => result[i].drink);
