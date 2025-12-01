@@ -221,7 +221,7 @@ app.get("/api/dailySales", async (req, res) => {
     const {startDate, endDate} = req.query;
     const result = await pool.query(
       `SELECT TO_CHAR("orderdate", 'YYYY-MM-DD') AS "productName",
-              COUNT("orderid") AS "quantitySol
+              COUNT("orderid") AS "quantitySold",
               SUM("orderprice" + "salestax" + COALESCE("tips", 0)) AS "totalRevenue"
       FROM "order"
       WHERE "orderdate" BETWEEN $1 AND $2
@@ -1077,7 +1077,7 @@ app.get("/kitchen", requireLogin, (req, res) => {
 })
 
 app.use(requireLogin, express.static(path.join(__dirname, "html")));
-app.use(express.static(path.join(__dirname, "menuBoard")));
+app.use(express.static(path.join(__dirname, "html/menuBoard")));
 
 // start server
 app.listen(PORT, () => {

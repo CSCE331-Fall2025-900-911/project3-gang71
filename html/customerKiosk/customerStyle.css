@@ -330,7 +330,14 @@ body {
     justify-content: space-between;
     margin: 15px;
 }
+.weatherAndRecs {
+    display: grid;
+    grid-template-columns: auto auto;
+    width: fit-content;
+}
 .weather {
+    grid-column: 1;
+    justify-self: end;
     background: rgba(255, 229, 233, 0.808);
     padding: .5rem 1rem;
     border-radius: 1rem;
@@ -358,24 +365,40 @@ body {
 }
 
 #drinkRecSectionDiv {
+    grid-column: 2;
+    display: inline-block;
+    justify-self: end;
     background: rgba(255, 229, 233, 0.808);
     padding: .5rem 1rem;
     border-radius: 1rem;
     box-shadow: 0 4px 10px #f6bbd2;
     font-size: .9rem;
-    width: 16%;
-    margin-right: 2%;
+    margin-left: 4%;
 }
 #drinkRecTitle {
     font-size: 1.2rem;
-    display: block;
+    width: 75%;
     margin-top: 0;
     margin-bottom: 5px;
 }
 .drinksList {
     margin-top: 0;
+    padding-left: 1.5rem;
+    display: inline-block;
+    width: max-content;
+}
+.drinksList ul {
+    padding-left: 1.5rem;
+    margin: 0;
+    list-style-position: inside;
+}
+.drinksList li {
+    width: block;
+    width: 100%;
 }
 .drinksList p {
     margin: 0;
     line-height: 1.4;
+    width: fit-content;
+    display: inline-block;
 }

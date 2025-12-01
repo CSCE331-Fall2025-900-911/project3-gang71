@@ -35,6 +35,17 @@ function populateToppingDropdowns() {
       select.remove(1);
     }
   });
+
+  // add "No Topping" option at the top
+  [topping1Select, topping2Select].forEach(select => {
+    const noToppingOption = document.createElement('option');
+    noToppingOption.value = "";
+    noToppingOption.textContent = "No Topping";
+    noToppingOption.dataset.price = "0";
+    noToppingOption.dataset.name = "No Topping";
+    select.appendChild(noToppingOption);
+  });
+
   // for the user - sort them in alphabetical order before displaying in dropdowns
   availableToppings.sort((a, b) => a.itemname.localeCompare(b.itemname, undefined, { sensitivity: 'base' }));
 
@@ -484,9 +495,9 @@ function fetchDrinkOptions(weather) {
   const keywordMap = {
     "hot": ["Slush", "Coconut", "Winter Melon", "Green Tea", "Delight", "Snow", "Mania", "Flurry", "Breeze", "Bliss", "Yogurt"],
     "warm": ["Rose", "Lavender", "Taro", "Strawberry", "Honeydew", "Mango", "Rosehip", "Peach", "Lemonade", "Longan", "Passion Fruit", "Lychee", "Dragonfruit", "Pineapple", "Grapefruit", "Punch", "Guava", "Orange"],
-    "neutral": ["Milk Tea", "Thai", "Oolong", "Latte", "Mocha", "Black Tea", "Cappuccino", "Macchiato", "Chai", "Matcha", "Honey", "Almond", "Coffee"],
+    "neutral": ["Milk Tea", "Thai", "Oolong", "Latte", "Mocha", "Black Tea", "Cappuccino", "Macchiato", "Matcha", "Honey", "Almond", "Coffee"],
     "cool": ["Pumpkin", "Caramel", "Apple", "Chai", "Cocoa", "Mocha"],
-    "cold": ["Hot", "Pistachio"]
+    "cold": ["Hot", "Pistachio", "Brown Sugar", "Chai", "Cocoa"]
   }
 
   let keywords = keywordMap[weather];
@@ -497,14 +508,27 @@ function fetchDrinkOptions(weather) {
       .then(data => {
       if (!data || data.length === 0) {
         console.log("No drinks found for " + keyword);
-        return [];
+        return { drinks: [], categories: [] };
       }
 
-      return data.map(drink => drink.itemname); // extract names
+      // filter out unwanted categories
+      const excludedCategories = ['Topping', 'Modification'];
+      const filteredData = data.filter(drink => 
+        !excludedCategories.includes(drink.itemcategory)
+      );
+
+      if (filteredData.length === 0) {
+        console.log("No valid drinks found for " + keyword);
+      }
+
+      // extract names and categories
+      let drink = filteredData.map(drink => drink.itemname);
+      let category = filteredData.map(drink => drink.itemcategory);
+      return { drink, category };
     })
       .catch(err => {
         console.error("Error fetching drink recommendation options:", err);
-        return [];
+        return { drinks: [], categories: [] };
       })
   );
 
@@ -512,32 +536,59 @@ function fetchDrinkOptions(weather) {
   return Promise.all(promises).then(results => results.flat());
 }
 
-function selectRandomDrinks(options, count = 2) { // default 2 drink recs
-  const shuffled = options.sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
+function selectRandomDrinks(result, count = 2) { // default 2 drink recs
+  // flatten
+  let allDrinks = [];
+  let allCategories = [];
+  
+  result.forEach(r => {
+    if (r.drink && r.category) {
+      r.drink.forEach((drink, index) => {
+        allDrinks.push(drink);
+        allCategories.push(r.category[index]);
+      });
+    }
+  });
+
+  // get 2 random indices
+  let indices = [];
+  while (indices.length < count) {
+    let randomIndex = Math.floor(Math.random() * allDrinks.length);
+    if (!indices.includes(randomIndex)) { // no duplicate recs
+      indices.push(randomIndex);
+    }
+  }
+
+  console.log(indices);
+  // extract drinks and categories using the same indices
+  let drinks = indices.map(i => allDrinks[i]);
+  console.log(drinks);
+  let categories = indices.map(i => allCategories[i]);  
+  return { drinks, categories };
 }
 
 async function getDrinkRec(weatherCategory) {
   const storedDrinks = sessionStorage.getItem('drinkRecommendations');
-  
-  let drinks;
+ 
+  let randomResult;
   if (storedDrinks) {
-    drinks = JSON.parse(storedDrinks); // use existing recommendations
+    randomResult = JSON.parse(storedDrinks); // use existing recommendations
+
   } else {
-    const options = await fetchDrinkOptions(weatherCategory);
-    drinks = selectRandomDrinks(options);
+    const result = await fetchDrinkOptions(weatherCategory);
+    randomResult = selectRandomDrinks(result);
     // store for other pages
-    sessionStorage.setItem('drinkRecommendations', JSON.stringify(drinks));
+    sessionStorage.setItem('drinkRecommendations', JSON.stringify(randomResult));
   }
   
-  // Add to HTML page
+  // add to HTML page
   const drinkRecSectionElement = document.getElementById("drinkRecSectionDiv");
   if (drinkRecSectionElement) {
     drinkRecSectionElement.innerHTML = `
       <p id="drinkRecTitle">Based on the weather, we recommend:<p>
       <ul class="drinksList">
-        <li><p>${drinks[0]}</p></li>
-        <li><p>${drinks[1]}</p></li>
+        <li><p>${randomResult.drinks[0]} (${randomResult.categories[0]})</p></li>
+        <li><p>${randomResult.drinks[1]} (${randomResult.categories[1]})</p></li>
       </ul>
     `;
   }
