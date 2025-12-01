@@ -511,10 +511,19 @@ function fetchDrinkOptions(weather) {
         return { drinks: [], categories: [] };
       }
 
+      // filter out unwanted categories
+      const excludedCategories = ['Topping', 'Modification'];
+      const filteredData = data.filter(drink => 
+        !excludedCategories.includes(drink.itemcategory)
+      );
+
+      if (filteredData.length === 0) {
+        console.log("No valid drinks found for " + keyword);
+      }
+
       // extract names and categories
-      let drink = data.map(drink => drink.itemname);
-      let category = data.map(drink => drink.itemcategory);
-      // remove if topping or modification
+      let drink = filteredData.map(drink => drink.itemname);
+      let category = filteredData.map(drink => drink.itemcategory);
       return { drink, category };
     })
       .catch(err => {
@@ -524,24 +533,23 @@ function fetchDrinkOptions(weather) {
   );
 
   // return promise to show that all keywords were processes
-  // return Promise.all(promises).then(results => results.flat());
-  return Promise.all(promises);
+  return Promise.all(promises).then(results => results.flat());
 }
 
 function selectRandomDrinks(result, count = 2) { // default 2 drink recs
-  // flatten all drinks and categories into single arrays
+  // flatten
   let allDrinks = [];
   let allCategories = [];
   
   result.forEach(r => {
-    if (r.drinks && r.categories) {
-      r.drinks.forEach((drink, index) => {
+    if (r.drink && r.category) {
+      r.drink.forEach((drink, index) => {
         allDrinks.push(drink);
-        allCategories.push(r.categories[index]);
+        allCategories.push(r.category[index]);
       });
     }
   });
-  
+
   // get 2 random indices
   let indices = [];
   while (indices.length < count) {
@@ -550,26 +558,25 @@ function selectRandomDrinks(result, count = 2) { // default 2 drink recs
       indices.push(randomIndex);
     }
   }
-  console.log(indices);
 
+  console.log(indices);
   // extract drinks and categories using the same indices
   let drinks = indices.map(i => allDrinks[i]);
-  let categories = indices.map(i => allCategories[i]);
+  console.log(drinks);
+  let categories = indices.map(i => allCategories[i]);  
   return { drinks, categories };
 }
 
 async function getDrinkRec(weatherCategory) {
   const storedDrinks = sessionStorage.getItem('drinkRecommendations');
-  
+ 
   let randomResult;
   if (storedDrinks) {
     randomResult = JSON.parse(storedDrinks); // use existing recommendations
 
   } else {
     const result = await fetchDrinkOptions(weatherCategory);
-    console.log(result);
     randomResult = selectRandomDrinks(result);
-    console.log(randomResult);
     // store for other pages
     sessionStorage.setItem('drinkRecommendations', JSON.stringify(randomResult));
   }
