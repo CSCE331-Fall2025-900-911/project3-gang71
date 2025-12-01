@@ -508,22 +508,24 @@ function fetchDrinkOptions(weather) {
       .then(data => {
       if (!data || data.length === 0) {
         console.log("No drinks found for " + keyword);
-        return [];
+        return { drinks: [], categories: [] };
       }
 
       // extract names and categories
       let drink = data.map(drink => drink.itemname);
       let category = data.map(drink => drink.itemcategory);
+      // remove if topping or modification
       return { drink, category };
     })
       .catch(err => {
         console.error("Error fetching drink recommendation options:", err);
-        return [];
+        return { drinks: [], categories: [] };
       })
   );
 
   // return promise to show that all keywords were processes
-  return Promise.all(promises).then(results => results.flat());
+  // return Promise.all(promises).then(results => results.flat());
+  return Promise.all(promises);
 }
 
 function selectRandomDrinks(result, count = 2) { // default 2 drink recs
