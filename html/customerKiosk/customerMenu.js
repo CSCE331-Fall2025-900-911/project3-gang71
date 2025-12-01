@@ -551,7 +551,9 @@ async function getDrinkRec(weatherCategory) {
 
   } else {
     const result = await fetchDrinkOptions(weatherCategory);
+    console.log(result);
     randomResult = selectRandomDrinks(result);
+    console.log(randomResult);
     // store for other pages
     sessionStorage.setItem('drinkRecommendations', JSON.stringify(randomResult));
   }
