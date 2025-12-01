@@ -1061,7 +1061,7 @@ app.get("/kitchen", requireLogin, (req, res) => {
 })
 
 app.use(requireLogin, express.static(path.join(__dirname, "html")));
-app.use(express.static(path.join(__dirname, "menuBoard")));
+app.use(express.static(path.join(__dirname, "html/menuBoard")));
 
 // start server
 app.listen(PORT, () => {
