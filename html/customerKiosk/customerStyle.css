@@ -104,7 +104,7 @@ body {
     text-align: center;
 
     /* keep drink name on one line */
-    max-width: 290px;
+    max-width: 230px;
     white-space: nowrap;
     overflow: hidden; 
     text-overflow: ellipsis;
@@ -120,7 +120,6 @@ body {
 
 .menuItemH1 {
     margin: 0px;
-    left: 2%;
     float: left;
     position: relative;
     width: 30%;
@@ -131,7 +130,6 @@ body {
 .menuItemButton {
     flex: 0 0 auto;
     padding: 8px 16px;
-    margin-left: auto;
     right: 5%;
     width: 40%;
     height: 10%;
