@@ -74,7 +74,7 @@ function renderDrinks(drinks, menuRow) {
       <img src="${drink.itemphoto}" alt="${drink.itemname}" class="menuItemImg">
       <h2 class="menuItemH2" data-translate>${drink.itemname}</h2>
       <p class="menuItemP" data-translate>${drink.itemdescrip}</p>
-      <div style="display: flex; align-items: center;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 50px";>
         <h1 class="menuItemH1">$${Number(drink.itemprice).toFixed(2)}</h1>
         <button class="menuItemButton" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.itemname}." data-translate>Customize</button>
       </div>
