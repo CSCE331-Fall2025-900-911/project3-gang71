@@ -1,11 +1,12 @@
 let ttsEnabled = JSON.parse(sessionStorage.getItem("ttsEnabled") || "false"); // get tts setting from storage or use default setting
+let preTaxAmount = 0;
 
 async function checkout() {
   // clear page
   document.getElementById("cartPage").innerHTML = "";
 
   // total price before tip
-  const totalPrice = calculateTotalPrice();
+  const totalPrice = Number(preTaxAmount);
   showPaymentScreen(totalPrice);
   if (ttsEnabled) {
     await speak("The current price is $" + totalPrice);
@@ -48,6 +49,7 @@ async function checkout() {
 function showPaymentScreen(totalPrice) {
   const checkoutButton = document.getElementById("checkoutButton");
   checkoutButton.style.display = "none";
+  checkoutButton.style.marginLeft = "1.212rem";
 
   document.getElementById("paymentScreen").innerHTML = `
       <button class="ttsButton" data-text="Pay with card">Card</button>
@@ -84,7 +86,7 @@ function addTip() {
     return;
   }
 
-  const totalPrice = calculateTotalPrice(tipAmount);
+  const totalPrice = calculateTotalPriceWithTip(preTaxAmount, tipAmount);
   if ((!(isNaN(tipAmount) || tipAmount == 0)) && ttsEnabled) {
     speak("A $" + tipAmount + " is added to the total. The new total is $" + totalPrice);
   }
@@ -93,15 +95,30 @@ function addTip() {
   priceH2.textContent = "Total price: $" + totalPrice;
 }
 
-function calculateTotalPrice(tipAmount = 0) {
+function calculateSubtotal() {
   const cartItems = JSON.parse(sessionStorage.getItem("cartItems")) || [];
-
   let total = cartItems.reduce((sum, item) => sum + Number(item.price), 0);
+  return total.toFixed(2);
+}
+
+function calculateTax(subtotal) {
+  const taxPercentage = 0.0625;
+  let temp = subtotal * taxPercentage
+  return temp.toFixed(2);
+}
+
+function calculateTotalPriceBeforeTip(subtotal, tax) {
+  priceBeforeTip = Number(subtotal) + Number(tax); 
+  return priceBeforeTip.toFixed(2);
+}
+
+function calculateTotalPriceWithTip(currentTotal, tipAmount = 0) {
+  let temp = Number(currentTotal);
   if (tipAmount != 0) {
-      total += tipAmount;
+    temp += Number(tipAmount);
   }
 
-  return total.toFixed(2);
+  return temp.toFixed(2);
 }
 
 // tts function
@@ -174,20 +191,39 @@ window.addEventListener("DOMContentLoaded", () => {
 
         // USE modsText here, not the old code!
         itemDiv.innerHTML = `
+          <div class="cartItemDiv">
             <img src="${item.url}" alt="${item.name}" class="cartItemImg">
-            <div>
-                <h3>${item.name}</h3>
-                <p>Price: $${Number(item.price).toFixed(2)}</p>
-                <p>${modsText || "No modifications"}</p>
-                <button class="removeBtn" data-index="${index}" data-text="Remove ${item.name} with ${plainModsText || "no modifications"}">Remove</button>
+            <div class="cartItemInfoDiv">
+              <h3>${item.name}</h3>
+              <p>Price: $${Number(item.price).toFixed(2)}</p>
+              <p class="itemMods">${modsText || "No modifications"}</p>
             </div>
+            
+            <span class="material-symbols-outlined removeBtn" data-index="${index}" data-text="Delete ${item.name} with ${plainModsText || "no modifications"}">delete</span>
+          <div>
         `;
+        console.log(item.url);
 
         cartDiv.appendChild(itemDiv);
     });
     
+    const subtotal = document.createElement("h3");
+    let subtotalAmount = calculateSubtotal();
+    subtotal.textContent = "Subtotal: $" + subtotalAmount;
+    subtotal.style.marginLeft = "2%";
+    cartDiv.appendChild(subtotal);
+
+    const tax = document.createElement("h3");
+    let taxAmount = calculateTax(subtotalAmount);
+    tax.textContent = "Tax: $" + taxAmount;
+    tax.style.marginLeft = "2%";
+    cartDiv.appendChild(tax);
+
     const price = document.createElement("h2");
-    price.textContent = "Total price: $" + calculateTotalPrice();
+    price.id = "preTipPrice";
+    preTaxAmount = calculateTotalPriceBeforeTip(subtotalAmount, taxAmount);
+    price.textContent = "Total price: $" + preTaxAmount;
+    price.style.marginLeft = "2%";
     cartDiv.appendChild(price);
 
     document.querySelectorAll(".removeBtn").forEach(btn => {
