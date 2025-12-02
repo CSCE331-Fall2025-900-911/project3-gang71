@@ -17,17 +17,16 @@
     <div class = logo>
       <img src = "https://cdn.vettedbiz.com/wp-content/uploads/2021/11/02114926/kung-fu-tea-logo.png" width = "75" height = "75">
     </div>
-    <a href="customerCart.html" class="bannerButtons ttsButton" data-text="Cart" data-translate>Cart </a>
-    <a href = "/api/logout" class="bannerButtons ttsButton" data-text="Log out" data-translate>Logout</a>
-    <label style="margin: 0 20px;">
-      <input type="checkbox" id="languageToggle" onchange="toggleLanguage(this)"/>
-        Español / Spanish
-    </label>
-    <label>
-      <input type="checkbox" id="ttsToggle"/>Enable TTS
-    </label>
     <div class = customerName>
       <p id = "custName"></p>
+      <a href = "/api/logout" class="bannerButtons ttsButton" data-text="Log out" data-translate>Logout</a>
+    </div>
+    <div class = bannerRight>
+      <label>
+        <input type="checkbox" id="ttsToggle"/>Enable TTS
+      </label>
+      <button id="languageToggle" class="languageToggleBtn" onclick="toggleLanguage(this)">Español</button>
+      <a href="customerCart.html" class="bannerButtons ttsButton" data-text="Cart" data-translate>Cart</a>
     </div>
   </div>
 
@@ -61,16 +60,16 @@
         </div>
 
         <div class="modification">
-            <h3>Cup Size:</h3>
+            <h3 data-translate>Cup Size:</h3>
             <div class="threeModificationChoices">
-                <button id="smallDrinkButton" class="size-button" data-size="small">Small</button>
-                <button id="mediumDrinkButton" class="size-button" data-size="medium">Medium (+$0.50)</button>
-                <button id="largeDrinkButton" class="size-button" data-size="large">Large (+$1.00)</button>
+                <button id="smallDrinkButton" class="size-button" data-size="small" data-translate>Small</button>
+                <button id="mediumDrinkButton" class="size-button" data-size="medium" data-translate>Medium (+$0.50)</button>
+                <button id="largeDrinkButton" class="size-button" data-size="large" data-translate>Large (+$1.00)</button>
             </div>
         </div>
 
         <div class="modification">
-            <h3>Sweetness:</h3>
+            <h3 data-translate>Sweetness:</h3>
             <div class="fourModificationChoices">
                 <button>0%</button>
                 <button>50%</button>
@@ -80,7 +79,7 @@
         </div>
 
         <div class="modification">
-            <h3>Ice:</h3>
+            <h3 data-translate>Ice:</h3>
             <div class="fourModificationChoices">
                 <button>0%</button>
                 <button>50%</button>
@@ -90,21 +89,21 @@
         </div>
 
         <div class="modification">
-            <h3>Toppings:</h3>
+            <h3 data-translate>Toppings:</h3>
             <div class="twoModificationChoices" style="height: fit-content;">
                 <select name="topping1" id="hi">
-                    <option value="" selected disabled hidden>Topping 1</option>
-                    <option value="boba">Boba</option>
-                    <option value="crystalBoba">Crystal Boba</option>
-                    <option value="pudding">Pudding</option>
-                    <option value="grassJelly">Grass Jelly</option>
+                    <option value="" selected disabled hidden data-translate>Topping 1</option>
+                    <option value="boba" data-translate>Boba</option>
+                    <option value="crystalBoba" data-translate>Crystal Boba</option>
+                    <option value="pudding" data-translate>Pudding</option>
+                    <option value="grassJelly" data-translate>Grass Jelly</option>
                 </select>
                 <select name="topping2">
-                    <option value="" selected disabled hidden>Topping 2</option>
-                    <option value="boba">Boba</option>
-                    <option value="crystalBoba">Crystal Boba</option>
-                    <option value="pudding">Pudding</option>
-                    <option value="grassJelly">Grass Jelly</option>
+                    <option value="" selected disabled hidden data-translate>Topping 2</option>
+                    <option value="boba" data-translate>Boba</option>
+                    <option value="crystalBoba" data-translate>Crystal Boba</option>
+                    <option value="pudding" data-translate>Pudding</option>
+                    <option value="grassJelly" data-translate>Grass Jelly</option>
                 </select>
             </div>
         </div>

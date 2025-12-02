@@ -969,7 +969,26 @@ app.post("/api/translate", async (req, res) => {
       'TTS enabled': 'TTS habilitado',
       'TTS disabled': 'TTS deshabilitado',
       'Closing modifications popup': 'Cerrando ventana emergente de modificaciones',
-      'added to cart!': '¡añadido al carrito!'
+      'added to cart!': '¡añadido al carrito!',
+      'Your cart is empty.': 'Tu carrito está vacío.',
+      'Size': 'Tamaño',
+      'Price': 'Precio',
+      'No modifications': 'Sin modificaciones',
+      'Remove': 'Eliminar',
+      'Total price': 'Precio total',
+      'Back to ordering': 'Volver a hacer pedido',
+      'Log out': 'Cerrar sesión',
+      'Cup Size:': 'Tamaño de Taza:',
+      'Small': 'Pequeño',
+      'Medium (+$0.50)': 'Mediano (+$0.50)',
+      'Large (+$1.00)': 'Grande (+$1.00)',
+      'Topping 1': 'Cobertura 1',
+      'Topping 2': 'Cobertura 2',
+      'Boba': 'Boba',
+      'Crystal Boba': 'Boba de Cristal',
+      'Pudding': 'Pudín',
+      'Grass Jelly': 'Gelatina de Hierba',
+      'No Topping': 'Sin Cobertura'
     };
 
     const fallback = mockDict[originalKey] || originalKey;

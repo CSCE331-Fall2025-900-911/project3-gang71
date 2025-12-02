@@ -6,16 +6,23 @@
     <link rel = "stylesheet" href = "customerStyle.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
     <title>Customer Cart</title>
+    <script src="translator.js"></script>
 </head>
 <body>
     <div class = topPageBanner style="top: 0%">
         <div class = logo>
             <img src = "https://cdn.vettedbiz.com/wp-content/uploads/2021/11/02114926/kung-fu-tea-logo.png" width = "75" height = "75">
         </div>
-            <a href="milkTeas.html" class="bannerButtons ttsButton" data-text="Back to ordering">Back to Ordering</a>
-            <a href = "/api/logout" class="bannerButtons ttsButton" data-text="Log out">Logout</a>
         <div class = customerName>
             <p id = "custName"></p>
+            <a href = "/api/logout" class="bannerButtons ttsButton" data-text="Log out" data-translate>Logout</a>
+        </div>
+        <div class = bannerRight>
+            <label>
+                <input type="checkbox" id="ttsToggle"/>Enable TTS
+            </label>
+            <button id="languageToggle" class="languageToggleBtn" onclick="toggleLanguage(this)">Español</button>
+            <a href="milkTeas.html" class="bannerButtons ttsButton" data-text="Back to ordering" data-translate>Back to Ordering</a>
         </div>
     </div>
 
