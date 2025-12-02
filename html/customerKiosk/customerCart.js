@@ -144,7 +144,7 @@ window.addEventListener("DOMContentLoaded", () => {
     let items = JSON.parse(sessionStorage.getItem("cartItems")) || [];
 
     if (items.length === 0) {
-        cartDiv.innerHTML = "<p>Your cart is empty.</p>";
+        cartDiv.innerHTML = "<p data-translate>Your cart is empty.</p>";
         return;
     }
 
@@ -157,17 +157,17 @@ window.addEventListener("DOMContentLoaded", () => {
         let modsText = '';
         
         if (mods.size) {
-            modsText += `Size: ${mods.size}<br>`;
+            modsText += `<span data-translate>Size</span>: ${mods.size}<br>`;
         }
         if (mods.sweetness) {
-            modsText += `Sweetness: ${mods.sweetness}<br>`;
+            modsText += `<span data-translate>Sweetness</span>: ${mods.sweetness}<br>`;
         }
         if (mods.ice) {
-            modsText += `Ice: ${mods.ice}<br>`;
+            modsText += `<span data-translate>Ice</span>: ${mods.ice}<br>`;
         }
         if (mods.toppings && mods.toppings.length > 0) {
             const toppingNames = mods.toppings.map(t => t.name).join(", ");
-            modsText += `Toppings: ${toppingNames}`;
+            modsText += `<span data-translate>Toppings</span>: ${toppingNames}`;
         }
 
         let plainModsText = modsText.replace(/<br>/g, ", ").replace(/&nbsp;/g, " ").trim();
@@ -176,10 +176,10 @@ window.addEventListener("DOMContentLoaded", () => {
         itemDiv.innerHTML = `
             <img src="${item.url}" alt="${item.name}" class="cartItemImg">
             <div>
-                <h3>${item.name}</h3>
-                <p>Price: $${Number(item.price).toFixed(2)}</p>
-                <p>${modsText || "No modifications"}</p>
-                <button class="removeBtn" data-index="${index}" data-text="Remove ${item.name} with ${plainModsText || "no modifications"}">Remove</button>
+                <h3 data-translate>${item.name}</h3>
+                <p><span data-translate>Price</span>: $${Number(item.price).toFixed(2)}</p>
+                <p>${modsText || "<span data-translate>No modifications</span>"}</p>
+                <button class="removeBtn" data-index="${index}" data-text="Remove ${item.name}" data-translate>Remove</button>
             </div>
         `;
 
@@ -187,8 +187,13 @@ window.addEventListener("DOMContentLoaded", () => {
     });
     
     const price = document.createElement("h2");
-    price.textContent = "Total price: $" + calculateTotalPrice();
+    price.innerHTML = '<span data-translate>Total price</span>: $' + calculateTotalPrice();
     cartDiv.appendChild(price);
+    
+    // Re-translate cart after rendering
+    if (pageTranslator.currentLanguage === 'ES') {
+      setTimeout(() => pageTranslator.translatePage('ES'), 100);
+    }
 
     document.querySelectorAll(".removeBtn").forEach(btn => {
         btn.addEventListener("click", async e => {
