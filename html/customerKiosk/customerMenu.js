@@ -371,6 +371,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+window.addEventListener('load', () => {
+  const categories = document.querySelector('.drinkCategoryPanel');
+  let currentHeight = categories.offsetHeight;
+  console.log(currentHeight);
+
+  // full height - current = paddingBottom
+  categories.style.paddingBottom = document.documentElement.scrollHeight + 'px';
+  console.log('Set padding to:', document.documentElement.scrollHeight);
+});
+
 // load employee name
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("custName").innerHTML = sessionStorage.getItem('currentCustomer');
