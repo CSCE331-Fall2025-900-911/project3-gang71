@@ -126,6 +126,7 @@ function openModificationsPopup(drink) {
 
   // put in drink info
   document.getElementById("itemImage").src = drink.itemphoto;
+  document.getElementById("itemImage").textContent = drink.itemname;
   document.getElementById("itemName").textContent = drink.itemname;
   document.getElementById("itemDescription").textContent = drink.itemdescrip;
   document.getElementById("modifiedDrinkPrice").textContent = `$${currentBasePrice.toFixed(2)}`;
@@ -485,7 +486,7 @@ async function getWeather() {
                 <span class="weatherLocation"> ${data.name} </span>
                 <div class = "weatherRow">
                     <div class="weatherColumn">
-                        <i class="material-symbols-outlined" style="font-size:50px;">${icon}</i>
+                        <i class="material-symbols-outlined" style="font-size:50px;" alt="${weatherMain}">${icon}</i>
                     </div>
                     <div class="weatherColumn">
                         <p>${data.main.temp}°F</p> 
