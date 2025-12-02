@@ -211,12 +211,14 @@ window.addEventListener("DOMContentLoaded", () => {
     let subtotalAmount = calculateSubtotal();
     subtotal.textContent = "Subtotal: $" + subtotalAmount;
     subtotal.style.marginLeft = "2%";
+    subtotal.style.fontSize = "1.5rem";
     cartDiv.appendChild(subtotal);
 
     const tax = document.createElement("h3");
     let taxAmount = calculateTax(subtotalAmount);
     tax.textContent = "Tax: $" + taxAmount;
     tax.style.marginLeft = "2%";
+    tax.style.fontSize = "1.5rem";
     cartDiv.appendChild(tax);
 
     const price = document.createElement("h2");

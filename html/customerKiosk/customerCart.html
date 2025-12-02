@@ -11,7 +11,7 @@
 </head>
 <body>
     <a class="skipLink" href="#menuContainer">Skip to website content</a>
-    <div class = topPageBanner style="top: 0%">
+    <header class = topPageBanner style="top: 0%">
         <div class = logo>
             <img src = "https://cdn.vettedbiz.com/wp-content/uploads/2021/11/02114926/kung-fu-tea-logo.png" width = "75" height = "75" alt="Kung Fu Tea Logo">
         </div>
@@ -29,10 +29,10 @@
             <button id="languageToggle" class="languageToggleBtn" onclick="toggleLanguage(this)">Español</button>
             <a href="milkTeas.html" class="bannerButtons ttsButton" data-text="Back to ordering" data-translate>Back to Ordering</a>
         </div>
-    </div>
+    </header>
 
     <div id="cartPage" style="margin-top: 6%;"></div>
-    <button id="checkoutButton" onclick="checkout()" class="bannerButtons ttsButton" data-text="Check out">Check Out</button>
+    <button id="checkoutButton" style="margin-left: 2%;"onclick="checkout()" class="bannerButtons ttsButton" data-text="Check out">Check Out</button>
     <div id="paymentScreen"></div>
     
     <script src="customerCart.js"></script>

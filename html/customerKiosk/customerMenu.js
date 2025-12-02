@@ -80,10 +80,10 @@ function renderDrinks(drinks, menuRow) {
     itemDiv.innerHTML = `
       <img src="${drink.itemphoto}" alt="${drink.itemname}" class="menuItemImg">
       <h2 class="menuItemH2" data-translate>${drink.itemname}</h2>
-      <p class="menuItemP" data-translate>${drink.itemdescrip}</p>
+      <p class="menuItemP" style="font-size: 1.07rem;" data-translate>${drink.itemdescrip}</p>
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 50px";>
-        <h1 class="menuItemH1">$${Number(drink.itemprice).toFixed(2)}</h1>
-        <button class="menuItemButton" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.itemname}." data-translate>Customize</button>
+        <h1 class="menuItemH1" style="font-size: 2rem;">$${Number(drink.itemprice).toFixed(2)}</h1>
+        <button class="menuItemButton" style="font-size: 1rem;" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.itemname}." data-translate>Customize</button>
       </div>
     `;
     menuRow.appendChild(itemDiv);
@@ -489,9 +489,9 @@ async function getWeather() {
                         <i class="material-symbols-outlined" style="font-size:50px;" alt="${weatherMain}">${icon}</i>
                     </div>
                     <div class="weatherColumn">
-                        <p>${data.main.temp}°F</p> 
-                        <p>Feels like: ${data.main.feels_like}°F</p>
-                        <p>Wind: ${data.wind.speed} m/s</p>       
+                        <p style="font-size: 1rem;">${data.main.temp}°F</p> 
+                        <p style="font-size: 1rem;">Feels like: ${data.main.feels_like}°F</p>
+                        <p style="font-size: 1rem;">Wind: ${data.wind.speed} m/s</p>       
                     </div>
                   </div>
                 `;

@@ -14,7 +14,7 @@
 
 <body data-category="Slush">
   <a class="skipLink" href="#menuContainer">Skip to website content</a>
-  <div class = topPageBanner>
+  <header class = topPageBanner>
     <div class = logo>
       <img src = "https://cdn.vettedbiz.com/wp-content/uploads/2021/11/02114926/kung-fu-tea-logo.png" width = "75" height = "75" alt="Kung Fu Tea Logo">
     </div>
@@ -32,9 +32,9 @@
       <button id="languageToggle" class="languageToggleBtn" onclick="toggleLanguage(this)">Español</button>
       <a href="customerCart.html" class="bannerButtons ttsButton" data-text="Cart" data-translate>Cart</a>
     </div>
-  </div>
+  </header>
 
-  <div class = drinkCategoryPanel>
+  <nav class = drinkCategoryPanel>
     <ul>
       <li><a href = "coldBrews.html" class="ttsButton" data-text="La Colombe Cold Brews" data-translate>La Colombe Cold Brews</a></li>
       <li><a href = "milkTeas.html" class="ttsButton" data-text="Milk Teas" data-translate>Milk Teas</a></li>
@@ -48,7 +48,7 @@
       <li><a href = "coffees.html" class="ttsButton" data-text="Coffees" data-translate>Coffees</a></li>
       <li><a href = "yogurts.html" class="ttsButton" data-text="Yogurts" data-translate>Yogurts</a></li>
     </ul>
-  </div>
+  </nav>
 
   <div id="drinksInCartSidebar" class="drinksInCartSidebar">
         <h2 style="width: fit-content;">Cart</h2>
@@ -60,7 +60,7 @@
         <div class="toModifyDrinkInfo">
             <img id="itemImage">
             <h2 id="itemName"></h2>
-            <p id="itemDescription"></p>
+            <p style="font-size: 1.2rem;"id="itemDescription"></p>
         </div>
 
         <div class="modification">
@@ -75,34 +75,34 @@
         <div class="modification">
             <h3 data-translate>Sweetness:</h3>
             <div class="fourModificationChoices">
-                <button>0%</button>
-                <button>50%</button>
-                <button>75%</button>
-                <button>100%</button>
+                <button class="size-button">0%</button>
+                <button class="size-button">50%</button>
+                <button class="size-button">75%</button>
+                <button class="size-button">100%</button>
             </div>
         </div>
 
         <div class="modification">
             <h3 data-translate>Ice:</h3>
             <div class="fourModificationChoices">
-                <button>0%</button>
-                <button>50%</button>
-                <button>100%</button>
-                <button>120%</button>
+                <button class="size-button">0%</button>
+                <button class="size-button">50%</button>
+                <button class="size-button">100%</button>
+                <button class="size-button">120%</button>
             </div>
         </div>
 
         <div class="modification">
             <h3 data-translate>Toppings:</h3>
             <div class="twoModificationChoices" style="height: fit-content;">
-                <select name="topping1" id="hi">
+                <select name="topping1" id="hi" class="size-button">
                     <option value="" selected disabled hidden data-translate>Topping 1</option>
                     <option value="boba" data-translate>Boba</option>
                     <option value="crystalBoba" data-translate>Crystal Boba</option>
                     <option value="pudding" data-translate>Pudding</option>
                     <option value="grassJelly" data-translate>Grass Jelly</option>
                 </select>
-                <select name="topping2">
+                <select name="topping2" class="size-button">
                     <option value="" selected disabled hidden data-translate>Topping 2</option>
                     <option value="boba" data-translate>Boba</option>
                     <option value="crystalBoba" data-translate>Crystal Boba</option>
@@ -112,11 +112,11 @@
             </div>
         </div>
 
-        <h3 id="modifiedDrinkPrice"></h3>
+        <h3 style="font-size: 2rem;"id="modifiedDrinkPrice"></h3>
 
         <div id="confirmModificationsDiv">
-            <button onclick="closeModificationsPopup()">Cancel</button>
-            <button id="addItemToCart">Add to Cart</button>
+            <button style="font-size: 1rem;"onclick="closeModificationsPopup()">Cancel</button>
+            <button style="font-size: 1rem;"id="addItemToCart">Add to Cart</button>
         </div>
     </div>
 
