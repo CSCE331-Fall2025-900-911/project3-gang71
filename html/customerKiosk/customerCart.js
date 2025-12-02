@@ -161,7 +161,7 @@ window.addEventListener("DOMContentLoaded", () => {
     let items = JSON.parse(sessionStorage.getItem("cartItems")) || [];
 
     if (items.length === 0) {
-        cartDiv.innerHTML = "<p>Your cart is empty.</p>";
+        cartDiv.innerHTML = "<p data-translate>Your cart is empty.</p>";
         return;
     }
 
@@ -174,17 +174,17 @@ window.addEventListener("DOMContentLoaded", () => {
         let modsText = '';
         
         if (mods.size) {
-            modsText += `Size: ${mods.size}<br>`;
+            modsText += `<span data-translate>Size</span>: ${mods.size}<br>`;
         }
         if (mods.sweetness) {
-            modsText += `Sweetness: ${mods.sweetness}<br>`;
+            modsText += `<span data-translate>Sweetness</span>: ${mods.sweetness}<br>`;
         }
         if (mods.ice) {
-            modsText += `Ice: ${mods.ice}<br>`;
+            modsText += `<span data-translate>Ice</span>: ${mods.ice}<br>`;
         }
         if (mods.toppings && mods.toppings.length > 0) {
             const toppingNames = mods.toppings.map(t => t.name).join(", ");
-            modsText += `Toppings: ${toppingNames}`;
+            modsText += `<span data-translate>Toppings</span>: ${toppingNames}`;
         }
 
         let plainModsText = modsText.replace(/<br>/g, ", ").replace(/&nbsp;/g, " ").trim();
@@ -194,12 +194,12 @@ window.addEventListener("DOMContentLoaded", () => {
           <div class="cartItemDiv">
             <img src="${item.url}" alt="${item.name}" class="cartItemImg">
             <div class="cartItemInfoDiv">
-              <h3>${item.name}</h3>
-              <p>Price: $${Number(item.price).toFixed(2)}</p>
-              <p class="itemMods">${modsText || "No modifications"}</p>
+              <h3 data-translate>${item.name}</h3>
+              <p><span data-translate>Price</span>: $${Number(item.price).toFixed(2)}</p>
+              <p class="itemMods">${modsText || "<span data-translate>No modifications</span>"}</p>
             </div>
             
-            <span class="material-symbols-outlined removeBtn" data-index="${index}" data-text="Delete ${item.name} with ${plainModsText || "no modifications"}">delete</span>
+            <span class="material-symbols-outlined removeBtn" data-index="${index}" data-text="Delete ${item.name} with ${plainModsText || "no modifications"}" data-translate>delete</span>
           <div>
         `;
         console.log(item.url);
@@ -224,7 +224,13 @@ window.addEventListener("DOMContentLoaded", () => {
     preTaxAmount = calculateTotalPriceBeforeTip(subtotalAmount, taxAmount);
     price.textContent = "Total price: $" + preTaxAmount;
     price.style.marginLeft = "2%";
+    price.innerHTML = '<span data-translate>Total price</span>: $' + calculateTotalPrice();
     cartDiv.appendChild(price);
+    
+    // Re-translate cart after rendering
+    if (pageTranslator.currentLanguage === 'ES') {
+      setTimeout(() => pageTranslator.translatePage('ES'), 100);
+    }
 
     document.querySelectorAll(".removeBtn").forEach(btn => {
         btn.addEventListener("click", async e => {

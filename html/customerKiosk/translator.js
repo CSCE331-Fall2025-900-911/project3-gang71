@@ -159,16 +159,21 @@ window.pageTranslator = pageTranslator; // expose globally if other scripts call
 document.addEventListener('DOMContentLoaded', function () {
   const languageToggle = document.getElementById('languageToggle');
   if (languageToggle && pageTranslator.getCurrentLanguage() === 'ES') {
-    toggle.checked = true;
+    languageToggle.textContent = 'English';
+    languageToggle.classList.add('active');
   }
 });
 
-// Global function for checkbox onchange handler
-function toggleLanguage(checkbox) {
-  console.log('toggleLanguage called, checked:', checkbox.checked);
-  if (checkbox.checked) {
+// Global function for button click handler
+function toggleLanguage(button) {
+  console.log('toggleLanguage called');
+  if (pageTranslator.getCurrentLanguage() === 'EN') {
     pageTranslator.switchLanguage('es');
+    button.textContent = 'English';
+    button.classList.add('active');
   } else {
     pageTranslator.switchLanguage('en');
+    button.textContent = 'Español';
+    button.classList.remove('active');
   }
 }

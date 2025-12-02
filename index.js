@@ -221,7 +221,7 @@ app.get("/api/dailySales", async (req, res) => {
     const {startDate, endDate} = req.query;
     const result = await pool.query(
       `SELECT TO_CHAR("orderdate", 'YYYY-MM-DD') AS "productName",
-              COUNT("orderid") AS "quantitySol
+              COUNT("orderid") AS "quantitySold",
               SUM("orderprice" + "salestax" + COALESCE("tips", 0)) AS "totalRevenue"
       FROM "order"
       WHERE "orderdate" BETWEEN $1 AND $2
@@ -953,7 +953,42 @@ app.post("/api/translate", async (req, res) => {
       '50%': '50%',
       '75%': '75%',
       '100%': '100%',
-      '120%': '120%'
+      '120%': '120%',
+      'Customize': 'Personalizar',
+      'Small drink size selected.': 'Tamaño pequeño seleccionado.',
+      'Medium drink size selected. The extra cost is $0.50.': 'Tamaño mediano seleccionado. El costo adicional es $0.50.',
+      'Large drink size selected. The extra cost is $1.00.': 'Tamaño grande seleccionado. El costo adicional es $1.00.',
+      '0% sweetness selected': '0% dulzura seleccionada',
+      '50% sweetness selected': '50% dulzura seleccionada',
+      '75% sweetness selected': '75% dulzura seleccionada',
+      '100% sweetness selected': '100% dulzura seleccionada',
+      '0% ice selected': '0% hielo seleccionado',
+      '50% ice selected': '50% hielo seleccionado',
+      '100% ice selected': '100% hielo seleccionado',
+      '120% ice selected': '120% hielo seleccionado',
+      'TTS enabled': 'TTS habilitado',
+      'TTS disabled': 'TTS deshabilitado',
+      'Closing modifications popup': 'Cerrando ventana emergente de modificaciones',
+      'added to cart!': '¡añadido al carrito!',
+      'Your cart is empty.': 'Tu carrito está vacío.',
+      'Size': 'Tamaño',
+      'Price': 'Precio',
+      'No modifications': 'Sin modificaciones',
+      'Remove': 'Eliminar',
+      'Total price': 'Precio total',
+      'Back to ordering': 'Volver a hacer pedido',
+      'Log out': 'Cerrar sesión',
+      'Cup Size:': 'Tamaño de Taza:',
+      'Small': 'Pequeño',
+      'Medium (+$0.50)': 'Mediano (+$0.50)',
+      'Large (+$1.00)': 'Grande (+$1.00)',
+      'Topping 1': 'Cobertura 1',
+      'Topping 2': 'Cobertura 2',
+      'Boba': 'Boba',
+      'Crystal Boba': 'Boba de Cristal',
+      'Pudding': 'Pudín',
+      'Grass Jelly': 'Gelatina de Hierba',
+      'No Topping': 'Sin Cobertura'
     };
 
     const fallback = mockDict[originalKey] || originalKey;
@@ -1061,7 +1096,7 @@ app.get("/kitchen", requireLogin, (req, res) => {
 })
 
 app.use(requireLogin, express.static(path.join(__dirname, "html")));
-app.use(express.static(path.join(__dirname, "menuBoard")));
+app.use(express.static(path.join(__dirname, "html/menuBoard")));
 
 // start server
 app.listen(PORT, () => {

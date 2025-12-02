@@ -43,6 +43,7 @@ function populateToppingDropdowns() {
     noToppingOption.textContent = "No Topping";
     noToppingOption.dataset.price = "0";
     noToppingOption.dataset.name = "No Topping";
+    noToppingOption.setAttribute('data-translate', ''); //  data-translate attribute
     select.appendChild(noToppingOption);
   });
 
@@ -56,11 +57,17 @@ function populateToppingDropdowns() {
     option1.textContent = `${topping.itemname} (+$${Number(topping.itemprice).toFixed(2)})`;
     option1.dataset.price = topping.itemprice;
     option1.dataset.name = topping.itemname;
+    option1.setAttribute('data-translate', ''); //  data-translate attribute
     topping1Select.appendChild(option1);
 
     const option2 = option1.cloneNode(true);
     topping2Select.appendChild(option2);
   });
+  
+  // Re-translate toppings if already in Spanish mode
+  if (pageTranslator && pageTranslator.currentLanguage === 'ES') {
+    setTimeout(() => pageTranslator.translatePage('ES'), 50);
+  }
 }
 
 //-------------------- MENU + DRINK FUNCTIONS --------------------//

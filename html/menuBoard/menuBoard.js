@@ -34,4 +34,5 @@ document.addEventListener("DOMContentLoaded", () => {
     loadCategory("Milk Cap", ".itemsMilkCap");
     loadCategory("Coffee", ".itemsCoffee");
     loadCategory("Yogurt", ".itemsYogurt");
+    loadCategory("Topping", ".itemsToppings");
 });
