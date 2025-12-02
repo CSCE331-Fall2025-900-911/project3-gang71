@@ -13,9 +13,10 @@
 </head>
 
 <body data-category="Coffee">
+  <a class="skipLink" href="#menuContainer">Skip to website content</a>
   <div class = topPageBanner>
     <div class = logo>
-      <img src = "https://cdn.vettedbiz.com/wp-content/uploads/2021/11/02114926/kung-fu-tea-logo.png" width = "75" height = "75">
+      <img src = "https://cdn.vettedbiz.com/wp-content/uploads/2021/11/02114926/kung-fu-tea-logo.png" width = "75" height = "75" alt="Kung Fu Tea Logo">
     </div>
     <div class = customerName>
       <p id = "custName"></p>
@@ -23,7 +24,10 @@
     </div>
     <div class = bannerRight>
       <label>
-        <input type="checkbox" id="ttsToggle"/>Enable TTS
+        <div class=TTS>
+          <label for="ttsToggle" class="TTS">Enable TTS</label>
+          <input type="checkbox" class="box" id="ttsToggle">
+        </div>
       </label>
       <button id="languageToggle" class="languageToggleBtn" onclick="toggleLanguage(this)">Español</button>
       <a href="customerCart.html" class="bannerButtons ttsButton" data-text="Cart" data-translate>Cart</a>

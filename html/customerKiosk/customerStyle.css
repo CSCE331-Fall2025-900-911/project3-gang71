@@ -359,7 +359,7 @@ body {
     padding: .5rem 1rem;
     border-radius: 1rem;
     box-shadow: 0 4px 10px #f6bbd2;
-    font-size: .9rem;
+    font-size: 1rem;
 }
 .weatherRow {
     display: flex;
@@ -389,7 +389,7 @@ body {
     padding: .5rem 1rem;
     border-radius: 1rem;
     box-shadow: 0 4px 10px #f6bbd2;
-    font-size: .9rem;
+    font-size: 1rem;
     margin-left: 4%;
 }
 #drinkRecTitle {
@@ -466,28 +466,65 @@ body {
 }
 .removeBtn:hover {
     box-shadow:inset 0px 0px 0px 2px #f6bbd2; /* inner border */
-  
+}
 /* Language Toggle Button */
 .languageToggleBtn {
-    background-color: #f6f6f9;    /* button background */
-    color: black;
-    border: none;
-    padding: 10px 20px;
-    font-size: 14px;
-    border-radius: 13px;
-    cursor: pointer;
-    font-weight: 600;
+    display: inline-block;        /* lets padding work */
+    padding: 0.6rem;
+    margin-left: 15px;
+    margin-top: 0;
+    margin-bottom: 0;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    margin: 0 10px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    color: #363949;               /* text color */
+    background-color: #f6f6f9;    /* button background */
+    border-radius: 6px;
+    border-color: #f6f6f9;
+    text-decoration: none;        /* remove underline */
+    font-size: 1.5rem;
 }
 
 .languageToggleBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    background-color: black;
+    border-color: black;
+    color: white;
+    cursor: pointer;
 }
 
 .languageToggleBtn.active {
     background-color: black;    /* button background */
     color: white;
 }
+
+.TTS{
+    font-size: 1.5rem;
+}
+.box {
+    width: 28px;
+    height: 28px;
+}
+.ttsButton{
+    font-size: 1.5rem;
+}
+
+
+:focus {
+    outline: 3px solid #e24060;
+    outline-offset: 2px;
+}
+
+.skipLink {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #000;
+  color: #fff;
+  padding: 8px 16px;
+  z-index: 999;
+}
+
+.skipLink:focus {
+  top: 0;
+}
+
