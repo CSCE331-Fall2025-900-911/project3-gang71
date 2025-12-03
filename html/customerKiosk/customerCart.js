@@ -52,15 +52,15 @@ function showPaymentScreen(totalPrice) {
   checkoutButton.style.marginLeft = "1.212rem";
 
   document.getElementById("paymentScreen").innerHTML = `
-      <button class="ttsButton" data-text="Pay with card">Card</button>
-      <button class="ttsButton" data-text="Pay with cash">Cash</button>
+      <button class="ttsButton bannerButtons" data-text="Pay with card">Card</button>
+      <button class="ttsButton bannerButtons" data-text="Pay with cash">Cash</button>
       <input id="tipInputAmount" type="text" placeholder="Enter tip amount" class="ttsButton" data-text="Enter tip amount">
-      <button onclick="addTip()" class="ttsButton" data-text="Add tip">Add Tip</button>
+      <button onclick="addTip()" class="ttsButton bannerButtons" data-text="Add tip">Add Tip</button>
       <h2 id="totalPriceH2">Total price: $${totalPrice}</h2>
       <a href="customerCart.html" style="text-decoration: none; color: black;">
-          <button class="ttsButton" data-text="Back to cart">Back to cart</button>
+          <button class="ttsButton bannerButtons" data-text="Back to cart">Back to cart</button>
       </a>
-      <button onclick="showThankYouScreen()" class="ttsButton" data-text="Pay">Pay</button>
+      <button onclick="showThankYouScreen()" class="ttsButton bannerButtons" data-text="Pay">Pay</button>
   `;
 }
 
@@ -212,6 +212,7 @@ window.addEventListener("DOMContentLoaded", () => {
     subtotal.textContent = "Subtotal: $" + subtotalAmount;
     subtotal.style.marginLeft = "2%";
     subtotal.style.fontSize = "1.5rem";
+    subtotal.style.marginBottom = "0";
     cartDiv.appendChild(subtotal);
 
     const tax = document.createElement("h3");
@@ -219,6 +220,8 @@ window.addEventListener("DOMContentLoaded", () => {
     tax.textContent = "Tax: $" + taxAmount;
     tax.style.marginLeft = "2%";
     tax.style.fontSize = "1.5rem";
+    tax.style.marginTop = "1%";
+    tax.style.marginBottom = "0";
     cartDiv.appendChild(tax);
 
     const price = document.createElement("h2");
@@ -226,7 +229,9 @@ window.addEventListener("DOMContentLoaded", () => {
     preTaxAmount = calculateTotalPriceBeforeTip(subtotalAmount, taxAmount);
     price.textContent = "Total price: $" + preTaxAmount;
     price.style.marginLeft = "2%";
-    price.innerHTML = '<span data-translate>Total price</span>: $' + calculateTotalPrice();
+    price.style.marginTop = "1%";
+    price.style.fontSize= "1.8rem";
+    price.innerHTML = '<span data-translate>Total price</span>: $' + preTaxAmount;
     cartDiv.appendChild(price);
     
     // Re-translate cart after rendering

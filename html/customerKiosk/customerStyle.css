@@ -561,3 +561,16 @@ body {
   top: 0;
 }
 
+
+/* checkout page */
+#tipInputAmount {
+    margin-left: 2%;
+    border-radius: 6px;
+    height: 3rem;
+}
+#totalPriceH2 {
+    margin-top: 3%;
+    margin-left: 1%;
+    margin-bottom: 2%;
+    font-size: 1.8rem;
+}
