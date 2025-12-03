@@ -462,35 +462,39 @@ window.addEventListener('load', () => {
 
 // load employee name
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("custName").innerHTML = sessionStorage.getItem('currentCustomer');
+  // get elements
+  const ttsToggle = document.getElementById("ttsToggle");
+  const ttsButtonText = document.getElementById("ttsLabel");
 
-const ttsToggle = document.getElementById("ttsToggle");
   if (ttsToggle) {
-    ttsToggle.checked = ttsEnabled;
-    const ttsButtonText = document.getElementById("ttsLabel");
+    // make sure it's focusable
+    ttsToggle.tabIndex = 0;
 
-    if (ttsToggle.checked) {
-      ttsButtonText.textContent = "Disable TTS";
-    }
-    else {
-      ttsButtonText.textContent = "Enable TTS";
-    }
+    // handle Enter/Space key toggling
+    ttsToggle.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault(); // prevent scrolling for space
+        ttsToggle.checked = !ttsToggle.checked;
+        const event = new Event("change");
+        ttsToggle.dispatchEvent(event); // trigger existing change handler
+      }
+    });
 
+    // existing change handler
     ttsToggle.addEventListener("change", async (e) => {
       if (ttsToggle.checked) {
         ttsButtonText.textContent = "Disable TTS";
         await speak("TTS enabled");
-      }
-      else {
+      } else {
         ttsButtonText.textContent = "Enable TTS";
         await speak("TTS disabled");
       }
-
-      ttsEnabled = e.target.checked;
+      ttsEnabled = ttsToggle.checked;
       sessionStorage.setItem("ttsEnabled", JSON.stringify(ttsEnabled));
     });
   }
 });
+
 
 document.querySelectorAll(".ttsButton").forEach(button => {
   button.addEventListener("click", async (e) => {
@@ -729,3 +733,14 @@ function trapFocus(popup) {
   popup.addEventListener("keydown", handleTab);
   return () => popup.removeEventListener("keydown", handleTab);
 }
+
+const ttsButton = document.getElementById("ttsButton");
+const ttsToggle = document.getElementById("ttsToggle");
+
+ttsButton.addEventListener("click", async () => {
+  ttsToggle.checked = !ttsToggle.checked;
+  ttsButton.textContent = ttsToggle.checked ? "Disable TTS" : "Enable TTS";
+  ttsEnabled = ttsToggle.checked;
+  sessionStorage.setItem("ttsEnabled", JSON.stringify(ttsEnabled));
+  await speak(ttsToggle.checked ? "TTS enabled" : "TTS disabled");
+});
