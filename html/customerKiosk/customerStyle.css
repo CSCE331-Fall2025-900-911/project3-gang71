@@ -281,6 +281,13 @@ body {
     background-color: rgb(255, 255, 255);
 }
 
+.threeModificationChoices button.selected,
+.fourModificationChoices button.selected {
+    background-color: black;
+    color: white;
+    border-color: black;
+}
+
 #confirmModificationsDiv button:focus {
     background-color: #ffe9ec;
 }
