@@ -183,7 +183,7 @@ function openModificationsPopup(drink, existingModifications = null) {
   toppingSelects.forEach(select => {
     select.onchange = async () => {
       // store only currently selected toppings
-      currentModifications.toppings = Array.from(toppingSelects)
+      toppingsIds = Array.from(toppingSelects)
         .map(sel => sel.value)
         .filter(v => v);
 
