@@ -103,30 +103,52 @@ function renderDrinks(drinks, menuRow) {
   if (pageTranslator.currentLanguage === 'ES') {
     pageTranslator.translatePage('ES');
   }
+}
 
-//   // ensure that drinkCategoryPanel length goes all the way down the page
-//   const categories = document.querySelector('.drinkCategoryPanel');
-//   const menuContainer = document.getElementById('menuContainer');
+// ensure that drinkCategoryPanel length goes all the way down the page
+function adjustSidebarHeight() {
+  const categories = document.querySelector('.drinkCategoryPanel');
+  const menuRows = document.querySelectorAll('.menuRow');
+  const menuHeader = document.querySelector('.menuHeader');
+
+  if (!categories || !menuHeader || menuRows.length === 0) {
+    console.log('Elements not ready yet');
+    return;
+  }
+
+  // force a reflow to ensure accurate measurements
+  void categories.offsetHeight;
+
+  let totalHeight = menuHeader.offsetHeight; // start with header
   
-//   const currentHeight = categories.offsetHeight;
-//   const totalHeight = menuContainer.offsetHeight;
-//   const difference = totalHeight - currentHeight;
-//   categories.style.height = totalHeight + 'px';
+  // add room for rows
+  menuRows.forEach((row, i) => {
+    console.log(`Row ${i} height:`, row.offsetHeight);
+    totalHeight += row.offsetHeight;
+  });
 
-//   // if (currentHeight < totalHeight) {
-//     // const listItems = categories.querySelectorAll('li');
-//     // listItems.forEach(li => {
-//     //   li.style.paddingBottom = "0";
-//     // });
-//   // }
+  let extraRoom = 30;
+  totalHeight += extraRoom;
 
-
-//   // 130 px
-//   // menu header also
+  console.log('Total content height needed:', totalHeight);
   
-//   console.log('Total menu rows height:', totalHeight);
-//   console.log('differece', difference);
-// }
+  const difference = totalHeight - categories.offsetHeight;
+  if (difference > 0) {
+    const oldSpacer = categories.querySelector('.sidebar-spacer');
+    if (oldSpacer) oldSpacer.remove();
+    
+    const spacer = document.createElement('div');
+    spacer.className = 'sidebar-spacer';
+    spacer.style.height = difference + 'px';
+    categories.appendChild(spacer);
+    
+    console.log('Spacer added:', difference + 'px');
+  }
+}
+
+window.addEventListener('load', () => {
+  setTimeout(adjustSidebarHeight, 1000); // wait until everything is loaded
+});
 
 //----- shows the pop up that allows the customer to make modifications to their drink before adding to the cart
 function openModificationsPopup(drink, existingModifications = null) {
@@ -473,21 +495,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 });
-
-// window.addEventListener('load', () => {
-//   const categories = document.querySelector('.drinkCategoryPanel');
-//   const menuRows = document.querySelectorAll('.menuRow');
-  
-//   // Calculate total height of all menu rows
-//   let totalHeight = 0;
-//   menuRows.forEach(row => {
-//     totalHeight += row.offsetHeight;
-//   });
-  
-//   categories.style.minHeight = totalHeight + 'px';
-  
-//   console.log('Total menu rows height:', totalHeight);
-// });
 
 // load employee name
 document.addEventListener("DOMContentLoaded", () => {
