@@ -1008,7 +1008,22 @@ app.get('/api/namebyid', async (req, res) => {
     console.error("Item ID query failed: ", err);
     res.status(500).json({ error: "No item found with given ID" });
   }
-})
+});
+
+// get base drink info based on id
+app.get('/api/drinkbyid', async (req, res) => {
+  try {
+    const itemID = req.query.id;
+    const result = await pool.query(
+      `SELECT * FROM menu WHERE menuID = $1;`,
+      [itemID]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Item ID query failed: ", err);
+    res.status(500).json({ error: "No item found with given ID" });
+  }
+});
 
 // get all past orders for given customer
 app.get('/api/reorder', async (req, res) => {
