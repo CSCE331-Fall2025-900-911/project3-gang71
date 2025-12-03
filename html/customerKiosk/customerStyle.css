@@ -285,6 +285,14 @@ body {
     background-color: #ffe9ec;
 }
 
+.twoModificationChoices button:focus, 
+.threeModificationChoices button:focus, 
+.fourModificationChoices button:focus, 
+#confirmModificationsDiv button:focus {
+    background-color: white;
+}
+
+
 
 #modifiedDrinkPrice {
     width: fit-content;

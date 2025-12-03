@@ -234,10 +234,9 @@ async function closeModificationsPopup() {
     await speak("Closing modifications popup");
   }
 
-  if (modificationsPopupDiv.dataset.removeFocusTrap) {
-    const removeTrap = modificationsPopupDiv.dataset.removeFocusTrap;
-    removeTrap();
-    delete modificationsPopupDiv.dataset.removeFocusTrap;
+  if (modificationsPopupDiv._removeFocusTrap) {
+    modificationsPopupDiv._removeFocusTrap();
+    delete modificationsPopupDiv._removeFocusTrap;
   }
 
   modificationsPopupDiv.style.display = "none";
