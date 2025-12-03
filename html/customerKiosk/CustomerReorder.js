@@ -73,7 +73,7 @@ function populateToppingDropdowns() {
 //-------------------- MENU + DRINK FUNCTIONS --------------------//
 
 // shows the pop up that allows the customer to make modifications to their drink before adding to the cart
-function openModificationsPopup(drink) {
+function openModificationsPopup(drink, existingModifications = null) {
   currentDrink = drink;
   currentBasePrice = Number(drink.itemprice);
 
@@ -128,6 +128,22 @@ function openModificationsPopup(drink) {
   if (currentModifications.size === 'small' && smallBtn) smallBtn.classList.add("selected");
   else if (currentModifications.size === 'medium' && mediumBtn) mediumBtn.classList.add("selected");
   else if (currentModifications.size === 'large' && largeBtn) largeBtn.classList.add("selected");
+
+  // Set sweetness button
+  const sweetnessButtons = document.querySelectorAll('.modification:nth-of-type(3) .fourModificationChoices button');
+  sweetnessButtons.forEach(btn => {
+    if (btn.textContent.trim() === currentModifications.sweetness) {
+      btn.classList.add("selected");
+    }
+  });
+  
+  // Set ice button
+  const iceButtons = document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button');
+  iceButtons.forEach(btn => {
+    if (btn.textContent.trim() === currentModifications.ice) {
+      btn.classList.add("selected");
+    }
+  });
 
   // add event listeners for modifications to recalc order price 
   const sizeButtons = document.querySelectorAll(".size-button");

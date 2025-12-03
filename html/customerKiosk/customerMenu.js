@@ -162,6 +162,22 @@ function openModificationsPopup(drink, existingModifications = null) {
   else if (currentModifications.size === 'medium' && mediumBtn) mediumBtn.classList.add("selected");
   else if (currentModifications.size === 'large' && largeBtn) largeBtn.classList.add("selected");
 
+  // Set sweetness button
+  const sweetnessButtons = document.querySelectorAll('.modification:nth-of-type(3) .fourModificationChoices button');
+  sweetnessButtons.forEach(btn => {
+    if (btn.textContent.trim() === currentModifications.sweetness) {
+      btn.classList.add("selected");
+    }
+  });
+  
+  // Set ice button
+  const iceButtons = document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button');
+  iceButtons.forEach(btn => {
+    if (btn.textContent.trim() === currentModifications.ice) {
+      btn.classList.add("selected");
+    }
+  });
+
   // add event listeners for modifications to recalc order price 
   const sizeButtons = document.querySelectorAll(".size-button");
   sizeButtons.forEach(btn => {
