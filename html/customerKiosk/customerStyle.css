@@ -285,7 +285,7 @@ body {
 .fourModificationChoices button.selected {
     background-color: black;
     color: white;
-    border-color: black;
+    border: 1px solid white;
 }
 
 #confirmModificationsDiv button:focus {
@@ -567,11 +567,8 @@ body {
 
 .skipLink {
   position: absolute;
-  top: -40px;
   left: 0;
-  background: #000;
-  color: #fff;
-  padding: 8px 16px;
+  padding: 0px 0px;
   z-index: 999;
 }
 
@@ -591,4 +588,11 @@ body {
     margin-left: 1%;
     margin-bottom: 2%;
     font-size: 1.8rem;
+}
+
+.threeModificationChoices .size-button.selected,
+.fourModificationChoices button.selected {
+  background-color: black;
+  color: white;
+  border: 1px solid white;
 }
