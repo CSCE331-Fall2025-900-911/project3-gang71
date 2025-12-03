@@ -389,12 +389,22 @@ document.addEventListener("DOMContentLoaded", () => {
 const ttsToggle = document.getElementById("ttsToggle");
   if (ttsToggle) {
     ttsToggle.checked = ttsEnabled;
+    const ttsButtonText = document.getElementById("ttsLabel");
+
+    if (ttsToggle.checked) {
+      ttsButtonText.textContent = "Disable TTS";
+    }
+    else {
+      ttsButtonText.textContent = "Enable TTS";
+    }
 
     ttsToggle.addEventListener("change", async (e) => {
       if (ttsToggle.checked) {
+        ttsButtonText.textContent = "Disable TTS";
         await speak("TTS enabled");
       }
       else {
+        ttsButtonText.textContent = "Enable TTS";
         await speak("TTS disabled");
       }
 
