@@ -12,7 +12,7 @@
     <script src="translator.js"></script>
 </head>
 
-<body data-category="Slush">
+<body data-category="Classic">
   <a class="skipLink" href="#menuContainer">Skip to website content</a>
   <header class = topPageBanner>
     <div class = logo>
@@ -25,7 +25,7 @@
     <div class = bannerRight>
       <label>
         <div class=TTS>
-          <label for="ttsToggle" class="TTS" id="ttsLabel">Enable TTS</label>
+          <label for="ttsToggle" class="TTS">Enable TTS</label>
           <input type="checkbox" class="box" id="ttsToggle">
         </div>
       </label>
@@ -39,7 +39,7 @@
       <li><a href = "coldBrews.html" class="ttsButton" data-text="La Colombe Cold Brews" data-translate>La Colombe Cold Brews</a></li>
       <li><a href = "milkTeas.html" class="ttsButton" data-text="Milk Teas" data-translate>Milk Teas</a></li>
       <li><a href = "matcha.html" class="ttsButton" data-text="Matcha" data-translate>Matcha</a></li>
-      <li><a href = "slushes.html" style = "color: #EB0C43;" class="ttsButton" data-text="Slushes" data-translate>Slushes</a></li>
+      <li><a href = "slushes.html" class="ttsButton" data-text="Slushes" data-translate>Slushes</a></li>
       <li><a href = "classics.html" class="ttsButton" data-text="Classics" data-translate>Classics</a></li>
       <li><a href = "punches.html" class="ttsButton" data-text="Punches" data-translate>Punches</a></li>
       <li><a href = "milkStrikes.html" class="ttsButton" data-text="Milk Strikes" data-translate>Milk Strikes</a></li>
@@ -47,7 +47,7 @@
       <li><a href = "milkCaps.html" class="ttsButton" data-text="Milk Caps" data-translate>Milk Caps</a></li>
       <li><a href = "coffees.html" class="ttsButton" data-text="Coffees" data-translate>Coffees</a></li>
       <li><a href = "yogurts.html" class="ttsButton" data-text="Yogurts" data-translate>Yogurts</a></li>
-      <li><a href = "reorder.html" class="ttsButton" data-text="Reorder" data-translate>Reorder</a></li>
+      <li><a href = "reorder.html" style = "color: #EB0C43;" class="ttsButton" data-text="Reorder" data-translate>Reorder</a></li>
     </ul>
   </nav>
 
@@ -96,7 +96,7 @@
         <div class="modification">
             <h3 data-translate>Toppings:</h3>
             <div class="twoModificationChoices" style="height: fit-content;">
-                <select name="topping1" id="hi" class="size-button">
+                <select name="topping1" class="size-button">
                     <option value="" selected disabled hidden data-translate>Topping 1</option>
                     <option value="boba" data-translate>Boba</option>
                     <option value="crystalBoba" data-translate>Crystal Boba</option>
@@ -113,17 +113,17 @@
             </div>
         </div>
 
-        <h3 style="font-size: 2rem;"id="modifiedDrinkPrice"></h3>
+        <h3 style="font-size: 2rem;" id="modifiedDrinkPrice"></h3>
 
         <div id="confirmModificationsDiv">
-            <button style="font-size: 1rem;"onclick="closeModificationsPopup()">Cancel</button>
+            <button style="font-size: 1rem;" onclick="closeModificationsPopup()">Cancel</button>
             <button style="font-size: 1rem;"id="addItemToCart">Add to Cart</button>
         </div>
     </div>
 
   <div class = menu id="menuContainer">
     <div class="menuHeader">
-      <h1 data-translate>Slushes</h1>
+      <h1 data-translate>Reorder</h1>
       <div class="weatherAndRecs">
         <div class="weather">
           <div id="weather">Weather loading...</div>
@@ -134,14 +134,8 @@
       </div>
     </div>
 
-    <div class = menuRow></div>
-    <div class = menuRow></div>
-    <div class = menuRow></div>
-    <div class = menuRow></div>
-    <div class = menuRow></div>
-    <div class = menuRow></div>
-    <div class = menuRow></div>
+    <div class="menuRow" id="reorderDiv"></div>
   </div>
-  <script src="customerMenu.js"></script>
+  <script src="customerReorder.js"></script>
 </body>
 </html>

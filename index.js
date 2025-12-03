@@ -543,24 +543,7 @@ app.get("/api/clientid", async (req, res) =>{
   res.json(process.env.OAUTH_CLIENT_ID);
 });
 
-// retrieve email from oauth
-// app.get("/api/email", async (req, res) => {
-//   try {
-//     const accessToken = req.query.token;
-//     var emailReq = new XMLHttpRequest();
-//     emailReq.open('GET', 'https://www.googleapis.com/oauth2/v2/userinfo');
-//     emailReq.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-
-//     emailReq.onload = function() {
-//       res.json(emailReq.responseText);
-//     }
-
-//     emailReq.send();
-//   } catch(err) {
-//     console.log(err);
-//     console.log("Error acquiring OAuth email");
-//   }
-// });
+// retrive email used in oauth
 app.get("/api/email", async (req, res) => {
   try {
     const accessToken = req.query.token;
@@ -1010,6 +993,48 @@ app.get('/weather', async (req, res) => {
   const response = await fetch(url);
   const data = await response.json();
   res.json(data);
+});
+
+// get menu item by id
+app.get('/api/namebyid', async (req, res) => {
+  try {
+    const itemID = req.query.id;
+    const result = await pool.query(
+      `SELECT itemName FROM menu WHERE menuID = $1;`,
+      [itemID]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Item ID query failed: ", err);
+    res.status(500).json({ error: "No item found with given ID" });
+  }
+})
+
+// get all past orders for given customer
+app.get('/api/reorder', async (req, res) => {
+  try {
+    const custName = req.query.name;
+    const namesSeparated = custName.split(' ');
+    if(namesSeparated.length < 2) {
+      console.error("Error slicing customer name");
+      res.status(500).json({ error: "Reorder display failed" })
+    }
+
+    const result = await pool.query(
+      `SELECT m.itemName, d.menuID, o.orderDate, m.itemPhoto, d.cupSize, d.sugarLevel, d.iceAmount, d.topping1, d.topping2, d.totalDrinkPrice 
+        FROM drinks d JOIN "order" o ON d.orderID = o.orderID 
+          JOIN customer c ON c.customerID = o.customerID 
+          JOIN menu m ON d.menuID = m.menuID
+        WHERE c.customerID = (SELECT customerID FROM customer
+          WHERE firstName = $1 AND lastName = $2)
+        ORDER BY o.orderDate DESC;`,
+      [namesSeparated[0], namesSeparated[1]]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Reorder query failed: ", err);
+    res.status(500).json({ error: "Reorder failed" });
+  }
 });
 
 // api route to get kitchen order statuses
