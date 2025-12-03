@@ -529,6 +529,9 @@ body {
 .size-button{
     font-size: 1rem;
 }
+.buttonText {
+    font-size: 1rem;
+}
 .box { /* hide checkbox */
   position: absolute;
   visibility: hidden;
