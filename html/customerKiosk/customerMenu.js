@@ -103,7 +103,30 @@ function renderDrinks(drinks, menuRow) {
   if (pageTranslator.currentLanguage === 'ES') {
     pageTranslator.translatePage('ES');
   }
-}
+
+//   // ensure that drinkCategoryPanel length goes all the way down the page
+//   const categories = document.querySelector('.drinkCategoryPanel');
+//   const menuContainer = document.getElementById('menuContainer');
+  
+//   const currentHeight = categories.offsetHeight;
+//   const totalHeight = menuContainer.offsetHeight;
+//   const difference = totalHeight - currentHeight;
+//   categories.style.height = totalHeight + 'px';
+
+//   // if (currentHeight < totalHeight) {
+//     // const listItems = categories.querySelectorAll('li');
+//     // listItems.forEach(li => {
+//     //   li.style.paddingBottom = "0";
+//     // });
+//   // }
+
+
+//   // 130 px
+//   // menu header also
+  
+//   console.log('Total menu rows height:', totalHeight);
+//   console.log('differece', difference);
+// }
 
 //----- shows the pop up that allows the customer to make modifications to their drink before adding to the cart
 function openModificationsPopup(drink, existingModifications = null) {
@@ -451,15 +474,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-window.addEventListener('load', () => {
-  const categories = document.querySelector('.drinkCategoryPanel');
-  let currentHeight = categories.offsetHeight;
-  console.log(currentHeight);
-
-  // full height - current = paddingBottom
-  categories.style.paddingBottom = document.documentElement.scrollHeight + 'px';
-  console.log('Set padding to:', document.documentElement.scrollHeight);
-});
+// window.addEventListener('load', () => {
+//   const categories = document.querySelector('.drinkCategoryPanel');
+//   const menuRows = document.querySelectorAll('.menuRow');
+  
+//   // Calculate total height of all menu rows
+//   let totalHeight = 0;
+//   menuRows.forEach(row => {
+//     totalHeight += row.offsetHeight;
+//   });
+  
+//   categories.style.minHeight = totalHeight + 'px';
+  
+//   console.log('Total menu rows height:', totalHeight);
+// });
 
 // load employee name
 document.addEventListener("DOMContentLoaded", () => {

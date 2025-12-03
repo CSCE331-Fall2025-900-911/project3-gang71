@@ -53,10 +53,11 @@ body {
     position: absolute;
     display: flex;
     top: 10%;
-    height: 90%;
+    /* height: 90%; */
     width: 20%;
     background-color: black;
     color: white;
+    z-index: 0;
 }
 
 .drinkCategoryPanel ul {
@@ -69,6 +70,7 @@ body {
     align-content: center;
     text-align: center;
     height: 15%;
+    padding-bottom: 10%;
 
     font-family: 'Courier New', Courier, monospace;
     font-size: 22px;
@@ -101,7 +103,7 @@ body {
 
 .menuItem {
     margin: 10px;
-    width: 23%;
+    width: 20.5%;
     text-align: center;
     background-color: #ffe9ec;
     padding: 1rem;                 
@@ -148,7 +150,7 @@ body {
     flex: 0 0 auto;
     padding: 8px 16px;
     right: 5%;
-    width: 60%;
+    width: 55%;
     height: 20%;
     background-color: black;
     color: white;
