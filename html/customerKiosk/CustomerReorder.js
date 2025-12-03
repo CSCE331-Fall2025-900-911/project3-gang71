@@ -83,20 +83,31 @@ function openModificationsPopup(drink) {
   document.getElementById("largeDrinkButton").dataset.selected = "false";
   document.querySelectorAll(".threeModificationChoices button, .fourModificationChoices button").forEach(btn => btn.classList.remove("selected"));
   document.querySelectorAll("select").forEach(sel => sel.selectedIndex = 0);
-  // reset modification values in code
-  currentModifications = {
-    size: 'small',
-    sweetness: '100%',
-    ice: '100%',
-    toppings: []
-  };
+
+  // If editing existing item, load its modifications
+  if (existingModifications) {
+    currentModifications = {
+      size: existingModifications.size,
+      sweetness: existingModifications.sweetness,
+      ice: existingModifications.ice,
+      toppings: existingModifications.toppings ? [...existingModifications.toppings] : []
+    };
+  } else {
+    // reset modification values for new item
+    currentModifications = {
+      size: 'small',
+      sweetness: '100%',
+      ice: '100%',
+      toppings: []
+    };
+  }
 
   // put in drink info
   document.getElementById("itemImage").src = drink.itemphoto;
   document.getElementById("itemImage").textContent = drink.itemname;
   document.getElementById("itemName").textContent = drink.itemname;
   document.getElementById("itemDescription").textContent = drink.itemdescrip;
-  document.getElementById("modifiedDrinkPrice").textContent = `$${currentBasePrice.toFixed(2)}`;
+  document.getElementById("modifiedDrinkPrice").textContent = `Total: $${currentBasePrice.toFixed(2)}`;
 
   // add tts text for drink size
   document.getElementById("smallDrinkButton").classList.add("ttsButton");
@@ -108,6 +119,15 @@ function openModificationsPopup(drink) {
 
   // populate drop menus
   populateToppingDropdowns();
+
+  // Set size button based on current modifications
+  const smallBtn = document.getElementById("smallDrinkButton");
+  const mediumBtn = document.getElementById("mediumDrinkButton");
+  const largeBtn = document.getElementById("largeDrinkButton");
+  
+  if (currentModifications.size === 'small' && smallBtn) smallBtn.classList.add("selected");
+  else if (currentModifications.size === 'medium' && mediumBtn) mediumBtn.classList.add("selected");
+  else if (currentModifications.size === 'large' && largeBtn) largeBtn.classList.add("selected");
 
   // add event listeners for modifications to recalc order price 
   const sizeButtons = document.querySelectorAll(".size-button");
@@ -126,14 +146,36 @@ function openModificationsPopup(drink) {
     };
   });
 
-  // add topping listeners
   const toppingSelects = document.querySelectorAll('select[name="topping1"], select[name="topping2"]');
+  
+  // Set toppings AFTER dropdowns are populated
+  toppingSelects.forEach(sel => sel.selectedIndex = 0); // Reset first
+  
+  if (existingModifications && existingModifications.toppings && existingModifications.toppings.length > 0) {
+    existingModifications.toppings.forEach((topping, index) => {
+      if (toppingSelects[index]) {
+        // Set by menuid/id
+        toppingSelects[index].value = topping.id;
+      }
+    });
+  }
+
+  // Calculate and display price
+  calculateModifiedPrice();
+  
+  // add topping listeners
   toppingSelects.forEach(select => {
     select.onchange = async () => {
       // store only currently selected toppings
       currentModifications.toppings = Array.from(toppingSelects)
         .map(sel => sel.value)
         .filter(v => v);
+
+      currentModifications.toppings = toppingIds.map(toppingId => {
+        const topping = availableToppings.find(t => String(t.menuid) === String(toppingId));
+        return topping ? { id: toppingId, name: topping.itemname, price: topping.itemprice } : null;
+      }).filter(t => t !== null);
+
       calculateModifiedPrice();
 
       if (ttsEnabled) {
@@ -179,7 +221,15 @@ function openModificationsPopup(drink) {
   });
 
   // show popup
-  document.getElementById("modificationsPopup").style.display = "block";
+  //document.getElementById("modificationsPopup").style.display = "block";
+  const popup = document.getElementById("modificationsPopup");
+  popup.style.display = "block";
+
+  const firstFocusable = popup.querySelector(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  firstFocusable?.focus();
+  popup.dataset.removeFocusTrap = trapFocus(popup);
 }
 
 //----- closes popup and resets buttons 
@@ -213,13 +263,19 @@ function calculateModifiedPrice() {
   else if (currentModifications.size === "large") newPrice += 1.00;
 
   // add topping fees
-  currentModifications.toppings.forEach(toppingId => {
-    const topping = availableToppings.find(t => String(t.menuid) === String(toppingId));
-    if (topping) newPrice += parseFloat(topping.itemprice);
-  });
+  if (currentModifications.toppings && currentModifications.toppings.length > 0) {
+    currentModifications.toppings.forEach(topping => {
+      if (topping && topping.price) {
+        newPrice += parseFloat(topping.price);
+      }
+    });
+  }
 
   // display / overwrite this new price 
-  document.getElementById("modifiedDrinkPrice").textContent = `$${newPrice.toFixed(2)}`;
+  const priceElement = document.getElementById("modifiedDrinkPrice");
+  if (priceElement) {
+    priceElement.textContent = `$${newPrice.toFixed(2)}`;
+  }
   return newPrice;
 }
 
@@ -619,11 +675,21 @@ async function displayReorder(items) {
 
     const drinkSugar = await fetch(`/api/namebyid?id=${mods.sugar}`);
     const sugar = await drinkSugar.json();
-    modsText += `Sweetness: ${sugar[0].itemname.split(' ')[0]}<br>`;
+    let sugarAmount = "";
+    if(sugar[0].itemname.split(' ')[0] === "0%") { sugarAmount = "0%"; }
+    else if(sugar[0].itemname.split(' ')[0] === "30%" || sugar[0].itemname.split(' ')[0] === "50%") { sugarAmount = "50%"; }
+    else if(sugar[0].itemname.split(' ')[0] === "70%") { sugarAmount = "75%"; }
+    else { sugarAmount = "100%"; }
+    modsText += `Sweetness: ${sugarAmount}<br>`;
 
     const drinkIce = await fetch(`/api/namebyid?id=${mods.ice}`);
     const ice = await drinkIce.json();
-    modsText += `Ice: ${ice[0].itemname.split(' ')[0]}<br>`;
+    let iceAmount = "";
+    if(ice[0].itemname.split(' ')[0] === "No") { iceAmount = "0%"; }
+    else if(ice[0].itemname.split(' ')[0] === "Less") { iceAmount = "50%"; }
+    else if(ice[0].itemname.split(' ')[0] === "Regular") { iceAmount = "100%"; }
+    else { iceAmount = "120%"; }
+    modsText += `Ice: ${iceAmount}<br>`;
 
     if (mods.toppings && mods.toppings.length > 0) {
       const toppingNames = mods.toppings.map(t => t.name).join(", ");
@@ -653,7 +719,14 @@ async function displayReorder(items) {
     // event listeners
     const addDrinkToOrderButton = drinkDiv.querySelector(".menuItemButton");
     addDrinkToOrderButton.addEventListener("click", async e => {
-      openModificationsPopup(drink);
+      const res = await fetch(`/api/drinkbyid?id=${drink.menuid}`);
+      const baseDrink = await res.json();
+      openModificationsPopup(baseDrink[0], 
+        {size: cup[0].itemname.split(' ')[0].toLowerCase(),
+        sweetness: sugarAmount,
+        ice: iceAmount,
+        toppings: mods.toppings
+      });
 
       if (ttsEnabled) {
         const drinkNameText = e.currentTarget.dataset.text;
@@ -665,113 +738,4 @@ async function displayReorder(items) {
   if (pageTranslator.currentLanguage === 'ES') {
     pageTranslator.translatePage('ES');
   }
-}
-
-async function modifyExistingDrink(drink) {
-  currentDrink = drink;
-  currentBasePrice = Number(drink.price);
-
-  // reset modifications UI (size, sweetness, ice, toppings)
-  document.getElementById("smallDrinkButton").dataset.selected = "false";
-  document.getElementById("mediumDrinkButton").dataset.selected = "false";
-  document.getElementById("largeDrinkButton").dataset.selected = "false";
-  document.querySelectorAll(".threeModificationChoices button, .fourModificationChoices button").forEach(btn => btn.classList.remove("selected"));
-  document.querySelectorAll("select").forEach(sel => sel.selectedIndex = 0);
-  // reset modification values in code
-  currentModifications = {
-    size: 'small',
-    sweetness: '100%',
-    ice: '100%',
-    toppings: []
-  };
-
-  // put in drink info
-  document.getElementById("itemImage").src = drink.itemphoto;
-  document.getElementById("itemImage").textContent = drink.itemname;
-  document.getElementById("itemName").textContent = drink.itemname;
-  document.getElementById("itemDescription").textContent = drink.itemdescrip;
-  document.getElementById("modifiedDrinkPrice").textContent = `$${currentBasePrice.toFixed(2)}`;
-
-  // add tts text for drink size
-  document.getElementById("smallDrinkButton").classList.add("ttsButton");
-  document.getElementById("smallDrinkButton").dataset.text = "Small drink size selected.";
-  document.getElementById("mediumDrinkButton").classList.add("ttsButton");
-  document.getElementById("mediumDrinkButton").dataset.text = "Medium drink size selected. The extra cost is $0.50.";
-  document.getElementById("largeDrinkButton").classList.add("ttsButton");
-  document.getElementById("largeDrinkButton").dataset.text = "Large drink size selected. The extra cost is $1.00.";
-
-  // populate drop menus
-  populateToppingDropdowns();
-
-  // add event listeners for modifications to recalc order price 
-  const sizeButtons = document.querySelectorAll(".size-button");
-  sizeButtons.forEach(btn => {
-    btn.onclick = () => {
-      // clear selection visuals
-      sizeButtons.forEach(b => b.classList.remove("selected"));
-      btn.classList.add("selected");
-      currentModifications.size = btn.dataset.size;
-      calculateModifiedPrice();
-
-      if (ttsEnabled) {
-        const cupSizeText = btn.dataset.text;
-        speak(cupSizeText);
-      }
-    };
-  });
-
-  // add topping listeners
-  const toppingSelects = document.querySelectorAll('select[name="topping1"], select[name="topping2"]');
-  toppingSelects.forEach(select => {
-    select.onchange = async () => {
-      // store only currently selected toppings
-      currentModifications.toppings = Array.from(toppingSelects)
-        .map(sel => sel.value)
-        .filter(v => v);
-      calculateModifiedPrice();
-
-      if (ttsEnabled) {
-        const newValue = select.value; // only capture the new value
-        const topping = availableToppings.find(t => String(t.menuid) === String(newValue)); // get topping for TTS
-
-        if (topping) {
-          const toppingText = "Topping selected: " + topping.itemname + ". The extra cost is $" + topping.itemprice;
-          await speak(toppingText);
-        }
-      }
-    };
-  });
-
-  // add sweetness listeners
-  document.querySelectorAll('.modification:nth-of-type(3) .fourModificationChoices button').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('.modification:nth-of-type(3) .fourModificationChoices button')
-        .forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      currentModifications.sweetness = btn.textContent.trim();
-
-      if (ttsEnabled) {
-        const sweetnessText = btn.textContent.trim() + " sweetness selected";
-        speak(sweetnessText);
-      }
-    };
-  });
-
-  // add ice listeners 
-  document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button')
-        .forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      currentModifications.ice = btn.textContent.trim();
-
-      if (ttsEnabled) {
-        const iceText = btn.textContent.trim() + " ice selected";
-        speak(iceText);
-      }
-    };
-  });
-
-  // show popup
-  document.getElementById("modificationsPopup").style.display = "block";
 }
