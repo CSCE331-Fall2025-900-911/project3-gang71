@@ -417,6 +417,7 @@ document.getElementById("addItemToCart").addEventListener("click", async () => {
 
 //----- get menu items from database using API
 document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("custName").innerHTML = sessionStorage.getItem('currentCustomer');
   const menuRows = document.querySelectorAll(".menuRow");
   const category = document.body.dataset.category;
 
