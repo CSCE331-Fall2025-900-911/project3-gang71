@@ -722,10 +722,10 @@ async function displayReorder(items) {
     drinkDiv.innerHTML = `
     <img src="${drink.photo}" alt="${drink.name}" class="menuItemImg">
     <h2 class = "menuItemH2" data-translate>${drink.name}</h2>
-    <p class="menuItemP" style="font-size: 1.07rem;" data-translate>${modsText || "No modifications"}</p>
+    <p class="menuItemP" style="font-size: 1.07rem; margin-bottom: 25px" data-translate>${modsText || "No modifications"}</p>
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 50px";>
         <h1 class="menuItemH1" style="font-size: 2rem;">$${Number(drink.price).toFixed(2)}</h1>
-        <button class="menuItemButton" style="font-size: 1rem;" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.name} with ${plainModsText || "no modifications"}" data-translate>Customize</button>
+        <button class="menuItemButton" style="font-size: 1.1rem; margin-left: -30px;" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.name} with ${plainModsText || "no modifications"}" data-translate>Customize</button>
       </div>
     </div>
     `;
