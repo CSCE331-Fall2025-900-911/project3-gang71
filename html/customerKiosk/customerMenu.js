@@ -80,10 +80,10 @@ function renderDrinks(drinks, menuRow) {
     itemDiv.innerHTML = `
       <img src="${drink.itemphoto}" alt="${drink.itemname}" class="menuItemImg">
       <h2 class="menuItemH2" data-translate>${drink.itemname}</h2>
-      <p class="menuItemP" style="font-size: 1.07rem;" data-translate>${drink.itemdescrip}</p>
+      <p class="menuItemP" style="font-size: 1.07rem; margin-bottom: 25px" data-translate>${drink.itemdescrip}</p>
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 50px";>
         <h1 class="menuItemH1" style="font-size: 2rem;">$${Number(drink.itemprice).toFixed(2)}</h1>
-        <button class="menuItemButton" style="font-size: 1rem;" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.itemname}." data-translate>Customize</button>
+        <button class="menuItemButton" style="font-size: 1.1rem; margin-left: -30px;" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.itemname}." data-translate>Customize</button>
       </div>
     `;
     menuRow.appendChild(itemDiv);
@@ -129,7 +129,7 @@ function openModificationsPopup(drink) {
   document.getElementById("itemImage").textContent = drink.itemname;
   document.getElementById("itemName").textContent = drink.itemname;
   document.getElementById("itemDescription").textContent = drink.itemdescrip;
-  document.getElementById("modifiedDrinkPrice").textContent = `$${currentBasePrice.toFixed(2)}`;
+  document.getElementById("modifiedDrinkPrice").textContent = `Total: $${currentBasePrice.toFixed(2)}`;
 
   // add tts text for drink size
   document.getElementById("smallDrinkButton").classList.add("ttsButton");
@@ -212,7 +212,15 @@ function openModificationsPopup(drink) {
   });
 
   // show popup
-  document.getElementById("modificationsPopup").style.display = "block";
+  //document.getElementById("modificationsPopup").style.display = "block";
+  const popup = document.getElementById("modificationsPopup");
+  popup.style.display = "block";
+
+  const firstFocusable = popup.querySelector(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  firstFocusable?.focus();
+  popup.dataset.removeFocusTrap = trapFocus(popup);
 }
 
 //----- closes popup and resets buttons 
@@ -225,6 +233,13 @@ async function closeModificationsPopup() {
   if (ttsEnabled) {
     await speak("Closing modifications popup");
   }
+
+  if (modificationsPopupDiv.dataset.removeFocusTrap) {
+    const removeTrap = modificationsPopupDiv.dataset.removeFocusTrap;
+    removeTrap();
+    delete modificationsPopupDiv.dataset.removeFocusTrap;
+  }
+
   modificationsPopupDiv.style.display = "none";
 }
 
@@ -252,7 +267,7 @@ function calculateModifiedPrice() {
   });
 
   // display / overwrite this new price 
-  document.getElementById("modifiedDrinkPrice").textContent = `$${newPrice.toFixed(2)}`;
+  document.getElementById("modifiedDrinkPrice").textContent = `Total: $${newPrice.toFixed(2)}`;
   return newPrice;
 }
 
@@ -493,15 +508,15 @@ async function getWeather() {
 
 
     resultDiv.innerHTML = `
-                <span class="weatherLocation"> ${data.name} </span>
+                <span class="weatherLocation" style ="font-size: 1.25rem"> ${data.name} </span>
                 <div class = "weatherRow">
                     <div class="weatherColumn">
                         <i class="material-symbols-outlined" style="font-size:50px;" alt="${weatherMain}">${icon}</i>
                     </div>
                     <div class="weatherColumn">
-                        <p style="font-size: 1rem;">${data.main.temp}°F</p> 
-                        <p style="font-size: 1rem;">Feels like: ${data.main.feels_like}°F</p>
-                        <p style="font-size: 1rem;">Wind: ${data.wind.speed} m/s</p>       
+                        <p style="font-size: 1.07rem; margin-top: 10px;">${data.main.temp}°F</p> 
+                        <p style="font-size: 1.07rem;">Feels like: ${data.main.feels_like}°F</p>
+                        <p style="font-size: 1.07rem;">Wind: ${data.wind.speed} m/s</p>       
                     </div>
                   </div>
                 `;
@@ -615,9 +630,39 @@ async function getDrinkRec(weatherCategory) {
     drinkRecSectionElement.innerHTML = `
       <p id="drinkRecTitle">Based on the weather, we recommend:<p>
       <ul class="drinksList">
-        <li><p>${randomResult.drinks[0]} (${randomResult.categories[0]})</p></li>
-        <li><p>${randomResult.drinks[1]} (${randomResult.categories[1]})</p></li>
+        <li><p style="font-size: 1.07rem;">${randomResult.drinks[0]} (${randomResult.categories[0]})</p></li>
+        <li><p style="font-size: 1.07rem;">${randomResult.drinks[1]} (${randomResult.categories[1]})</p></li>
       </ul>
     `;
   }
+}
+
+
+function trapFocus(popup) {
+  const focusableElements = popup.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  const firstEl = focusableElements[0];
+  const lastEl = focusableElements[focusableElements.length - 1];
+
+  function handleTab(e) {
+    if (e.key === "Tab") {
+      if (e.shiftKey) {
+        if (document.activeElement === firstEl) {
+          e.preventDefault();
+          lastEl.focus();
+        }
+      } else {
+        if (document.activeElement === lastEl) {
+          e.preventDefault();
+          firstEl.focus();
+        }
+      }
+    }
+    if (e.key === "Escape") {
+      closeModificationsPopup();
+    }
+  }
+  popup.addEventListener("keydown", handleTab);
+  return () => popup.removeEventListener("keydown", handleTab);
 }

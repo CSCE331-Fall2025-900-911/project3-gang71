@@ -109,7 +109,6 @@ body {
     box-shadow: 0 4px 10px #f6bbd2;    
 }
 
-
 .menuItemImg {
     position: relative;
     width: 90%;
@@ -149,12 +148,14 @@ body {
     flex: 0 0 auto;
     padding: 8px 16px;
     right: 5%;
-    width: 40%;
-    height: 10%;
+    width: 60%;
+    height: 20%;
     background-color: black;
     color: white;
     position: relative;
     border-style: none;
+    border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace;
 }
 .menuItemButton:hover{
     cursor: pointer;
@@ -177,6 +178,7 @@ body {
     align-items: center;
     background-color: #ffe9ec;
     box-shadow: 0 4px 30px #855869; 
+    border-radius: 12px;  
     
     /* keep on top */
     z-index: 1000;
@@ -394,13 +396,13 @@ body {
     margin-left: 4%;
 }
 #drinkRecTitle {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     width: 75%;
     margin-top: 0;
     margin-bottom: 5px;
 }
 .drinksList {
-    margin-top: 0;
+    margin-top: -.7rem;
     padding-left: 1.5rem;
     display: inline-block;
     width: max-content;
