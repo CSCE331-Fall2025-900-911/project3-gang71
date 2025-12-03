@@ -169,11 +169,12 @@ body {
     position: fixed;
     left: 30%;
     top: 10%;    
+    padding-top: 1%;
     padding-left: 2%;
     width: 55%;
     height: fit-content;
     padding-bottom: 2%;
-    padding-top: 2%;
+    /* padding-top: 2%; */
     /* justify-content: center; */
     align-items: center;
     background-color: #ffe9ec;
@@ -240,11 +241,16 @@ body {
 }
 
 .twoModificationChoices {
-    width: 20%;
-
+    width: fit-content;
     display: grid;
     grid-template-columns: auto auto;
     gap: 5%;
+}
+
+.twoModificationChoices select {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .twoModificationChoices button {
@@ -303,11 +309,13 @@ body {
 
 #modifiedDrinkPrice {
     width: fit-content;
+    padding-top: 0;
+    margin-bottom: 1%;
 }
 
 #confirmModificationsDiv {
     float: right;
-    margin-right: 3%
+    margin-right: 3%;
 }
 
 

@@ -161,7 +161,9 @@ window.addEventListener("DOMContentLoaded", () => {
     let items = JSON.parse(sessionStorage.getItem("cartItems")) || [];
 
     if (items.length === 0) {
-        cartDiv.innerHTML = "<p data-translate>Your cart is empty.</p>";
+        cartDiv.innerHTML = "<p data-translate style='margin: 2% 0% 2% 2%; font-size:1.5rem;'>Your cart is empty.</p>";
+        const checkoutButton = document.getElementById("checkoutButton");
+        checkoutButton.style.display = "none";
         return;
     }
 
