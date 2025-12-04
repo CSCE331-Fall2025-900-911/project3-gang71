@@ -91,8 +91,35 @@ function renderOrders(orders) {
         if (order.items && order.items.length > 0) {
             for (let i = 0; i < order.items.length; i++) {
                 const item = order.items[i];
+
+                // Include customizations if they exist
+                let customizationsHTML = '';
+
+                if (item.size || item.sugar || item.ice || item.topping1 || item.topping2) {
+                    customizationsHTML = '<div class="item-customizations">';
+                    if (item.size) {
+                        customizationsHTML += '<div>Size: ' + item.size + '</div>';
+                    }
+                    if (item.sugar) {
+                        customizationsHTML += '<div>Sugar: ' + item.sugar + '</div>';
+                    }
+                    if (item.ice) {
+                        customizationsHTML += '<div>Ice: ' + item.ice + '</div>';
+                    }
+                    if (item.topping1) {
+                        customizationsHTML += '<div>Topping 1: ' + item.topping1 + '</div>';
+                    }
+                    if (item.topping2) {
+                        customizationsHTML += '<div>Topping 2: ' + item.topping2 + '</div>';
+                    }
+                    customizationsHTML += '</div>';
+                }
+
                 itemsHTML +=
-                    "<li>" + item.quantity + "x " + item.name + "</li>";
+                    "<li>" + 
+                        '<div class="item-name">' + item.quantity + "x " + item.name + "</div>" + 
+                        customizationsHTML +
+                    "</li>";
             }
         }
 
