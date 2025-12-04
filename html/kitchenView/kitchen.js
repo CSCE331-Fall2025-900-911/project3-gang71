@@ -110,8 +110,8 @@ function renderOrders(orders) {
         "</ul>" +
         '<div class="order-actions">' +
             '<button class="start" data-action="start">Start</button>' +
-            '<button class="done" data-action="done">Done</button>' +
-            '<button class="bump" data-action="bump">Bump</button>' +
+            '<button class="done" data-action="done">Ready</button>' +
+            '<button class="delivered" data-action="delivered">Delivered</button>' +
         "</div>"
 
         // touch friendly button handling
@@ -130,8 +130,8 @@ function renderOrders(orders) {
                         await updateStatus(order.orderid, "In Progress");
                     } else if (action === "done") {
                         await updateStatus(order.orderid, "Done");
-                    } else if (action === "bump") {
-                        await bumpOrder(order.orderid);
+                    } else if (action === "delivered") {
+                        await deliverOrder(order.orderid);
                     }
 
                     // Refresh orders after status update
@@ -156,7 +156,7 @@ async function updateStatus(orderId, status) {
         });
 }
 
-async function bumpOrder(orderId) {
+async function deliverOrder(orderId) {
     await fetch(API_BASE + "/api/kitchen/orders/" + orderId, {
         method: "DELETE"
     });
