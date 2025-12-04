@@ -1063,11 +1063,26 @@ app.get("/api/kitchen/orders", async (req, res) => {
         COALESCE(c.firstname || ' ' || c.lastname, ' ') AS customername,
         d.drinkid,
         d.quantity,
-        m.itemname
+        m.itemname,
+        d.cupsize,
+        d.sugarlevel,
+        d.iceamount,
+        d.topping1,
+        d.topping2,
+        sm.itemname AS sizename,
+        sgm.itemname AS sugarname,
+        im.itemname AS icename,
+        t1m.itemname AS topping1name,
+        t2m.itemname AS topping2name
       FROM "order" o
       JOIN drinks d ON o.orderid = d.orderid
       JOIN menu m ON d.menuid = m.menuid
       LEFT JOIN customer c ON o.customerid = c.customerid
+      LEFT JOIN menu sm ON d.cupsize = sm.menuid
+      LEFT JOIN menu sgm ON d.sugarlevel = sgm.menuid
+      LEFT JOIN menu im ON d.iceamount = im.menuid
+      LEFT JOIN menu t1m ON d.topping1 = t1m.menuid
+      LEFT JOIN menu t2m ON d.topping2 = t2m.menuid
       WHERE o.orderdate = CURRENT_DATE
       ORDER BY o.orderdate, o.ordertime, o.orderid, d.drinkid;
       `);
@@ -1095,6 +1110,11 @@ app.get("/api/kitchen/orders", async (req, res) => {
           drinkid: r.drinkid,
           name: r.itemname,
           quantity: r.quantity,
+          size: r.sizename,
+          sugar: r.sugarname,
+          ice: r.icename,
+          topping1: r.topping1name,
+          topping2: r.topping2name,
         });
       });
 

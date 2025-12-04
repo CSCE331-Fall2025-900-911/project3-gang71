@@ -162,6 +162,18 @@ body {
     border-bottom: none;
 }
 
+.item-name {
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+}
+
+.item-customizations {
+    font-size: 0.8rem;
+    color: var(--color-dark-variant);
+    padding-left: 1rem;
+    line-height: 1.4;
+}
+
 /* STATUS */
 .order-status {
   display: inline-block;
