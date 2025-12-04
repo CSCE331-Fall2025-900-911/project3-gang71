@@ -219,3 +219,42 @@ body{
     background: var(--color-info-light);
     cursor: pointer;
 }
+
+
+.phoneNumber1 {
+  display: block;
+  font-size: 1.5em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
+  position: absolute;
+  left: 5%;
+  top: 38%;
+}
+
+.username1 {
+  display: block;
+  font-size: 1.5em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
+  position: absolute;
+  left: 55%;
+  top: 33%;
+}
+.password1 {
+  display: block;
+  font-size: 1.5em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
+  position: absolute;
+  left: 55%;
+  top: 50%;
+}
