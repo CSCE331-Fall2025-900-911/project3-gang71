@@ -6,11 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kitchen View</title>
 
-    <!-- Manager layout + theme -->
+    <!-- Manager layout & theme -->
     <link rel="stylesheet" href="/manager/managerStyle.css">
     <!-- Kitchen-specific card styling -->
     <link rel="stylesheet" href="/kitchenView/kitchenStyle.css">
-
     <!-- Material icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
 </head>
@@ -70,16 +69,18 @@
 
             <header class="header">
                 <h2>Orders</h2>
-                <div id="clock"></div>
+                <div class="header-right">
+                    <div id="clock"></div>
+                    <button id="refreshButton">
+                        <span class="material-icons-sharp">refresh</span>
+                        Refresh Orders
+                    </button>
+                </div>
             </header>
 
             <main id="order-board">
                 <!-- Orders will be injected here by kitchen.js -->
             </main>
-
-            <footer class="footer">
-                <button id="refreshButton">Refresh Orders</button>
-            </footer>
         </main>
     </div>
 
