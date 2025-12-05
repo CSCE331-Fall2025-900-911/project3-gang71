@@ -10,7 +10,7 @@
     <script src="translator.js"></script>
 </head>
 <body>
-    <a class="skipLink" href="#menuContainer"></a>
+    <a class="skipLink" href="#menuContainer">Skip to menu</a>
     <header class = topPageBanner style="top: 0%">
         <div class = logo>
             <img src = "https://cdn.vettedbiz.com/wp-content/uploads/2021/11/02114926/kung-fu-tea-logo.png" width = "75" height = "75" alt="Kung Fu Tea Logo">
@@ -22,11 +22,11 @@
         <div class = bannerRight>
             <label>
                 <div class=TTS>
-          <button id="ttsButton" class="languageToggleBtn">Enable TTS</button>
+          <button id="ttsButton" class="languageToggleBtn" aria-label="Enable text to speech">Enable TTS</button>
           <input type="checkbox" id="ttsToggle" style="display:none;">
                 </div>
             </label>
-            <button id="languageToggle" class="languageToggleBtn" onclick="toggleLanguage(this)">Español</button>
+            <button id="languageToggle" class="languageToggleBtn" onclick="toggleLanguage(this)" aria-label="Change language to Spanish">Español</button>
             <a href="milkTeas.html" class="bannerButtons ttsButton" data-text="Back to ordering" data-translate>Back to Ordering</a>
         </div>
     </header>
