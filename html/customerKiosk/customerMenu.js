@@ -78,11 +78,11 @@ function renderDrinks(drinks, menuRow) {
     itemDiv.classList.add("menuItem");
 
     itemDiv.innerHTML = `
-      <img src="${drink.itemphoto}" alt="${drink.itemname}" class="menuItemImg">
+      <img src="${drink.itemphoto}" alt="Image of ${drink.itemname}" class="menuItemImg">
       <h2 class="menuItemH2" data-translate>${drink.itemname}</h2>
       <p class="menuItemP" style="font-size: 1.07rem; margin-bottom: 25px" data-translate>${drink.itemdescrip}</p>
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 50px";>
-        <h1 class="menuItemH1" style="font-size: 2rem;">$${Number(drink.itemprice).toFixed(2)}</h1>
+        <p class="menuItemH1" style="font-size: 2rem;">$${Number(drink.itemprice).toFixed(2)}</p>
         <button class="menuItemButton" style="font-size: 1.1rem; margin-left: -30px;" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.itemname}." data-translate>Customize</button>
       </div>
     `;
