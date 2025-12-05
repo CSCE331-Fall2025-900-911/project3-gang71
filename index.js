@@ -22,16 +22,16 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// // session middleware
-// app.use(session({
-//   secret: process.env.MIDDLEWARE_SECRET,
-//   resave: false,
-//   saveUninitialized: false,
-//   cookie: {
-//     secure: false, // set true if using HTTPS
-//     maxAge: 1000 * 60 * 60 * 8 // 8 hours
-//   }
-// }));
+// session middleware
+app.use(session({
+  secret: process.env.MIDDLEWARE_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // set true if using HTTPS
+    maxAge: 1000 * 60 * 60 * 8 // 8 hours
+  }
+}));
 
 // PostgreSQL connection
 const pool = new Pool({
@@ -620,8 +620,10 @@ app.get('/api/logout', (req, res) => {
       console.error(err);
       return res.status(500).send("Logout failed");
     }
-    res.clearCookie('connect.sid') // clears the cookie in browser
-    res.redirect('public/index.html');
+    // res.clearCookie('connect.sid') // clears the cookie in browser
+    // res.redirect('public/index.html');
+    res.clearCookie('connect.sid', { path: '/' });
+    res.redirect('/');
   });
 });
 
@@ -1173,7 +1175,7 @@ app.post("/api/kitchen/orders/:id/recall", (req, res) => {
 
 app.use("/manager", express.static(path.join(__dirname, "html", "manager")));
 app.use("/kitchenView", express.static(path.join(__dirname, "html", "kitchenView")));
-app.get("/kitchen", (res) => {
+app.get("/kitchen", (req, res) => {
   res.redirect("/kitchenView/kitchen.html");
 })
 
