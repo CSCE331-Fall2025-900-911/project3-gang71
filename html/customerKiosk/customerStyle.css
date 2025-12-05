@@ -583,8 +583,17 @@ body {
   z-index: 999;
 }
 
+.skipLink {
+  position: absolute;
+  top: -40px;   
+  left: 0;
+  padding: 8px 12px;
+  z-index: 999;
+  text-decoration: none;
+}
+
 .skipLink:focus {
-  top: 0;
+  top: -40px; 
 }
 
 
@@ -606,4 +615,10 @@ body {
   background-color: black;
   color: white;
   border: 1px solid white;
+}
+
+.drinkOptions{
+    font-size: 1.15rem;
+    padding-top: 46;
+    width: max-content;
 }
