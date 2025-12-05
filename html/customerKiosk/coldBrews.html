@@ -11,7 +11,7 @@
 
 <body data-category="La Colombe Cold Brew">
   <a class="skipLink" href="#menuContainer">Skip to menu</a>
-  <header class = topPageBanner>
+  <header class="topPageBanner" role="banner">
     <div class = logo>
       <img src = "https://cdn.vettedbiz.com/wp-content/uploads/2021/11/02114926/kung-fu-tea-logo.png" width = "75" height = "75" alt="Kung Fu Tea Logo">
     </div>
@@ -31,7 +31,7 @@
     </div>
   </header>
 
-  <nav class="drinkCategoryPanel" aria-label="Drink categories">
+  <nav class="drinkCategoryPanel" role="navigation" aria-label="Drink categories">
     <ul>
       <li><a href = "coldBrews.html" style = "color: #EB0C43;" class="ttsButton" data-text="La Colombe Cold Brews" data-translate>La Colombe Cold Brews</a></li>
       <li><a href = "milkTeas.html" class="ttsButton" data-text="Milk Teas" data-translate>Milk Teas</a></li>
@@ -104,14 +104,14 @@
         </div>
     </div>
 
-  <div class = menu  tabindex="-1">
+  <div class="menu" id="menuContainer" tabindex="-1">
     <div class="menuHeader">
       <h1 data-translate>La Colombe Cold Brews</h1>
       <div class="weatherAndRecs">
         <div class="weather">
           <div id="weather" aria-live="polite">Weather loading...</div>
         </div>
-        <div id="drinkRecSectionDiv">
+        <div id="drinkRecSectionDiv" role="region" aria-label="Drink recommendations">
           <p id="drinkRecSectionDiv" aria-live="polite">Drink recommendations loading...</p>
         </div>
       </div>
