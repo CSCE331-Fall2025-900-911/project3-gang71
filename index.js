@@ -236,6 +236,26 @@ app.get("/api/dailySales", async (req, res) => {
   }
 });
 
+// API route to get most sold item (all time)
+app.get("/api/mostSoldItem", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT m.itemname AS "itemname",
+              COUNT(d.drinkid) AS "quantitySold",
+              SUM(d.totaldrinkprice) AS "totalRevenue"
+      FROM drinks d
+      JOIN menu m ON d.menuid = m.menuid
+      GROUP BY m.itemname
+      ORDER BY COUNT(d.drinkid) DESC
+      LIMIT 1;`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
+
 // API route to get weekly sales
 app.get("/api/weeklySales", async (req, res) => {
   try {
