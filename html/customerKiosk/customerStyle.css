@@ -578,22 +578,23 @@ body {
 
 .skipLink {
   position: absolute;
-  left: 0;
-  padding: 0px 0px;
-  z-index: 999;
-}
-
-.skipLink {
-  position: absolute;
-  top: -40px;   
-  left: 0;
+  left: -999px;
+  top: -999px;
   padding: 8px 12px;
+  background-color: #fff;
+  color: #000;
   z-index: 999;
   text-decoration: none;
+  font-weight: bold;
+  border: 1px solid #000;
+  border-radius: 4px;
 }
 
 .skipLink:focus {
-  top: -40px; 
+  left: 10px;
+  top: 10px;
+  outline: 2px solid #e24060;
+  outline-offset: 2px;
 }
 
 
