@@ -18,9 +18,8 @@ class PageTranslator {
    * @param {string} targetLang - Target language code (e.g., 'ES' for Spanish)
    * @returns  Translated text
    */
-    async translate(text) {
+    async translate(text, targetLang = 'ES') {
         try {
-            const targetLang = 'ES'; // always Spanish
             const key = text.trim();
             if (this.translationCache[key] && this.translationCache[key][targetLang]) {
                 return this.translationCache[key][targetLang];
