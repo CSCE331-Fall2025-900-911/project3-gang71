@@ -3,6 +3,7 @@ const API_BASE = "";
 const board = document.getElementById("order-board");
 const refreshButton = document.getElementById("refreshButton");
 const clockELement = document.getElementById("clock");
+let lastDeliveredOrder = null; // track only the last delivered order
 
 // clock in header
 function startClock() {
@@ -158,6 +159,12 @@ function renderOrders(orders) {
                     } else if (action === "done") {
                         await updateStatus(order.orderid, "Done");
                     } else if (action === "delivered") {
+                        // track order before bumping
+                        lastDeliveredOrder = {
+                            orderid: order.orderid,
+                            customername: order.customername
+                        };
+
                         await deliverOrder(order.orderid);
                     }
 
@@ -189,6 +196,34 @@ async function deliverOrder(orderId) {
     });
 }
 
+async function recallLastOrder() {
+    if (!lastDeliveredOrder) {
+        alert("No recently delivered order to recall");
+        return;
+    }
+
+    const orderId = lastDeliveredOrder.orderid;
+    const customerName = lastDeliveredOrder.customername || "Order #" + orderId;
+
+    // confirm before recalling
+    if (!confirm("Recall " + customerName + "?")) {
+        return;
+    }
+
+    const response = await fetch(API_BASE + "/api/kitchen/orders/" + orderId + "/recall", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+    });
+
+    if (response.ok) {
+        lastDeliveredOrder = null; // clear after recall
+        await refresh();
+    } else {
+        const error = await response.json();
+        alert(error.error || "Failed to recall order");
+    }
+}
+
 async function refresh() {
     const orders = await fetchOrders();
     renderOrders(orders);
@@ -197,7 +232,14 @@ async function refresh() {
 document.addEventListener("DOMContentLoaded", function() {
     startClock();
     refresh();
+
     refreshButton.addEventListener("click", refresh);
+
+    // add recall button to header
+    const recallButton = document.getElementById("recallButton");
+    if (recallButton) {
+        recallButton.addEventListener("click", recallLastOrder);
+    }
 
     setInterval(refresh, 30000); // auto-refresh every 30 seconds
 });
