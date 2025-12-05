@@ -1148,6 +1148,20 @@ app.delete("/api/kitchen/orders/:id", (req, res) => {
   res.status(204).send();
 });
 
+// recall a bumped order (bring back to kitchen view)
+app.post("/api/kitchen/orders/:id/recall", (req, res) => {
+  const id = parseInt(req.params.id, 10);
+
+  if (!kitchenBumped.has(id)) {
+    return res.status(400).json({error: "Order was not Bumped"});
+  }
+
+  kitchenBumped.delete(id);
+  kitchenStatus.set(id, "New");
+
+  res.json({success: true, orderid: id});
+})
+
 // kitchen view
 app.use("/manager", requireLogin, express.static(path.join(__dirname, "html", "manager")));
 app.use("/kitchenView", requireLogin, express.static(path.join(__dirname, "html", "kitchenView")));
