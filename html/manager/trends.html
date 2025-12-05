@@ -66,9 +66,9 @@
             <div class="salesOptions">
                 <input type="date" id="endDate"/>
             </div>
-
-            <select class="salesOptions" id="reportTypeBox">
-                <option value="dailySales">Daily Sales</option>
+            <label for="trends">Select a report type: </label>
+            <select name ="trends" class="salesOptions" id="reportTypeBox">
+                <option value="dailySales">Daily Sales &darr;</option>
                 <option value="weeklySales">Weekly Sales</option>
                 <option value="monthlySales">Monthly Sales</option>
                 <option value="yearlySales">Yearly Sales</option>
@@ -77,7 +77,7 @@
                 <option value="employeePerformance">Employee Performance</option>
                 <option value="productUsageChart">Product Usage Chart</option>
             </select>
-            <button class="salesOptions" id="generateReportTypeButton">Generate Report Type</button>
+            <button class="salesOptions" id="generateReportTypeButton">Generate Report</button>
             <button class="salesOptions" id="downloadReportButton">Download Report</button>
     
             <!-- ----------------TABLE-------------------- -->
