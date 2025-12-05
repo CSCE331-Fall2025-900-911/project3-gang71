@@ -22,16 +22,16 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// session middleware
-app.use(session({
-  secret: process.env.MIDDLEWARE_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: false, // set true if using HTTPS
-    maxAge: 1000 * 60 * 60 * 8 // 8 hours
-  }
-}));
+// // session middleware
+// app.use(session({
+//   secret: process.env.MIDDLEWARE_SECRET,
+//   resave: false,
+//   saveUninitialized: false,
+//   cookie: {
+//     secure: false, // set true if using HTTPS
+//     maxAge: 1000 * 60 * 60 * 8 // 8 hours
+//   }
+// }));
 
 // PostgreSQL connection
 const pool = new Pool({
@@ -43,12 +43,12 @@ const pool = new Pool({
   // ssl: { rejectUnauthorized: false }, // needed for secure remote connections
 });
 
-function requireLogin(req, res, next) {
-  if (!req.session.user) {
-    return res.redirect('/index.html');
-  }
-  next();
-}
+// function requireLogin(req, res, next) {
+//   if (!req.session.user) {
+//     return res.redirect('/index.html');
+//   }
+//   next();
+// }
 
 app.use(express.static(path.join(__dirname, 'public'))); // serve login page
 
@@ -1149,13 +1149,21 @@ app.delete("/api/kitchen/orders/:id", (req, res) => {
 });
 
 // kitchen view
-app.use("/manager", requireLogin, express.static(path.join(__dirname, "html", "manager")));
-app.use("/kitchenView", requireLogin, express.static(path.join(__dirname, "html", "kitchenView")));
-app.get("/kitchen", requireLogin, (req, res) => {
+// app.use("/manager", requireLogin, express.static(path.join(__dirname, "html", "manager")));
+// app.use("/kitchenView", requireLogin, express.static(path.join(__dirname, "html", "kitchenView")));
+// app.get("/kitchen", requireLogin, (req, res) => {
+//   res.redirect("/kitchenView/kitchen.html");
+// })
+
+// app.use(requireLogin, express.static(path.join(__dirname, "html")));
+
+app.use("/manager", express.static(path.join(__dirname, "html", "manager")));
+app.use("/kitchenView", express.static(path.join(__dirname, "html", "kitchenView")));
+app.get("/kitchen", (res) => {
   res.redirect("/kitchenView/kitchen.html");
 })
 
-app.use(requireLogin, express.static(path.join(__dirname, "html")));
+app.use(express.static(path.join(__dirname, "html")));
 app.use(express.static(path.join(__dirname, "html/menuBoard")));
 
 // start server
