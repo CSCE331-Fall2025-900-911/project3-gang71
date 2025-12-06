@@ -526,6 +526,10 @@ body {
     background-color: black;    /* button background */
     color: white;
 }
+.selected {
+    background-color: black;
+    color: white;
+}
 
 .TTS{
     font-size: 1.5rem;
