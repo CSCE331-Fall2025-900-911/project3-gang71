@@ -78,7 +78,7 @@ function showPaymentScreen(totalPrice) {
 
 function showThankYouScreen() {
   // clear sessionStorage 
-  sessionStorage.remove("cartItems");
+  sessionStorage.removeItem("cartItems");
 
   document.getElementById("paymentScreen").innerHTML = "";
   document.getElementById("paymentScreen").innerHTML = "<h1>Your order is placed. Thank you for visiting!</h1>";
