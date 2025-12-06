@@ -661,7 +661,7 @@ app.get("/api/orders", async (req, res) => {
   }
 });
 
-// Place order endpoint
+// Place order endpoint for cashier view
 app.post('/api/orders/place', async (req, res) => {
   const { orderNumber, paymentMethod, subtotal, tax, total, items, timestamp } = req.body;
   
@@ -752,7 +752,147 @@ app.post('/api/orders/place', async (req, res) => {
         
         // Map ice amount to menuID
         let iceAmount = null;
-        const iceResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE $1 LIMIT 1", [`%${item.modifications.ice}%ice%`]);
+        let ice = null;
+        if(item.modifications.ice === "0%") { ice = "No"; }
+        else if(item.modifications.ice === "50%") { ice = "Less"; }
+        else if(item.modifications.ice === "100%") { ice = "Regular"; }
+        else { ice = "More"; }
+        const iceResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE $1 LIMIT 1", [`%${ice}%ice%`]);
+        iceAmount = iceResult.rows.length > 0 ? iceResult.rows[0].menuid : null;
+        
+        // Get topping menuIDs
+        const topping1 = item.modifications.toppings[0] ? parseInt(item.modifications.toppings[0].id) : null;
+        const topping2 = item.modifications.toppings[1] ? parseInt(item.modifications.toppings[1].id) : null;
+        
+        // Insert the drink
+        const drinkQuery = `
+          INSERT INTO drinks (drinkid, orderid, menuid, cupsize, sugarlevel, iceamount, topping1, topping2, totaldrinkprice)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `;
+        
+        await pool.query(drinkQuery, [
+          currentDrinkId,
+          orderNumber,
+          menuID,
+          cupSize,
+          sugarLevel,
+          iceAmount,
+          topping1,
+          topping2,
+          parseFloat(item.price)
+        ]);
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      orderId: orderNumber,
+      orderNumber: orderNumber 
+    });
+    
+  } catch (error) {
+    console.error('Error placing order:', error);
+    res.status(500).json({ error: 'Failed to place order', details: error.message });
+  }
+});
+
+// Place order endpoint for customer view
+app.post('/api/orders/placeOrder', async (req, res) => {
+  const { orderNumber, paymentMethod, subtotal, tax, tip, total, items, timestamp } = req.body;
+  
+  try {
+    // Get current date and time
+    const orderDateTime = new Date(timestamp);
+    const orderDate = orderDateTime.toISOString().split('T')[0]; // YYYY-MM-DD
+    const orderTime = orderDateTime.toTimeString().split(' ')[0]; // HH:MM:SS
+    
+    // Get the employeeID from session
+    // You'll need to modify your login to also store employeeID in the session
+    // For now, we'll query it based on the employee name in session
+    const customerName = req.session.user ? `${req.session.user.firstname} ${req.session.user.lastname}` : null;
+    
+    if (!customerName) {
+      return res.status(401).json({ error: 'Not logged in' });
+    }
+    
+    // Get employeeID from the employee table
+    const custResult = await pool.query(
+      'SELECT customerid FROM customer WHERE firstname = $1 AND lastname = $2',
+      [req.session.user.firstname, req.session.user.lastname]
+    );
+    
+    if (custResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+    
+    const customerID = custResult.rows[0].customerid;
+    
+    // Insert the order into the order table
+    const orderQuery = `
+      INSERT INTO "order" (orderid, orderprice, salestax, orderdate, ordertime, tips, customerid)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING orderid
+    `;
+    
+    await pool.query(orderQuery, [
+      parseInt(orderNumber),
+      parseFloat(total),
+      parseFloat(tax),
+      orderDate,
+      orderTime,
+      parseFloat(tip),
+      customerID
+    ]);
+    
+    // Now insert each drink into the drinks table
+    // Get the current max drinkID to generate new IDs
+    const maxDrinkIdResult = await pool.query('SELECT COALESCE(MAX(drinkid), 0) as maxid FROM drinks');
+    let currentDrinkId = maxDrinkIdResult.rows[0].maxid;
+    
+    for (const item of items) {
+      // For each quantity of the same drink
+      for (let i = 0; i < item.quantity; i++) {
+        currentDrinkId++;
+        
+        // Get the menuID for the drink by name
+        const menuIdResult = await pool.query(
+          'SELECT menuid FROM menu WHERE itemname = $1',
+          [item.name]
+        );
+        
+        if (menuIdResult.rows.length === 0) {
+          console.error(`Menu item not found: ${item.name}`);
+          continue;
+        }
+        
+        const menuID = menuIdResult.rows[0].menuid;
+        
+        // Map size to menuID (you may need to adjust these based on your actual menu table)
+        let cupSize = null;
+        if (item.modifications.size === 'small') {
+          const sizeResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE '%small%' LIMIT 1");
+          cupSize = sizeResult.rows.length > 0 ? sizeResult.rows[0].menuid : null;
+        } else if (item.modifications.size === 'medium') {
+          const sizeResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE '%medium%' LIMIT 1");
+          cupSize = sizeResult.rows.length > 0 ? sizeResult.rows[0].menuid : null;
+        } else if (item.modifications.size === 'large') {
+          const sizeResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE '%large%' LIMIT 1");
+          cupSize = sizeResult.rows.length > 0 ? sizeResult.rows[0].menuid : null;
+        }
+        
+        // Map sugar level to menuID
+        let sugarLevel = null;
+        const sugarResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE $1 LIMIT 1", [`%${item.modifications.sweetness}%sugar%`]);
+        sugarLevel = sugarResult.rows.length > 0 ? sugarResult.rows[0].menuid : null;
+        
+        // Map ice amount to menuID
+        let iceAmount = null;
+        let ice = null;
+        if(item.modifications.ice === "0%") { ice = "No"; }
+        else if(item.modifications.ice === "50%") { ice = "Less"; }
+        else if(item.modifications.ice === "100%") { ice = "Regular"; }
+        else { ice = "More"; }
+        const iceResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE $1 LIMIT 1", [`%${ice}%ice%`]);
         iceAmount = iceResult.rows.length > 0 ? iceResult.rows[0].menuid : null;
         
         // Get topping menuIDs

@@ -1,5 +1,6 @@
 let ttsEnabled = JSON.parse(sessionStorage.getItem("ttsEnabled") || "false"); // get tts setting from storage or use default setting
 let preTaxAmount = 0;
+let selectedPaymentMethod = null;
 
 async function checkout() {
   // clear page
@@ -60,13 +61,24 @@ function showPaymentScreen(totalPrice) {
       <a href="customerCart.html" style="text-decoration: none; color: black;">
           <button class="ttsButton bannerButtons" data-text="Back to cart">Back to cart</button>
       </a>
-      <button onclick="showThankYouScreen()" class="ttsButton bannerButtons" data-text="Pay">Pay</button>
+      <button onclick="handlePlaceOrder()" class="ttsButton bannerButtons" data-text="Pay">Pay</button>
   `;
+
+  document.getElementById("cardPaymentBtn").addEventListener("click", () => {
+    console.log("made it here");
+    selectedPaymentMethod = "card";
+    updatePaymentButtonStyles();
+  });
+
+  document.getElementById("cashPaymentBtn").addEventListener("click", () => {
+    selectedPaymentMethod = "cash";
+    updatePaymentButtonStyles();
+  });
 }
 
 function showThankYouScreen() {
   // clear sessionStorage 
-  sessionStorage.clear();
+  sessionStorage.remove("cartItems");
 
   document.getElementById("paymentScreen").innerHTML = "";
   document.getElementById("paymentScreen").innerHTML = "<h1>Your order is placed. Thank you for visiting!</h1>";
@@ -339,6 +351,109 @@ document.getElementById("paymentScreen").addEventListener("click", async (e) => 
     window.location.href = url;
   }
 });
+
+// Handle placing the order
+async function handlePlaceOrder() {
+  let cartItems = JSON.parse(sessionStorage.getItem("cartItems")) || [];
+  
+  // Check if cart is empty
+  if (cartItems.length === 0) {
+    alert("Your cart is empty! Please add items before placing an order.");
+    return;
+  }
+
+  // Check if payment method is selected
+  if (!selectedPaymentMethod) {
+    alert("Please select a payment method before placing the order.");
+    return;
+  }
+
+  try {
+    // Get current order number
+    let orderNumber = 0;
+    fetch('/api/orders')
+    .then((response) => response.json())
+    .then(async orders => {
+        orders.forEach(orderNum => {
+          orderNumber = orderNum.max + 1;
+        });
+        console.log(orderNumber);
+    //const currentOrderText = orderNumElement ? orderNumElement.textContent : "Order #1";
+    //const currentOrderNum = parseInt(currentOrderText.replace("Order #", "")) || 1;
+
+    // Calculate totals
+    const subtotal = calculateSubtotal();
+    //const taxRate = 0.0825;
+    const tax = calculateTax(subtotal);
+    const tipAmount = Number(document.getElementById("tipInputAmount").value);
+    if (isNaN(tipAmount) || tipAmount < 0) {
+      alert("Please enter a valid tip amount");
+      if (ttsEnabled) {
+        speak("Please enter a valid tip amount");
+      }
+      return;
+    }
+    const total = calculateTotalPriceWithTip(calculateTotalPriceBeforeTip(subtotal, tax), tipAmount);
+
+    cartItems.forEach(item => {
+      console.log(item.modifications);
+    });
+
+    // Prepare order data for database
+    const orderData = {
+      orderNumber: orderNumber,
+      paymentMethod: selectedPaymentMethod,
+      subtotal: subtotal,
+      tax: tax,
+      tip: tipAmount,
+      total: total,
+      items: cartItems.map(item => ({
+        name: item.name,
+        quantity: 1,
+        price: item.price,
+        modifications: item.modifications
+      })),
+      timestamp: new Date().toISOString()
+    };
+
+    // Send order to database
+    const response = await fetch('/api/orders/placeOrder', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to place order: ${response.status}`);
+    }
+
+    // Success!
+    //alert(`Thank you! Order #${currentOrderNum} placed successfully!\n\nPayment Method: ${selectedPaymentMethod.toUpperCase()}\nTotal: ${total.toFixed(2)}`);
+    showThankYouScreen();
+
+    // Clear the cart
+    sessionStorage.removeItem("cartItems");
+
+    // Reset payment buttons
+    selectedPaymentMethod = null;
+    //updatePaymentButtonStyles();
+  })
+
+  } catch (error) {
+    console.error("Error placing order:", error);
+    alert("Error placing order. Please try again.");
+  }
+}
+
+function updatePaymentButtonStyles() {
+    const cardBtn = document.getElementById("cardPaymentBtn");
+    const cashBtn = document.getElementById("cashPaymentBtn");
+
+    cardBtn.classList.toggle("selected", selectedPaymentMethod === "card");
+    cashBtn.classList.toggle("selected", selectedPaymentMethod === "cash");
+}
 
 // Handle logout
 function handleLogout() {
