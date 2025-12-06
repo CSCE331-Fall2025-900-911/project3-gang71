@@ -755,3 +755,12 @@ async function displayReorder(items) {
     pageTranslator.translatePage('ES');
   }
 }
+
+// Handle logout
+function handleLogout() {
+  // Clear session storage
+  sessionStorage.removeItem("currentEmployee");
+  sessionStorage.removeItem("cartItems");
+  // Redirect to logout endpoint which will clear server session
+  window.location.href = '/api/logout';
+}
