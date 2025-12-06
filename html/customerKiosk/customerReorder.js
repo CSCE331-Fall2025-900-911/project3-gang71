@@ -625,6 +625,7 @@ async function reorderDrinks() {
   .then((data) => {
     if (!data || data.length === 0) {
       displayReorder([]);
+      return;
     }
 
     let reorderItems = [];
