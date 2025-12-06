@@ -21,7 +21,7 @@
     </div>
     <div class = customerName>
       <p id = "custName" style="margin-left:20px"></p>
-      <a href = "/api/logout" class="bannerButtons ttsButton" data-text="Log out" data-translate>Logout</a>
+      <a href = "/api/logout" id ="logout" class="bannerButtons ttsButton" data-text="Log out" data-translate>Logout</a>
     </div>
     <div class = bannerRight>
       <label>
@@ -37,18 +37,18 @@
 
   <nav class="drinkCategoryPanel" role="navigation" aria-label="Drink categories">
     <ul>
-      <li><a href = "coldBrews.html" class="ttsButton" data-text="La Colombe Cold Brews" data-translate>La Colombe Cold Brews</a></li>
-      <li><a href = "milkTeas.html" class="ttsButton" data-text="Milk Teas" data-translate>Milk Teas</a></li>
-      <li><a href = "matcha.html" class="ttsButton" data-text="Matcha" data-translate>Matcha</a></li>
-      <li><a href = "slushes.html" class="ttsButton" data-text="Slushes" data-translate>Slushes</a></li>
-      <li><a href = "classics.html" class="ttsButton" data-text="Classics" data-translate>Classics</a></li>
-      <li><a href = "punches.html" class="ttsButton" data-text="Punches" data-translate>Punches</a></li>
-      <li><a href = "milkStrikes.html" class="ttsButton" data-text="Milk Strikes" data-translate>Milk Strikes</a></li>
-      <li><a href = "oatStrikes.html" class="ttsButton" data-text="Oat Strikes" data-translate>Oat Strikes</a></li>
-      <li><a href = "milkCaps.html" class="ttsButton" data-text="Milk Caps" data-translate>Milk Caps</a></li>
-      <li><a href = "coffees.html" class="ttsButton" data-text="Coffees" data-translate>Coffees</a></li>
-      <li><a href = "yogurts.html" class="ttsButton" data-text="Yogurts" data-translate>Yogurts</a></li>
-      <li><a href = "reorder.html" style = "color: #EB0C43;" class="ttsButton" data-text="Reorder" data-translate>Reorder</a></li>
+      <li><a href = "coldBrews.html#coldBrewHeading" class="ttsButton" data-text="La Colombe Cold Brews" data-translate>La Colombe Cold Brews</a></li>
+      <li><a href = "milkTeas.html#milkTeaHeading" class="ttsButton" data-text="Milk Teas" data-translate>Milk Teas</a></li>
+      <li><a href = "matcha.html#matchaHeading" class="ttsButton" data-text="Matcha" data-translate>Matcha</a></li>
+      <li><a href = "slushes.html#slushHeading" class="ttsButton" data-text="Slushes" data-translate>Slushes</a></li>
+      <li><a href = "classics.html#classicsHeading" class="categoryLink"  class="ttsButton" data-text="Classics" data-translate>Classics</a></li>
+      <li><a href = "punches.html#punchHeading" class="ttsButton" data-text="Punches" data-translate>Punches</a></li>
+      <li><a href = "milkStrikes.html#milkStrikeHeading" class="ttsButton" data-text="Milk Strikes" data-translate>Milk Strikes</a></li>
+      <li><a href = "oatStrikes.html#oatStrikeHeading" class="ttsButton" data-text="Oat Strikes" data-translate>Oat Strikes</a></li>
+      <li><a href = "milkCaps.html#milkCapHeading" class="ttsButton" data-text="Milk Caps" data-translate>Milk Caps</a></li>
+      <li><a href = "coffees.html#coffeeHeading" class="ttsButton" data-text="Coffees" data-translate>Coffees</a></li>
+      <li><a href = "yogurts.html#yogurtHeading" class="ttsButton" data-text="Yogurts" data-translate>Yogurts</a></li>
+      <li><a href = "reorder.html#reorderHeading" class="ttsButton" style = "color: #EB0C43;" data-text="Reorder" data-translate>Reorder</a></li>
     </ul>
   </nav>
 
@@ -116,7 +116,7 @@
 
   <main class="menu" id="menuContainer" tabindex="-1">
     <div class="menuHeader">
-      <h1 data-translate>Reorder</h1>
+      <h1 id="reorderHeading" data-translate>Reorder</h1>
       <div class="weatherAndRecs">
         <div class="weather">
           <div id="weather" aria-live="polite">Weather loading...</div>
@@ -128,6 +128,7 @@
     </div>
 
     <div class="menuRow" id="reorderDiv"></div>
+    <a href="#logout" id="endOfMenuRedirect" class="endNavReturn">Back to top (Logout)</a>
   </main>
   <script src="customerReorder.js"></script>
 </body>

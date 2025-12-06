@@ -565,6 +565,19 @@ document.addEventListener("DOMContentLoaded", () => {
   getWeather();
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll('.categoryLink').forEach(link => {
+    link.addEventListener('click', function (e) {
+      setTimeout(() => {
+        const logoutButton = document.getElementById("logoutButton"); 
+        if (logoutButton) logoutButton.focus();
+      }, 50);
+
+    });
+  });
+});
+
+
 
 async function getWeather() {
   const res = await fetch('/weather');
@@ -780,3 +793,5 @@ ttsButton.addEventListener("click", async () => {
   sessionStorage.setItem("ttsEnabled", JSON.stringify(ttsEnabled));
   await speak(ttsToggle.checked ? "TTS enabled" : "TTS disabled");
 });
+
+

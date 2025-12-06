@@ -623,3 +623,18 @@ body {
     padding-top: 46;
     width: max-content;
 }
+
+.endNavReturn {
+  position: absolute;
+  left: -999px;
+}
+.endNavReturn:focus {
+  left: 0;
+  padding: 8px;
+  background: #fff;
+  border: 2px solid black;
+  z-index: 999;
+  outline: 2px solid #e24060;
+  outline-offset: 2px;
+  color: black;
+}
