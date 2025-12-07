@@ -179,6 +179,7 @@ nav .sidebar a:hover span{
 main {
     display: grid;
     position: absolute;
+    pointer-events: auto;
     width: 96%;
     margin: 0 auto;
     column-gap: 1.8rem;
@@ -413,6 +414,13 @@ aside > button:hover {
 #modificationsPopup .popup-content {
     background: #ffe9ec !important;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+
+    /* user pain point fix - modification pop up getting cut off */
+    /* make box based on screen size proportion */
+    max-height: 80vh;   
+    /* enable automatic scroll bar */
+    overflow-y: auto;    
+    padding-right: 10px; 
 }
 
 .modification h3 {
@@ -496,6 +504,7 @@ aside > button:hover {
     display: flex;
     gap: 10px;
     margin: 0 5px;
+    z-index: 1000;
 }
 
 .payment-btn {
@@ -510,6 +519,7 @@ aside > button:hover {
     cursor: pointer;
     transition: all 0.3s ease;
     color: var(--color-dark);
+    z-index: 1000;
 }
 
 .payment-btn:hover {
