@@ -21,23 +21,34 @@ class PageTranslator {
     async translate(text, targetLang = 'ES') {
         try {
             const key = text.trim();
+            console.log('[translate] Input text:', key, 'Target lang:', targetLang);
+            
             if (this.translationCache[key] && this.translationCache[key][targetLang]) {
+                console.log('[translate] Found in cache:', this.translationCache[key][targetLang]);
                 return this.translationCache[key][targetLang];
             }
 
+            console.log('[translate] Not in cache, calling API...');
             const resp = await fetch('/api/translate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: key,  targetLang: targetLang, })
             });
 
+            console.log('[translate] API response status:', resp.status, resp.ok);
+            
             if (!resp.ok) {
                 console.error('Translate API response not ok', resp.status);
+                const errorData = await resp.json();
+                console.error('Error data:', errorData);
                 return text;
             }
 
             const data = await resp.json();
+            console.log('[translate] API response data:', data);
+            
             const translated = data.translatedText || text;
+            console.log('[translate] Translated result:', translated);
 
             // store in client cache keyed by original text
             if (!this.translationCache[key]) this.translationCache[key] = {};
@@ -48,6 +59,7 @@ class PageTranslator {
 
         } catch (err) {
             console.error('Translation fetch error:', err);
+            console.error('Error stack:', err.stack);
             return text;        // Return original text if translation fails
         }
     }
@@ -55,8 +67,11 @@ class PageTranslator {
     // Translate multiple texts in batch. translate() itself checks client cache so this
     // will call the server only for uncached originals.
     async translateBatch(texts, targetLang = 'es') {
+        console.log('[translateBatch] Starting batch with', texts.length, 'texts, target lang:', targetLang);
         const promises = texts.map(t => this.translate(t, targetLang));
-        return Promise.all(promises);
+        const results = await Promise.all(promises);
+        console.log('[translateBatch] Batch complete, results:', results);
+        return results;
     }
 
     // ensure element has an id we can use as a key
@@ -70,56 +85,72 @@ class PageTranslator {
     async translatePage(targetLang = 'ES') {
         try {
             // Normalize target language to uppercase
-            targetLang = targetLang.toUpperCase(); 
+            targetLang = targetLang.toUpperCase();
+            console.log('[translatePage] Starting translation to:', targetLang);
 
             const elements = Array.from(document.querySelectorAll('[data-translate]'));
-            if (elements.length === 0) return;
+            console.log('[translatePage] Found', elements.length, 'elements with data-translate');
+            
+            if (elements.length === 0) {
+                console.warn('[translatePage] No elements found with data-translate attribute');
+                return;
+            }
 
             // Collect original texts (one per element) but avoid duplicates
             const originals = [];
             const elToOriginal = [];
 
-            elements.forEach(el => {
+            elements.forEach((el, idx) => {
                 const id = this.ensureElementId(el);
                 if (!this.originalContent[id]) {
                     this.originalContent[id] = el.textContent.trim();
                 }
                 const original = this.originalContent[id];
+                console.log('[translatePage] Element', idx, 'id:', id, 'original text:', original);
                 elToOriginal.push({ el, original });
                 originals.push(original);
             });
 
             // Remove duplicates to minimize requests
             const uniqueOriginals = Array.from(new Set(originals));
+            console.log('[translatePage] Unique originals to translate:', uniqueOriginals.length);
 
             // Translate all unique originals (translate() will skip already-cached ones)
             const translatedMap = {};
+            console.log('[translatePage] Calling translateBatch...');
             const translations = await this.translateBatch(uniqueOriginals, targetLang);
+            console.log('[translatePage] Got translations back:', translations);
+            
             uniqueOriginals.forEach((orig, i) => {
                 translatedMap[orig] = translations[i] || orig;
             });
 
+            console.log('[translatePage] Translation map:', translatedMap);
+
             // Apply translations to elements and update client cache
-            elToOriginal.forEach(({ el, original }) => {
+            elToOriginal.forEach(({ el, original }, idx) => {
                 const translated = translatedMap[original] || original;
+                console.log('[translatePage] Setting element', idx, 'to:', translated);
                 el.textContent = translated;
             });
 
             this.currentLanguage = targetLang;
             localStorage.setItem('currentLanguage', targetLang);
+            console.log('[translatePage] Translation complete!');
         } catch (err) {
             console.error('translatePage error:', err);
+            console.error('Error stack:', err.stack);
         }
     }
 
     async switchLanguage(lang) {
         const normalizedLang = lang.toUpperCase();
-        console.log('switchLanguage called with:', lang, 'normalized to:', normalizedLang);
+        console.log('[switchLanguage] Called with:', lang, 'normalized to:', normalizedLang);
         if (normalizedLang === 'ES') {
-            console.log('Calling translatePage with ES');
+            console.log('[switchLanguage] Calling translatePage with ES');
             await this.translatePage('ES');
         } else {
-            console.log('Calling switchToEnglish');
+            console.log('[switchLanguage] Calling switchToEnglish');
             this.switchToEnglish();
         }
     }
@@ -165,12 +196,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Global function for button click handler
 function toggleLanguage(button) {
-  console.log('toggleLanguage called');
+  console.log('[toggleLanguage] Called, current language:', pageTranslator.getCurrentLanguage());
   if (pageTranslator.getCurrentLanguage() === 'EN') {
+    console.log('[toggleLanguage] Switching to Spanish');
     pageTranslator.switchLanguage('es');
     button.textContent = 'English';
     button.classList.add('active');
   } else {
+    console.log('[toggleLanguage] Switching to English');
     pageTranslator.switchLanguage('en');
     button.textContent = 'Español';
     button.classList.remove('active');
