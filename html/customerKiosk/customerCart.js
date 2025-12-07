@@ -2,7 +2,84 @@ let ttsEnabled = JSON.parse(sessionStorage.getItem("ttsEnabled") || "false"); //
 let preTaxAmount = 0;
 let selectedPaymentMethod = null;
 
+// Global variables to track customer points
+let customerPoints = 0;
+let pointsToEarn = 0;
+let orderCostInPoints = 0;
+
+// Function to fetch customer's current points from database
+async function fetchCustomerPoints() {
+  try {
+    const customerName = sessionStorage.getItem('currentCustomer');
+    if (!customerName) {
+      console.error("No customer name found in session");
+      return 0;
+    }
+    
+    const response = await fetch(`/api/customer/points?name=${encodeURIComponent(customerName)}`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch customer points");
+    }
+    
+    const data = await response.json();
+    customerPoints = data.points || 0;
+    return customerPoints;
+    
+  } catch (err) {
+    console.error("Error fetching customer points:", err);
+    return 0;
+  }
+}
+
+// Function to calculate points earned from order (5 point per $1 spent)
+function calculatePointsToEarn(totalAmount) {
+  pointsToEarn = Math.floor(totalAmount) * 25; // nvm 25 points per dollar, rounded down -- 5 is too low
+  return pointsToEarn;
+}
+
+// Function to convert dollars to points (100 points = $1)
+function convertDollarsToPoints(dollarAmount) {
+  return Math.ceil(dollarAmount * 100); // 100 points = $1
+}
+
+// Function to update customer points in database
+async function updateCustomerPoints(pointsChange, action) {
+  try {
+    const customerName = sessionStorage.getItem('currentCustomer');
+    if (!customerName) {
+      throw new Error("No customer name found");
+    }
+    
+    const response = await fetch('/api/customer/points', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        customerName: customerName,
+        pointsChange: pointsChange,
+        action: action // 'add' or 'subtract'
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to update points");
+    }
+    
+    const data = await response.json();
+    customerPoints = data.newPoints;
+    return data.newPoints;
+    
+  } catch (err) {
+    console.error("Error updating points:", err);
+    throw err;
+  }
+}
+
 async function checkout() {
+  // Fetch customer's current points before showing payment screen
+  await fetchCustomerPoints();
+  
   // clear page
   document.getElementById("cartPage").innerHTML = "";
 
@@ -52,17 +129,47 @@ function showPaymentScreen(totalPrice) {
   checkoutButton.style.display = "none";
   checkoutButton.style.marginLeft = "1.212rem";
 
+  // Calculate if customer has enough points to pay
+  const hasEnoughPoints = customerPoints >= orderCostInPoints;
+  const pointsButtonDisabled = hasEnoughPoints ? '' : 'disabled';
+  const pointsButtonStyle = hasEnoughPoints ? '' : 'opacity: 0.5; cursor: not-allowed;';
+
+  // Add points payment button and display current points balance
   document.getElementById("paymentScreen").innerHTML = `
-      <button class="ttsButton bannerButtons" data-text="Pay with card" id="cardPaymentBtn">Card</button>
-      <button class="ttsButton bannerButtons" data-text="Pay with cash" id="cashPaymentBtn">Cash</button>
-      <input id="tipInputAmount" type="text" placeholder="Enter tip amount" class="ttsButton" data-text="Enter tip amount">
-      <button onclick="addTip()" class="ttsButton bannerButtons" data-text="Add tip">Add Tip</button>
-      <h2 id="totalPriceH2">Total price: $${totalPrice}</h2>
-      <a href="customerCart.html" style="text-decoration: none; color: black;">
-          <button class="ttsButton bannerButtons" data-text="Back to cart">Back to cart</button>
-      </a>
-      <button onclick="handlePlaceOrder()" class="ttsButton bannerButtons" data-text="Pay">Pay</button>
+      <h2 style="margin-left: 2%; margin-top: 2%;">Select Payment Method:</h2>
+      <div style="display: flex; gap: 10px; margin-left: 2%; margin-top: 1%;">
+        <button class="ttsButton bannerButtons" data-text="Pay with card" id="cardPaymentBtn">Card</button>
+        <button class="ttsButton bannerButtons" data-text="Pay with cash" id="cashPaymentBtn">Cash</button>
+        <button class="ttsButton bannerButtons" data-text="Pay with points" id="pointsPaymentBtn" ${pointsButtonDisabled} style="${pointsButtonStyle}">
+          Points (${orderCostInPoints} pts)
+        </button>
+      </div>
+      
+      <h3 style="margin-left: 2%; margin-top: 2%; color: #4CAF50;">Your Points Balance: ${customerPoints} points</h3>
+      ${!hasEnoughPoints ? `<p style="margin-left: 2%; color: #ff6b6b;">You need ${orderCostInPoints - customerPoints} more points to pay with points.</p>` : ''}
+      
+      <div style="margin-left: 2%; margin-top: 2%;">
+        <input id="tipInputAmount" type="text" placeholder="Enter tip amount" class="ttsButton" data-text="Enter tip amount">
+        <button onclick="addTip()" class="ttsButton bannerButtons" data-text="Add tip">Add Tip</button>
+      </div>
+      
+      <h2 id="totalPriceH2" style="margin-left: 2%; margin-top: 2%;">Total price: $${totalPrice}</h2>
+      
+      <div style="margin-left: 2%; margin-top: 2%; display: flex; gap: 10px;">
+        <a href="customerCart.html" style="text-decoration: none; color: black;">
+            <button class="ttsButton bannerButtons" data-text="Back to cart">Back to cart</button>
+        </a>
+        <button onclick="handlePlaceOrder()" class="ttsButton bannerButtons" data-text="Pay">Pay</button>
+      </div>
   `;
+
+  // Add event listener for points payment button
+  document.getElementById("pointsPaymentBtn").addEventListener("click", () => {
+    if (customerPoints >= orderCostInPoints) {
+      selectedPaymentMethod = "points";
+      updatePaymentButtonStyles();
+    }
+  });
 
   document.getElementById("cardPaymentBtn").addEventListener("click", () => {
     console.log("made it here");
@@ -167,7 +274,10 @@ function speak(text) {
   });
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
+    // Fetch customer points when page loads
+    await fetchCustomerPoints();
+    
     const cartDiv = document.getElementById("cartPage");
 
     let items = JSON.parse(sessionStorage.getItem("cartItems")) || [];
@@ -247,6 +357,27 @@ window.addEventListener("DOMContentLoaded", () => {
     price.style.fontSize= "1.8rem";
     price.innerHTML = '<span data-translate>Total price</span>: $' + preTaxAmount;
     cartDiv.appendChild(price);
+    
+    // Display order cost in points (100 points = $1)
+    orderCostInPoints = convertDollarsToPoints(Number(preTaxAmount));
+    const pointsPrice = document.createElement("h3");
+    pointsPrice.textContent = `Order cost in points: ${orderCostInPoints} points`;
+    pointsPrice.style.marginLeft = "2%";
+    pointsPrice.style.marginTop = "1%";
+    pointsPrice.style.fontSize = "1.3rem";
+    pointsPrice.style.color = "#4CAF50";
+    cartDiv.appendChild(pointsPrice);
+    
+    // Display points that will be earned from this order (5 points per $1)
+    pointsToEarn = calculatePointsToEarn(Number(preTaxAmount));
+    const earnedPoints = document.createElement("h3");
+    earnedPoints.textContent = `Points you'll earn: ${pointsToEarn} points`;
+    earnedPoints.style.marginLeft = "2%";
+    earnedPoints.style.marginTop = "0.5%";
+    earnedPoints.style.fontSize = "1.3rem";
+    earnedPoints.style.color = "#2196F3";
+    earnedPoints.style.marginBottom = "1%";
+    cartDiv.appendChild(earnedPoints);
     
     // Re-translate cart after rendering
     if (pageTranslator.currentLanguage === 'ES') {
@@ -367,6 +498,14 @@ async function handlePlaceOrder() {
     alert("Please select a payment method before placing the order.");
     return;
   }
+  
+  // If paying with points, check if customer has enough
+  if (selectedPaymentMethod === "points") {
+    if (customerPoints < orderCostInPoints) {
+      alert(`You don't have enough points. You need ${orderCostInPoints} points but only have ${customerPoints}.`);
+      return;
+    }
+  }
 
   try {
     // Get current order number
@@ -378,12 +517,9 @@ async function handlePlaceOrder() {
           orderNumber = orderNum.max + 1;
         });
         console.log(orderNumber);
-    //const currentOrderText = orderNumElement ? orderNumElement.textContent : "Order #1";
-    //const currentOrderNum = parseInt(currentOrderText.replace("Order #", "")) || 1;
 
     // Calculate totals
     const subtotal = calculateSubtotal();
-    //const taxRate = 0.0825;
     const tax = calculateTax(subtotal);
     const tipAmount = Number(document.getElementById("tipInputAmount").value);
     if (isNaN(tipAmount) || tipAmount < 0) {
@@ -429,8 +565,18 @@ async function handlePlaceOrder() {
       throw new Error(`Failed to place order: ${response.status}`);
     }
 
+    // Handle points after successful order
+    if (selectedPaymentMethod === "points") {
+      // Subtract points used for payment
+      await updateCustomerPoints(orderCostInPoints, 'subtract');
+      alert(`Order placed successfully! You paid with ${orderCostInPoints} points.\nRemaining points: ${customerPoints}`);
+    } else {
+      // Add points earned from purchase (1 point per dollar spent)
+      await updateCustomerPoints(pointsToEarn, 'add');
+      alert(`Order placed successfully! You earned ${pointsToEarn} points.\nTotal points: ${customerPoints}`);
+    }
+
     // Success!
-    //alert(`Thank you! Order #${currentOrderNum} placed successfully!\n\nPayment Method: ${selectedPaymentMethod.toUpperCase()}\nTotal: ${total.toFixed(2)}`);
     showThankYouScreen();
 
     // Clear the cart
@@ -438,7 +584,6 @@ async function handlePlaceOrder() {
 
     // Reset payment buttons
     selectedPaymentMethod = null;
-    //updatePaymentButtonStyles();
   })
 
   } catch (error) {
@@ -450,9 +595,11 @@ async function handlePlaceOrder() {
 function updatePaymentButtonStyles() {
     const cardBtn = document.getElementById("cardPaymentBtn");
     const cashBtn = document.getElementById("cashPaymentBtn");
+    const pointsBtn = document.getElementById("pointsPaymentBtn");
 
     cardBtn.classList.toggle("selected", selectedPaymentMethod === "card");
     cashBtn.classList.toggle("selected", selectedPaymentMethod === "cash");
+    pointsBtn.classList.toggle("selected", selectedPaymentMethod === "points");
 }
 
 // Handle logout
