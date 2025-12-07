@@ -796,6 +796,98 @@ app.post('/api/orders/place', async (req, res) => {
   }
 });
 
+// LOYALTY POINTS APIs---
+// Get customer's current loyalty points
+app.get("/api/customer/points", async (req, res) => {
+  try {
+    const customerName = req.query.name;
+    
+    if (!customerName) {
+      return res.status(400).json({ error: "Customer name is required" });
+    }
+    
+    const namesSeparated = customerName.split(' ');
+    if (namesSeparated.length < 2) {
+      return res.status(400).json({ error: "Invalid customer name format" });
+    }
+    
+    const result = await pool.query(
+      `SELECT loyaltypoints, customerid FROM customer WHERE firstname = $1 AND lastname = $2`,
+      [namesSeparated[0], namesSeparated[1]]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Customer not found" });
+    }
+    
+    res.json({
+      points: result.rows[0].loyaltypoints,
+      customerId: result.rows[0].customerid
+    });
+    
+  } catch (err) {
+    console.error("Error fetching loyalty points:", err);
+    res.status(500).json({ error: "Failed to fetch loyalty points" });
+  }
+});
+
+// Update customer's loyalty points after order
+app.patch("/api/customer/points", async (req, res) => {
+  try {
+    const { customerName, pointsChange, action } = req.body;
+    
+    if (!customerName || pointsChange === undefined) {
+      return res.status(400).json({ error: "Customer name and points change are required" });
+    }
+    
+    const namesSeparated = customerName.split(' ');
+    if (namesSeparated.length < 2) {
+      return res.status(400).json({ error: "Invalid customer name format" });
+    }
+    
+    // Get current points
+    const currentPointsResult = await pool.query(
+      `SELECT loyaltypoints, customerid FROM customer WHERE firstname = $1 AND lastname = $2`,
+      [namesSeparated[0], namesSeparated[1]]
+    );
+    
+    if (currentPointsResult.rows.length === 0) {
+      return res.status(404).json({ error: "Customer not found" });
+    }
+    
+    const currentPoints = currentPointsResult.rows[0].loyaltypoints;
+    let newPoints;
+    
+    if (action === 'add') {
+      // Add points (earned from purchase)
+      newPoints = currentPoints + pointsChange;
+    } else if (action === 'subtract') {
+      // Subtract points (used for payment)
+      if (currentPoints < pointsChange) {
+        return res.status(400).json({ error: "Insufficient points" });
+      }
+      newPoints = currentPoints - pointsChange;
+    } else {
+      return res.status(400).json({ error: "Invalid action. Use 'add' or 'subtract'" });
+    }
+    
+    // Update points in database
+    const updateResult = await pool.query(
+      `UPDATE customer SET loyaltypoints = $1 WHERE firstname = $2 AND lastname = $3 RETURNING loyaltypoints`,
+      [newPoints, namesSeparated[0], namesSeparated[1]]
+    );
+    
+    res.json({
+      success: true,
+      newPoints: updateResult.rows[0].loyaltypoints
+    });
+    
+  } catch (err) {
+    console.error("Error updating loyalty points:", err);
+    res.status(500).json({ error: "Failed to update loyalty points" });
+  }
+});
+
 // Place order endpoint for customer view
 app.post('/api/orders/placeOrder', async (req, res) => {
   const { orderNumber, paymentMethod, subtotal, tax, tip, total, items, timestamp } = req.body;
