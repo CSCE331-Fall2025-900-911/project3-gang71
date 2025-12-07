@@ -260,7 +260,14 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
   }
 
   // show popup
-  popup.style.display = "block";
+  popup.style.display = "flex";
+  
+  // SCROLLBAR FIX: Reset scroll position to top when popup opens
+  // This ensures users start at the top of the popup content
+  const popupContent = popup.querySelector('.popup-content');
+  if (popupContent) {
+    popupContent.scrollTop = 0;
+  }
 }
 
 //----- closes popup and resets buttons 
