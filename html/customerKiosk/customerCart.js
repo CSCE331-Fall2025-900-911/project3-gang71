@@ -127,40 +127,36 @@ async function checkout() {
 function showPaymentScreen(totalPrice) {
   const checkoutButton = document.getElementById("checkoutButton");
   checkoutButton.style.display = "none";
-  checkoutButton.style.marginLeft = "1.212rem";
 
   // Calculate if customer has enough points to pay
   const hasEnoughPoints = customerPoints >= orderCostInPoints;
   const pointsButtonDisabled = hasEnoughPoints ? '' : 'disabled';
   const pointsButtonStyle = hasEnoughPoints ? '' : 'opacity: 0.5; cursor: not-allowed;';
 
-  // Add points payment button and display current points balance
+  // ALIGNMENT FIX: Removed the wrapper divs around buttons to align them with text
   document.getElementById("paymentScreen").innerHTML = `
       <h2 style="margin-left: 2%; margin-top: 2%;">Select Payment Method:</h2>
-      <div style="display: flex; gap: 10px; margin-left: 2%; margin-top: 1%;">
-        <button class="ttsButton bannerButtons" data-text="Pay with card" id="cardPaymentBtn">Card</button>
-        <button class="ttsButton bannerButtons" data-text="Pay with cash" id="cashPaymentBtn">Cash</button>
-        <button class="ttsButton bannerButtons" data-text="Pay with points" id="pointsPaymentBtn" ${pointsButtonDisabled} style="${pointsButtonStyle}">
-          Points (${orderCostInPoints} pts)
-        </button>
-      </div>
       
-      <h3 style="margin-left: 2%; margin-top: 2%; color: #4CAF50;">Your Points Balance: ${customerPoints} points</h3>
-      ${!hasEnoughPoints ? `<p style="margin-left: 2%; color: #ff6b6b;">You need ${orderCostInPoints - customerPoints} more points to pay with points.</p>` : ''}
+      <button class="ttsButton bannerButtons" data-text="Pay with card" id="cardPaymentBtn" style="margin-left: 2%; margin-top: 1%; margin-right: 10px;">Card</button>
+      <button class="ttsButton bannerButtons" data-text="Pay with cash" id="cashPaymentBtn" style="margin-right: 10px;">Cash</button>
+      <button class="ttsButton bannerButtons" data-text="Pay with points" id="pointsPaymentBtn" ${pointsButtonDisabled} style="${pointsButtonStyle}">
+        Points (${orderCostInPoints} pts)
+      </button>
+      
+      <h3 style="margin-left: 2%; margin-top: 2%; color: #de0aa9ff;">Your Points Balance: ${customerPoints} points</h3>
+      ${!hasEnoughPoints ? `<p style="margin-left: 2%; color: #f689dbff;">You need ${orderCostInPoints - customerPoints} more points to pay with points.</p>` : ''}
       
       <div style="margin-left: 2%; margin-top: 2%;">
         <input id="tipInputAmount" type="text" placeholder="Enter tip amount" class="ttsButton" data-text="Enter tip amount">
-        <button onclick="addTip()" class="ttsButton bannerButtons" data-text="Add tip">Add Tip</button>
+        <button onclick="addTip()" class="ttsButton bannerButtons" data-text="Add tip" style="margin-left: 10px;">Add Tip</button>
       </div>
       
       <h2 id="totalPriceH2" style="margin-left: 2%; margin-top: 2%;">Total price: $${totalPrice}</h2>
       
-      <div style="margin-left: 2%; margin-top: 2%; display: flex; gap: 10px;">
-        <a href="customerCart.html" style="text-decoration: none; color: black;">
-            <button class="ttsButton bannerButtons" data-text="Back to cart">Back to cart</button>
-        </a>
-        <button onclick="handlePlaceOrder()" class="ttsButton bannerButtons" data-text="Pay">Pay</button>
-      </div>
+      <button class="ttsButton bannerButtons" data-text="Pay" onclick="handlePlaceOrder()" style="margin-left: 2%; margin-top: 2%; margin-right: 10px;">Pay</button>
+      <a href="customerCart.html" style="text-decoration: none; color: black;">
+          <button class="ttsButton bannerButtons" data-text="Back to cart">Back to cart</button>
+      </a>
   `;
 
   // Add event listener for points payment button
@@ -188,7 +184,7 @@ function showThankYouScreen() {
   sessionStorage.removeItem("cartItems");
 
   document.getElementById("paymentScreen").innerHTML = "";
-  document.getElementById("paymentScreen").innerHTML = "<h1>Your order is placed. Thank you for visiting!</h1>";
+  document.getElementById("paymentScreen").innerHTML = "<h1 style='margin-left: 2%; margin-top: 2%;'>Your order is placed. Thank you for visiting!</h1>";
   if (ttsEnabled) {
     speak("Your order is placed. Thank you for visiting!");
   }
@@ -365,7 +361,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     pointsPrice.style.marginLeft = "2%";
     pointsPrice.style.marginTop = "1%";
     pointsPrice.style.fontSize = "1.3rem";
-    pointsPrice.style.color = "#4CAF50";
+    pointsPrice.style.color = "#000000ff";
     cartDiv.appendChild(pointsPrice);
     
     // Display points that will be earned from this order (5 points per $1)
@@ -375,7 +371,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     earnedPoints.style.marginLeft = "2%";
     earnedPoints.style.marginTop = "0.5%";
     earnedPoints.style.fontSize = "1.3rem";
-    earnedPoints.style.color = "#2196F3";
+    earnedPoints.style.color = "#ee81efff";
     earnedPoints.style.marginBottom = "1%";
     cartDiv.appendChild(earnedPoints);
     

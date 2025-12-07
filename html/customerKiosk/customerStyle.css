@@ -642,3 +642,8 @@ body {
   outline-offset: 2px;
   color: black;
 }
+
+#tipInputAmount {
+    margin-left: 0; /* Remove any inherited margin */
+    width: 200px; /* Give it a fixed width */
+}
