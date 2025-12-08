@@ -102,12 +102,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load the current order number
   fetch('/api/orders')
     .then((response) => response.json())
-    .then(orders => {
+    .then(data => {
       const orderNumber = document.getElementById("orderNumber");
-      if (orderNumber) {
-        orders.forEach(orderNum => {
-          orderNumber.innerHTML = "Order #" + (orderNum.max + 1);
-        });
+      if (orderNumber && data.length > 0) {
+        const nextOrder = data[0].max + 1;
+        orderNumber.innerHTML = "Order #" + nextOrder;
+        orderNumber.dataset.orderId = nextOrder;
       }
     })
     .catch(err => {
@@ -571,8 +571,9 @@ async function handlePlaceOrder() {
   try {
     // Get current order number
     const orderNumElement = document.getElementById("orderNumber");
-    const currentOrderText = orderNumElement ? orderNumElement.textContent : "Order #1";
-    const currentOrderNum = parseInt(currentOrderText.replace("Order #", "")) || 1;
+    const currentOrderNum = orderNumElement
+    ? parseInt(orderNumElement.dataset.orderId) // from dataset
+    : 1;
 
     // Calculate totals
     const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -582,7 +583,6 @@ async function handlePlaceOrder() {
 
     // Prepare order data for database
     const orderData = {
-      orderNumber: currentOrderNum,
       paymentMethod: selectedPaymentMethod,
       subtotal: subtotal.toFixed(2),
       tax: tax.toFixed(2),
