@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,13 +12,13 @@
     <!-- FOR LOW VISION ACCESSIBILITY FEATURES (TEXT ENLARGEMENT & CONTRAST) -->
     <link rel = "stylesheet" href = "accessibility.css">
     <script src = "accessibility.js"></script>
-
+    
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
     <script src="translator.js"></script>
 </head>
 
-<body data-category="Classic">
+<body data-category="Seasonal">
   <a class="skipLink" href="#menuContainer">Skip to menu</a>
   <header class="topPageBanner" role="banner">
     <div class = logo>
@@ -29,10 +30,10 @@
     </div>
     <div class = bannerRight>
       <label>
-      <div class="TTS">
-        <button id="ttsButton" class="languageToggleBtn" aria-label="Enable text to speech">Enable TTS</button>
-        <input type="checkbox" id="ttsToggle" style="display:none;">
-      </div>
+        <div class=TTS>
+          <button id="ttsButton" class="languageToggleBtn" aria-label="Enable text to speech">Enable TTS</button>
+          <input type="checkbox" id="ttsToggle" style="display:none;">
+        </div>
       </label>
       <button id="languageToggle" class="languageToggleBtn" onclick="toggleLanguage(this)" aria-label="Change language to Spanish">Español</button>
       <a href="customerCart.html" class="bannerButtons ttsButton" data-text="Cart" data-translate>Cart</a>
@@ -45,14 +46,14 @@
       <li><a href = "milkTeas.html#milkTeaHeading" class="ttsButton" data-text="Milk Teas" data-translate>Milk Teas</a></li>
       <li><a href = "matcha.html#matchaHeading" class="ttsButton" data-text="Matcha" data-translate>Matcha</a></li>
       <li><a href = "slushes.html#slushHeading" class="ttsButton" data-text="Slushes" data-translate>Slushes</a></li>
-      <li><a href = "classics.html#classicsHeading" class="categoryLink" style = "color: #EB0C43;" class="ttsButton" data-text="Classics" data-translate>Classics</a></li>
+      <li><a href = "classics.html#classicsHeading" class="categoryLink"  class="ttsButton" data-text="Classics" data-translate>Classics</a></li>
       <li><a href = "punches.html#punchHeading" class="ttsButton" data-text="Punches" data-translate>Punches</a></li>
       <li><a href = "milkStrikes.html#milkStrikeHeading" class="ttsButton" data-text="Milk Strikes" data-translate>Milk Strikes</a></li>
       <li><a href = "oatStrikes.html#oatStrikeHeading" class="ttsButton" data-text="Oat Strikes" data-translate>Oat Strikes</a></li>
       <li><a href = "milkCaps.html#milkCapHeading" class="ttsButton" data-text="Milk Caps" data-translate>Milk Caps</a></li>
       <li><a href = "coffees.html#coffeeHeading" class="ttsButton" data-text="Coffees" data-translate>Coffees</a></li>
       <li><a href = "yogurts.html#yogurtHeading" class="ttsButton" data-text="Yogurts" data-translate>Yogurts</a></li>
-      <li><a href = "seasonal.html#seasonalHeading" class="ttsButton" data-text="Seasonal" data-translate>Seasonal</a></li>
+      <li><a href = "seasonal.html#seasonalHeading" class="ttsButton" style = "color: #EB0C43;" data-text="Seasonal" data-translate>Seasonal</a></li>
       <li><a href = "reorder.html#reorderHeading" class="ttsButton" data-text="Reorder" data-translate>Reorder</a></li>
     </ul>
   </nav>
@@ -113,17 +114,17 @@
             </div>
         </div>
 
-        <h3 style="font-size: 2rem;" id="modifiedDrinkPrice"></h3>
+        <h3 style="font-size: 2rem;"id="modifiedDrinkPrice"></h3>
 
         <div id="confirmModificationsDiv">
-            <button style="font-size: 1rem;" onclick="closeModificationsPopup()">Cancel</button>
+            <button style="font-size: 1rem;"onclick="closeModificationsPopup()">Cancel</button>
             <button style="font-size: 1rem;"id="addItemToCart">Add to Cart</button>
         </div>
     </div>
 
   <main class="menu" id="menuContainer" tabindex="-1">
     <div class="menuHeader">
-      <h1 id="classicsHeading" data-translate>Classics</h1>
+      <h1 id="seasonalHeading" data-translate>Seasonal</h1>
       <div class="weatherAndRecs">
         <div class="weather">
           <div id="weather" aria-live="polite">Weather loading...</div>
@@ -142,7 +143,6 @@
     <div class = menuRow></div>
     <div class = menuRow></div>
     <a href="#logout" id="endOfMenuRedirect" class="endNavReturn">Back to top (Logout)</a>
-
   </main>
   <script src="customerMenu.js"></script>
 </body>
