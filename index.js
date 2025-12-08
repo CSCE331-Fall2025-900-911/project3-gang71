@@ -704,13 +704,12 @@ app.post('/api/orders/place', async (req, res) => {
     
     // Insert the order into the order table
     const orderQuery = `
-      INSERT INTO "order" (orderid, orderprice, salestax, orderdate, ordertime, tips, employeeid)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO "order" (orderprice, salestax, orderdate, ordertime, tips, employeeid)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING orderid
     `;
     
     await pool.query(orderQuery, [
-      orderNumber,
       parseFloat(total),
       parseFloat(tax),
       orderDate,
