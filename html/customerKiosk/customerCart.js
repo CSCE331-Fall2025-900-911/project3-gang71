@@ -472,7 +472,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
           // Play TTS if enabled
           if (ttsEnabled) {
-            const drinkMods = e.currentTarget.dataset.text;
+            const drinkMods = e.currentTarget.dataset.text.replace(/<[^>]*>/g, "");
             await speak(`Removing ${item.name} with ${drinkMods}`);
           }
 
@@ -572,6 +572,46 @@ function speak(text) {
     }
   });
 }
+
+// Connect visible TTS button to hidden checkbox
+document.addEventListener("DOMContentLoaded", () => {
+    const ttsButton = document.getElementById("ttsButton");
+    const ttsToggle = document.getElementById("ttsToggle");
+    const ttsLabel = document.getElementById("ttsLabel") || ttsButton; 
+    // If no separate label text, the button text is updated directly
+
+    if (ttsButton && ttsToggle) {
+
+        // Set initial state on page load
+        ttsToggle.checked = ttsEnabled;
+        ttsButton.textContent = ttsEnabled ? "Disable TTS" : "Enable TTS";
+
+        // FIX: Make clicking the button toggle the checkbox manually
+        ttsButton.addEventListener("click", async () => {
+            ttsToggle.checked = !ttsToggle.checked;  // manually flip the switch
+
+            ttsEnabled = ttsToggle.checked;          // update global
+            sessionStorage.setItem("ttsEnabled", JSON.stringify(ttsEnabled));
+
+            // Update visible text
+            ttsButton.textContent = ttsEnabled ? "Disable TTS" : "Enable TTS";
+
+            // Announce change
+            if (ttsEnabled) {
+                await speak("TTS enabled");
+            } else {
+                await speak("TTS disabled");
+            }
+        });
+    }
+
+    // Keep existing listener for internal logic (leave this as-is)
+    if (ttsToggle) {
+        ttsToggle.addEventListener("change", async (e) => {
+            // Do nothing here. The button controls the toggle now.
+        });
+    }
+});
 
 document.getElementById("paymentScreen").addEventListener("click", async (e) => {
   const button = e.target.closest(".ttsButton");
