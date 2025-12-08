@@ -71,6 +71,7 @@ async function generateDashboardGraph() {
 document.addEventListener("DOMContentLoaded", () => {
     getWeather();
     loadMostSoldItem();
+    document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
 });
 
 async function loadMostSoldItem() {
