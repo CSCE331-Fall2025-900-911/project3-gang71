@@ -1,0 +1,275 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* accessibility toolbar styles */
+#accessibility-toolbar {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 10000;
+}
+
+#a11y-toggle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #ec73a1;
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, background 0.2s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+#a11y-toggle:hover {
+    background: #d85a89;
+    transform: scale(1.1);
+}
+
+#a11y-toggle .material-icons-sharp {
+    font-size: 28px;
+}
+
+.a11y-panel {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    min-width: 300px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    border: 2px solid #ec73a1;
+    font-family: 'Poppins', sans-serif;
+}
+
+.a11y-panel h3 {
+    margin: 0 0 1rem 0;
+    color: #363949;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.a11y-section {
+    margin-bottom: 1.5rem;
+}
+
+.a11y-section label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #363949;
+    font-size: 0.9rem;
+}
+
+.a11y-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+    gap: 0.5rem;
+}
+
+.a11y-btn {
+    padding: 0.6rem 1rem;
+    border: 2px solid #dce1eb;
+    background: #fff;
+    color: #363949;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    font-family: 'Poppins', sans-serif;
+    white-space: normal;
+    text-align: center;
+
+}
+
+.a11y-btn:hover {
+    border-color: #ec73a1;
+    background: #fff5f8;
+}
+
+.a11y-btn.active {
+    background: #ec73a1;
+    color: #fff;
+    border-color: #ec73a1;
+}
+
+.a11y-close {
+    width: 100%;
+    padding: 0.7rem;
+    background: #f6f6f9;
+    border: 1px solid #dce1eb;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #363949;
+    margin-top: 1rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+}
+
+.a11y-close:hover {
+    background: #dce1eb;
+}
+
+/* high contrast mode */
+body.high-contrast {
+    background: #000 !important;
+    color: #fff !important;
+}
+
+/* text & border colors */
+body.high-contrast * {
+    border-color: #fff !important;
+}
+
+body.high-contrast,
+body.high-contrast p,
+body.high-contrast span,
+body.high-contrast li,
+body.high-contrast h1,
+body.high-contrast h2,
+body.high-contrast h3,
+body.high-contrast h4,
+body.high-contrast h5,
+body.high-contrast h6 {
+    color: #fff !important;
+}
+
+/* links */
+body.high-contrast a {
+    color: #fff !important;
+    text-decoration: underline !important;
+}
+
+body.high-contrast button {
+    background: #000 !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+    font-weight: bold !important;
+}
+
+body.high-contrast .topPageBanner {
+    background: #000 !important;
+    border-bottom: 2px solid #fff !important;
+}
+
+body.high-contrast .drinkCategoryPanel {
+    background: #000 !important;
+    color: #fff !important;
+    border-right: 2px solid #fff !important;
+}
+
+body.high-contrast .menuItem {
+    background: #111 !important;
+    color: #fff !important;
+    border-radius: 16px !important;
+    border: 2px solid #fff !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.8) !important;
+}
+
+body.high-contrast .modificationsPopup,
+body.high-contrast .cartItemDiv {
+    background: #000 !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+    box-shadow: none !important;
+}
+
+body.high-contrast .bannerButtons,
+body.high-contrast .languageToggleBtn {
+    display: inline-block;
+    background: #000 !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+    border-radius: 8px !important;
+    padding: 0.4rem 0.9rem !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.15) !important;
+    cursor: pointer;
+}
+
+body.high-contrast .bannerButtons:hover,
+body.high-contrast .languageToggleBtn:hover {
+    background: #111 !important;
+}
+
+body.high-contrast .weather,
+body.high-contrast #drinkRecSectionDiv {
+    background: #000 !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+    box-shadow: none !important;
+}
+
+body.high-contrast .a11y-panel {
+    background: #111 !important;
+    border-color: #fff !important;
+}
+
+body.high-contrast .ally-btn {
+    background: #000 !important;
+    border-color: #fff !important;
+}
+
+body.high-contrast .a11y-btn.active {
+    background: #fff !important;
+    color: #000 !important;
+}
+
+body.high-contrast .input,
+body.high-contrast .textarea,
+body.high-contrast select {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #ec73a1 !important;
+}
+
+body.high-contrast #modificationsPopup button.selected {
+    background: #ec73a1 !important;
+    color: #000 !important;
+    border-color: #ec73a1 !important;
+}
+
+body.high-contrast .removeBtn {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border-radius: 50% !important;
+    padding: 10px !important;
+    border: 2px solid #ffffff !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+body.high-contrast .modificationsPopup button,
+body.high-contrast #cartPage button {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7) !important;
+}
+
+body.high-contrast .a11y-panel {
+    background: #111111 !important;
+    border-color: #ffffff !important;
+}
+
+body.high-contrast .a11y-panel h3,
+body.high-contrast .a11y-panel .a11y-section label {
+    color: #ffffff !important;
+}
+
+/* responsive adjustments */
+@media (max-width: 768px) {
+    #accessibility-toolbar {
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .a11y-panel {
+        right: -10px;
+        min-width: 280px;
+    }
+}
