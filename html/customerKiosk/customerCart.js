@@ -1,4 +1,4 @@
-let ttsEnabled = JSON.parse(sessionStorage.getItem("ttsEnabled") || "false"); // get tts setting from storage or use default setting
+let ttsEnabled = JSON.parse(sessionStorage.getItem("ttsEnabled") || "false");
 let preTaxAmount = 0;
 let selectedPaymentMethod = null;
 
@@ -6,6 +6,530 @@ let selectedPaymentMethod = null;
 let customerPoints = 0;
 let pointsToEarn = 0;
 let orderCostInPoints = 0;
+
+// Variables for drink modifications
+let currentDrink = null;
+let currentBasePrice = 0;
+let currentModifications = {
+  size: 'small',
+  sweetness: '100%',
+  ice: '100%',
+  toppings: []
+};
+let availableToppings = [];
+let editingItemIndex = null;
+
+//-------------------- EDIT FEATURE: TOPPING HELPER FUNCTIONS --------------------//
+// Load toppings from database
+async function loadToppings() {
+  try {
+    const response = await fetch('/api/menu/Topping');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    availableToppings = await response.json();
+  } catch (err) {
+    console.error("Error loading toppings:", err);
+  }
+}
+
+// Populate topping dropdowns
+function populateToppingDropdowns() {
+  const topping1Select = document.querySelector('select[name="topping1"]');
+  const topping2Select = document.querySelector('select[name="topping2"]');
+  
+  if (!topping1Select || !topping2Select) return;
+  
+  // Clear existing options except first one
+  [topping1Select, topping2Select].forEach(select => {
+    while (select.options.length > 1) {
+      select.remove(1);
+    }
+  });
+  
+  // Sort alphabetically
+  availableToppings.sort((a, b) => a.itemname.localeCompare(b.itemname, undefined, { sensitivity: 'base' }));
+
+  // Populate dropdowns
+  availableToppings.forEach(topping => {
+    const option1 = document.createElement('option');
+    option1.value = topping.menuid;
+    option1.textContent = `${topping.itemname} (+$${Number(topping.itemprice).toFixed(2)})`;
+    option1.dataset.price = topping.itemprice;
+    option1.dataset.name = topping.itemname;
+    topping1Select.appendChild(option1);
+    
+    const option2 = option1.cloneNode(true);
+    topping2Select.appendChild(option2);
+  });
+}
+
+//-------------------- EDIT FEATURE: MODIFICATION POPUP --------------------//
+// Open popup for editing cart item
+function openModificationsPopup(drink, existingModifications = null, itemIndex = null) {
+  currentDrink = drink;
+  // FIXED: Handle both new drinks (with itemprice) and cart items (with basePrice)
+  currentBasePrice = Number(drink.basePrice || drink.itemprice || 0);
+  editingItemIndex = itemIndex;
+  
+  console.log("Opening popup with:", { drink, currentBasePrice, existingModifications });
+
+  const popup = document.getElementById("modificationsPopup");
+  if (!popup) return alert("Modifications popup not found.");
+
+  // Load existing modifications or defaults
+  currentModifications = existingModifications ? {
+    size: existingModifications.size,
+    sweetness: existingModifications.sweetness,
+    ice: existingModifications.ice,
+    // FIXED: Ensure toppings array is properly cloned with all required properties
+    toppings: existingModifications.toppings ? existingModifications.toppings.map(t => ({
+      id: t.id,
+      name: t.name,
+      price: parseFloat(t.price) || 0  // Ensure price is a number
+    })) : []
+  } : {
+    size: "small",
+    sweetness: "100%",
+    ice: "100%",
+    toppings: []
+  };
+
+  // Fill drink info
+  document.getElementById("itemImage").src = drink.itemphoto;
+  document.getElementById("itemName").textContent = drink.itemname;
+  document.getElementById("itemDescription").textContent = drink.itemdescrip;
+
+  // Populate dropdowns FIRST before trying to set values
+  populateToppingDropdowns();
+
+  // Reset all button selections
+  document.querySelectorAll(".threeModificationChoices button, .fourModificationChoices button")
+    .forEach(btn => btn.classList.remove("selected"));
+
+  // --- SIZE ---
+  if (currentModifications.size === "small") document.getElementById("smallDrinkButton").classList.add("selected");
+  if (currentModifications.size === "medium") document.getElementById("mediumDrinkButton").classList.add("selected");
+  if (currentModifications.size === "large") document.getElementById("largeDrinkButton").classList.add("selected");
+
+  // Pull modification sections (sweetness is #2, ice is #3)
+  const modificationDivs = document.querySelectorAll(".modification");
+
+  // --- SWEETNESS ---
+  const sweetnessButtons = modificationDivs[1].querySelectorAll(".fourModificationChoices button");
+  sweetnessButtons.forEach(btn => {
+    if (btn.textContent.trim() === currentModifications.sweetness) {
+      btn.classList.add("selected");
+    }
+  });
+
+  // --- ICE ---
+  const iceButtons = modificationDivs[2].querySelectorAll(".fourModificationChoices button");
+  iceButtons.forEach(btn => {
+    if (btn.textContent.trim() === currentModifications.ice) {
+      btn.classList.add("selected");
+    }
+  });
+
+  // --- TOPPINGS ---
+  const toppingSelects = [
+    document.querySelector('select[name="topping1"]'),
+    document.querySelector('select[name="topping2"]')
+  ];
+
+  // Reset selects to default "No Topping" option
+  toppingSelects.forEach(sel => sel.selectedIndex = 0);
+
+  // FIXED: Apply existing toppings AFTER dropdowns are populated
+  // Use setTimeout to ensure DOM has updated with all options
+  if (currentModifications.toppings && currentModifications.toppings.length > 0) {
+    setTimeout(() => {
+      currentModifications.toppings.forEach((topping, i) => {
+        if (toppingSelects[i] && topping.id) {
+          // Set the dropdown value to match the topping's menuid
+          toppingSelects[i].value = topping.id;
+          
+          // Log for debugging
+          console.log(`Setting topping ${i + 1}: ${topping.name} (ID: ${topping.id})`);
+        }
+      });
+      
+      // FIXED: Recalculate price AFTER toppings are set
+      calculateModifiedPrice();
+    }, 100); // Increased timeout to ensure dropdowns are fully populated
+  } else {
+    // If no toppings, just calculate base price
+    calculateModifiedPrice();
+  }
+
+  // --- EVENT HANDLERS ---
+  // Size
+  document.querySelectorAll(".size-button").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".size-button").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      currentModifications.size = btn.dataset.size;
+      calculateModifiedPrice();
+    };
+  });
+
+  // Sweetness
+  sweetnessButtons.forEach(btn => {
+    btn.onclick = () => {
+      sweetnessButtons.forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      currentModifications.sweetness = btn.textContent.trim();
+      calculateModifiedPrice();
+    };
+  });
+
+  // Ice
+  iceButtons.forEach(btn => {
+    btn.onclick = () => {
+      iceButtons.forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      currentModifications.ice = btn.textContent.trim();
+      calculateModifiedPrice();
+    };
+  });
+
+  // Toppings - Update currentModifications when user changes selection
+  toppingSelects.forEach(select => {
+    select.onchange = () => {
+      // Get all selected topping IDs (filter out empty values)
+      const ids = toppingSelects.map(sel => sel.value).filter(v => v);
+
+      // FIXED: Build toppings array with proper structure
+      currentModifications.toppings = ids.map(id => {
+        const top = availableToppings.find(t => String(t.menuid) === String(id));
+        if (!top) return null;
+        
+        return {
+          id: top.menuid,
+          name: top.itemname,
+          price: parseFloat(top.itemprice) || 0  // Ensure price is a number
+        };
+      }).filter(Boolean);  // Remove any null entries
+
+      // Recalculate price whenever toppings change
+      calculateModifiedPrice();
+    };
+  });
+
+  // Update button text based on whether we're editing or adding
+  const addButton = document.getElementById("addItemToCart");
+  addButton.textContent = editingItemIndex !== null ? "Update Item" : "Add to Cart";
+  addButton.onclick = updateCartItem;
+
+  // Show popup
+  popup.style.display = "grid";
+
+  // Reset scroll to top
+  popup.scrollTop = 0;
+}
+
+// Close modification popup
+function closeModificationsPopup() {
+  const modificationsPopupDiv = document.getElementById("modificationsPopup");
+  if (!modificationsPopupDiv) {
+    console.error("Modifications popup container not found!");
+    return;
+  }
+  modificationsPopupDiv.style.display = "none";
+  editingItemIndex = null;
+}
+
+// Calculate modified price
+function calculateModifiedPrice() {
+  let newPrice = Number(currentBasePrice);
+
+  if (isNaN(newPrice)) {
+    console.error("Base price is invalid:", currentBasePrice);
+    newPrice = 0;
+  }
+
+  // Size upcharge
+  if (currentModifications.size === "medium") newPrice += 0.50;
+  if (currentModifications.size === "large") newPrice += 1.00;
+
+  // Toppings
+  if (Array.isArray(currentModifications.toppings)) {
+    currentModifications.toppings.forEach(topping => {
+      const toppingPrice = parseFloat(topping.price);
+      if (!isNaN(toppingPrice)) newPrice += toppingPrice;
+    });
+  }
+
+  // Update display
+  const priceElement = document.getElementById("modifiedDrinkPrice");
+  if (priceElement) {
+    priceElement.textContent = `$${newPrice.toFixed(2)}`;
+  }
+
+  return newPrice;
+}
+
+// NO RELOAD: Update cart item and re-render without page reload
+function updateCartItem() {
+  let cartItems = JSON.parse(sessionStorage.getItem("cartItems")) || [];
+  
+  if (!currentDrink) return;
+
+  const finalPrice = calculateModifiedPrice();
+
+  // Preserve quantity if editing an existing item
+  const preservedQuantity = (editingItemIndex !== null && cartItems[editingItemIndex]) 
+    ? cartItems[editingItemIndex].quantity 
+    : 1;
+
+  // FIXED: Ensure toppings are properly structured when saving to cart
+  const cartItem = {
+    name: currentDrink.itemname,
+    basePrice: Number(currentDrink.itemprice ?? currentDrink.basePrice ?? currentBasePrice),
+    price: Number(currentDrink.itemprice),
+    url: currentDrink.itemphoto,
+    quantity: preservedQuantity,
+    modifications: {
+      size: currentModifications.size,
+      sweetness: currentModifications.sweetness,
+      ice: currentModifications.ice,
+      // FIXED: Ensure each topping has id, name, and price as a number
+      toppings: currentModifications.toppings ? currentModifications.toppings.map(t => ({
+        id: t.id,
+        name: t.name,
+        price: parseFloat(t.price) || 0  // Ensure price is stored as a number
+      })) : []
+    }
+  };
+
+  // Update or add the item to cart
+  if (editingItemIndex !== null) {
+    cartItems[editingItemIndex] = cartItem;
+    editingItemIndex = null;  // Reset editing index
+  } else {
+    cartItems.push(cartItem);
+  }
+
+  // Save updated cart to sessionStorage
+  sessionStorage.setItem('cartItems', JSON.stringify(cartItems));
+  
+  // Close the popup
+  closeModificationsPopup();
+  
+  // Re-render the cart to show changes immediately
+  renderCartItems();
+}
+
+// NO RELOAD: Render cart items without page reload
+function renderCartItems() {
+  const cartDiv = document.getElementById("cartPage");
+  
+  let items = JSON.parse(sessionStorage.getItem("cartItems")) || [];
+
+  // Clear cart display
+  cartDiv.innerHTML = "";
+
+  if (items.length === 0) {
+    cartDiv.innerHTML = "<p data-translate style='margin: 2% 0% 2% 2%; font-size:1.5rem;'>Your cart is empty.</p>";
+    const checkoutButton = document.getElementById("checkoutButton");
+    checkoutButton.style.display = "none";
+    
+    // Update totals
+    updateCartTotals();
+    return;
+  }
+
+  // Show checkout button
+  const checkoutButton = document.getElementById("checkoutButton");
+  if (checkoutButton) checkoutButton.style.display = "block";
+
+  items.forEach((item, index) => {
+    // Ensure item has quantity
+    if (!item.quantity || isNaN(item.quantity)) {
+      item.quantity = 1;
+    }
+
+    const itemDiv = document.createElement("div");
+    itemDiv.classList.add("cartItem");
+
+    const mods = item.modifications || {};
+    let modsText = '';
+    
+    if (mods.size) {
+      modsText += `<span data-translate>Size</span>: ${mods.size}<br>`;
+    }
+    if (mods.sweetness) {
+      modsText += `<span data-translate>Sweetness</span>: ${mods.sweetness}<br>`;
+    }
+    if (mods.ice) {
+      modsText += `<span data-translate>Ice</span>: ${mods.ice}<br>`;
+    }
+    if (mods.toppings && mods.toppings.length > 0) {
+      const toppingNames = mods.toppings.map(t => t.name).join(", ");
+      modsText += `<span data-translate>Toppings</span>: ${toppingNames}`;
+    }
+
+    let plainModsText = modsText.replace(/<br>/g, ", ").replace(/&nbsp;/g, " ").trim();
+
+    // EDIT & QUANTITY FEATURES: Added edit button and quantity controls
+    itemDiv.innerHTML = `
+      <div class="cartItemDiv">
+        </button>
+        <img src="${item.url}" alt="${item.name}" class="cartItemImg">
+        <div class="cartItemInfoDiv">
+          <h3 data-translate>${item.name}</h3>
+          <p><span data-translate>Price</span>: $${Number(item.price).toFixed(2)} each</p>
+          <p class="itemMods">${modsText || "<span data-translate>No modifications</span>"}</p>
+          
+          <div class="quantity-controls" style="display: flex; align-items: center; gap: 5px; margin-top: 10px;">
+            <button class="qty-btn minus-btn" style="width: 30px; height: 30px; font-size: 18px; cursor: pointer; background-color: #FFB6C1; border: none; border-radius: 5px; color: white; font-weight: bold;">-</button>
+            <span style="font-size: 16px; font-weight: bold; min-width: 30px; text-align: center; background-color: #ffccd3ff; padding: 5px 10px; border-radius: 5px;">${item.quantity}</span>
+            <button class="qty-btn plus-btn" style="width: 30px; height: 30px; font-size: 18px; cursor: pointer; background-color: #FFB6C1; border: none; border-radius: 5px; color: white; font-weight: bold;">+</button>
+          </div>
+          
+          <p style="margin-top: 10px; font-weight: bold;"><span data-translate>Total</span>: $${(item.price * item.quantity).toFixed(2)}</p>
+        </div>
+        
+        <span class="material-symbols-outlined removeBtn" data-index="${index}" data-text="Delete ${item.name} with ${plainModsText || "no modifications"}" data-translate style="position: absolute; bottom: 10px; right: 10px; border-radius: 50%; background-color: white; padding: 10px; cursor: pointer; border: 2px solid #f6bbd2;">delete</span>
+      </div>
+    `;
+
+    cartDiv.appendChild(itemDiv);
+
+    // EDIT FEATURE: Add edit button listener
+    /**
+    const editBtn = itemDiv.querySelector(".edit-btn");
+    editBtn.addEventListener("click", () => {
+      openModificationsPopup(
+        { 
+          itemname: item.name,
+          basePrice: Number(item.basePrice),   // <-- use the correct key
+          itemphoto: item.url,
+          itemdescrip: "" 
+        },
+        item.modifications,
+        index
+      );
+    });
+    **/
+
+    // QUANTITY FEATURE: Add quantity button listeners
+    const minusBtn = itemDiv.querySelector(".minus-btn");
+    const plusBtn = itemDiv.querySelector(".plus-btn");
+
+    minusBtn.addEventListener("click", () => {
+      minusBtn.style.backgroundColor = "#FF69B4";
+      setTimeout(() => minusBtn.style.backgroundColor = "#FFB6C1", 150);
+      
+      if (item.quantity > 1) {
+        item.quantity--;
+        sessionStorage.setItem('cartItems', JSON.stringify(items));
+        renderCartItems(); // NO RELOAD: Re-render instead of reload
+      } else {
+        if (confirm("Remove this item from cart?")) {
+          items.splice(index, 1);
+          sessionStorage.setItem('cartItems', JSON.stringify(items));
+          renderCartItems(); // NO RELOAD: Re-render instead of reload
+        }
+      }
+    });
+
+    plusBtn.addEventListener("click", () => {
+      plusBtn.style.backgroundColor = "#FF69B4";
+      setTimeout(() => plusBtn.style.backgroundColor = "#FFB6C1", 150);
+      
+      item.quantity++;
+      sessionStorage.setItem('cartItems', JSON.stringify(items));
+      renderCartItems(); // NO RELOAD: Re-render instead of reload
+    });
+
+    // Keep remove button functionality
+    const removeBtn = itemDiv.querySelector(".removeBtn");
+    removeBtn.addEventListener("click", async () => {
+      if (ttsEnabled) {
+        const drinkMods = plainModsText;
+        await speak(`Removing ${item.name} with ${drinkMods}`);
+      }
+
+      items.splice(index, 1);
+      sessionStorage.setItem("cartItems", JSON.stringify(items));
+      renderCartItems(); // NO RELOAD: Re-render instead of reload
+    });
+  });
+
+  // Update totals
+  updateCartTotals();
+  
+  // Re-translate if in Spanish
+  if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage === 'ES') {
+    setTimeout(() => pageTranslator.translatePage('ES'), 100);
+  }
+}
+
+// NO RELOAD: Update cart totals without full re-render
+function updateCartTotals() {
+  const cartDiv = document.getElementById("cartPage");
+  
+  // Remove old totals if they exist
+  const oldSubtotal = cartDiv.querySelector('#cartSubtotal');
+  const oldTax = cartDiv.querySelector('#cartTax');
+  const oldPrice = cartDiv.querySelector('#preTipPrice');
+  const oldPointsPrice = cartDiv.querySelector('#cartPointsPrice');
+  const oldEarnedPoints = cartDiv.querySelector('#cartEarnedPoints');
+  
+  if (oldSubtotal) oldSubtotal.remove();
+  if (oldTax) oldTax.remove();
+  if (oldPrice) oldPrice.remove();
+  if (oldPointsPrice) oldPointsPrice.remove();
+  if (oldEarnedPoints) oldEarnedPoints.remove();
+  
+  const subtotal = document.createElement("h3");
+  subtotal.id = "cartSubtotal";
+  let subtotalAmount = calculateSubtotal();
+  subtotal.textContent = "Subtotal: $" + subtotalAmount;
+  subtotal.style.marginLeft = "2%";
+  subtotal.style.fontSize = "1.5rem";
+  subtotal.style.marginBottom = "0";
+  cartDiv.appendChild(subtotal);
+
+  const tax = document.createElement("h3");
+  tax.id = "cartTax";
+  let taxAmount = calculateTax(subtotalAmount);
+  tax.textContent = "Tax: $" + taxAmount;
+  tax.style.marginLeft = "2%";
+  tax.style.fontSize = "1.5rem";
+  tax.style.marginTop = "1%";
+  tax.style.marginBottom = "0";
+  cartDiv.appendChild(tax);
+
+  const price = document.createElement("h2");
+  price.id = "preTipPrice";
+  preTaxAmount = calculateTotalPriceBeforeTip(subtotalAmount, taxAmount);
+  price.innerHTML = '<span data-translate>Total price</span>: $' + preTaxAmount;
+  price.style.marginLeft = "2%";
+  price.style.marginTop = "1%";
+  price.style.fontSize= "1.8rem";
+  cartDiv.appendChild(price);
+  
+  orderCostInPoints = convertDollarsToPoints(Number(preTaxAmount));
+  const pointsPrice = document.createElement("h3");
+  pointsPrice.id = "cartPointsPrice";
+  pointsPrice.textContent = `Order cost in points: ${orderCostInPoints} points`;
+  pointsPrice.style.marginLeft = "2%";
+  pointsPrice.style.marginTop = "1%";
+  pointsPrice.style.fontSize = "1.3rem";
+  pointsPrice.style.color = "#000000ff";
+  cartDiv.appendChild(pointsPrice);
+  
+  pointsToEarn = calculatePointsToEarn(Number(preTaxAmount));
+  const earnedPoints = document.createElement("h3");
+  earnedPoints.id = "cartEarnedPoints";
+  earnedPoints.textContent = `Points you'll earn: ${pointsToEarn} points`;
+  earnedPoints.style.marginLeft = "2%";
+  earnedPoints.style.marginTop = "0.5%";
+  earnedPoints.style.fontSize = "1.3rem";
+  earnedPoints.style.color = "#FFB6C1";
+  earnedPoints.style.marginBottom = "1%";
+  cartDiv.appendChild(earnedPoints);
+}
 
 //----------------------------------- REWARDS SYSTEM -----------------------------------------//
 // Function to fetch customer's current points from database
@@ -32,15 +556,15 @@ async function fetchCustomerPoints() {
   }
 }
 
-// Function to calculate points earned from order (5 point per $1 spent)
+// Function to calculate points earned from order (25 points per $1 spent)
 function calculatePointsToEarn(totalAmount) {
-  pointsToEarn = Math.floor(totalAmount) * 25; // nvm 25 points per dollar, rounded down -- 5 is too low
+  pointsToEarn = Math.floor(totalAmount) * 25;
   return pointsToEarn;
 }
 
 // Function to convert dollars to points (100 points = $1)
 function convertDollarsToPoints(dollarAmount) {
-  return Math.ceil(dollarAmount * 100); // 100 points = $1
+  return Math.ceil(dollarAmount * 100);
 }
 
 // Function to update customer points in database
@@ -145,8 +669,8 @@ function showPaymentScreen(totalPrice) {
         Points (${orderCostInPoints} pts)
       </button>
       
-      <h3 style="margin-left: 2%; margin-top: 2%; color: #de0aa9ff;">Your Points Balance: ${customerPoints} points</h3>
-      ${!hasEnoughPoints ? `<p style="margin-left: 2%; color: #f689dbff;">You need ${orderCostInPoints - customerPoints} more points to pay with points.</p>` : ''}
+      <h3 style="margin-left: 2%; margin-top: 2%; color: #f04e66ff;">Your Points Balance: ${customerPoints} points</h3>
+      ${!hasEnoughPoints ? `<p style="margin-left: 2%; color: #FFB6C1;">You need ${orderCostInPoints - customerPoints} more points to pay with points.</p>` : ''}
       
       <div style="margin-left: 2%; margin-top: 2%;">
         <input id="tipInputAmount" type="text" placeholder="Enter tip amount" class="ttsButton" data-text="Enter tip amount">
@@ -170,7 +694,6 @@ function showPaymentScreen(totalPrice) {
   });
 
   document.getElementById("cardPaymentBtn").addEventListener("click", () => {
-    console.log("made it here");
     selectedPaymentMethod = "card";
     updatePaymentButtonStyles();
   });
@@ -214,7 +737,11 @@ function addTip() {
 
 function calculateSubtotal() {
   const cartItems = JSON.parse(sessionStorage.getItem("cartItems")) || [];
-  let total = cartItems.reduce((sum, item) => sum + Number(item.price), 0);
+  // QUANTITY FIX: Multiply price by quantity
+  let total = cartItems.reduce((sum, item) => {
+    const qty = item.quantity || 1;
+    return sum + (Number(item.price) * qty);
+  }, 0);
   return total.toFixed(2);
 }
 
@@ -296,7 +823,7 @@ async function handlePlaceOrder() {
       total: total,
       items: cartItems.map(item => ({
         name: item.name,
-        quantity: 1,
+        quantity: item.quantity || 1,
         price: item.price,
         modifications: item.modifications
       })),
@@ -356,154 +883,24 @@ function updatePaymentButtonStyles() {
 //------------------------------------ LOAD WINDOW / PAGE --------------------------------//
 // load window
 window.addEventListener("DOMContentLoaded", async () => {
-    // Fetch customer points when page loads
+    // load customer name
+    document.getElementById("custName").textContent =
+        sessionStorage.getItem("currentCustomer");
+
+    // Load toppings for edit popup
+    await loadToppings();
+
+    // Load customer points
     await fetchCustomerPoints();
-    
-    const cartDiv = document.getElementById("cartPage");
 
-    let items = JSON.parse(sessionStorage.getItem("cartItems")) || [];
+    // Render cart with edit + quantity functionality
+    renderCartItems();
 
-    if (items.length === 0) {
-        cartDiv.innerHTML = "<p data-translate style='margin: 2% 0% 2% 2%; font-size:1.5rem;'>Your cart is empty.</p>";
-        const checkoutButton = document.getElementById("checkoutButton");
-        checkoutButton.style.display = "none";
-        return;
+    // Apply translations if needed
+    if (typeof pageTranslator !== "undefined" &&
+        pageTranslator.currentLanguage === "ES") {
+        setTimeout(() => pageTranslator.translatePage("ES"), 100);
     }
-
-    items.forEach((item, index) => {
-        const itemDiv = document.createElement("div");
-        itemDiv.classList.add("cartItem");
-
-        // Format modifications properly
-        const mods = item.modifications || {};
-        let modsText = '';
-        
-        if (mods.size) {
-            modsText += `<span data-translate>Size</span>: ${mods.size}<br>`;
-        }
-        if (mods.sweetness) {
-            modsText += `<span data-translate>Sweetness</span>: ${mods.sweetness}<br>`;
-        }
-        if (mods.ice) {
-            modsText += `<span data-translate>Ice</span>: ${mods.ice}<br>`;
-        }
-        if (mods.toppings && mods.toppings.length > 0) {
-            const toppingNames = mods.toppings.map(t => t.name).join(", ");
-            modsText += `<span data-translate>Toppings</span>: ${toppingNames}`;
-        }
-
-        let plainModsText = modsText.replace(/<br>/g, ", ").replace(/&nbsp;/g, " ").trim();
-
-        // USE modsText here, not the old code!
-        itemDiv.innerHTML = `
-          <div class="cartItemDiv">
-            <img src="${item.url}" alt="${item.name}" class="cartItemImg">
-            <div class="cartItemInfoDiv">
-              <h3 data-translate>${item.name}</h3>
-              <p><span data-translate>Price</span>: $${Number(item.price).toFixed(2)}</p>
-              <p class="itemMods">${modsText || "<span data-translate>No modifications</span>"}</p>
-            </div>
-            
-            <span class="material-symbols-outlined removeBtn" data-index="${index}" data-text="Delete ${item.name} with ${plainModsText || "no modifications"}" data-translate>delete</span>
-          <div>
-        `;
-        console.log(item.url);
-
-        cartDiv.appendChild(itemDiv);
-    });
-    
-    const subtotal = document.createElement("h3");
-    let subtotalAmount = calculateSubtotal();
-    subtotal.textContent = "Subtotal: $" + subtotalAmount;
-    subtotal.style.marginLeft = "2%";
-    subtotal.style.fontSize = "1.5rem";
-    subtotal.style.marginBottom = "0";
-    cartDiv.appendChild(subtotal);
-
-    const tax = document.createElement("h3");
-    let taxAmount = calculateTax(subtotalAmount);
-    tax.textContent = "Tax: $" + taxAmount;
-    tax.style.marginLeft = "2%";
-    tax.style.fontSize = "1.5rem";
-    tax.style.marginTop = "1%";
-    tax.style.marginBottom = "0";
-    cartDiv.appendChild(tax);
-
-    const price = document.createElement("h2");
-    price.id = "preTipPrice";
-    preTaxAmount = calculateTotalPriceBeforeTip(subtotalAmount, taxAmount);
-    price.textContent = "Total price: $" + preTaxAmount;
-    price.style.marginLeft = "2%";
-    price.style.marginTop = "1%";
-    price.style.fontSize= "1.8rem";
-    price.innerHTML = '<span data-translate>Total price</span>: $' + preTaxAmount;
-    cartDiv.appendChild(price);
-    
-    // Display order cost in points (100 points = $1)
-    orderCostInPoints = convertDollarsToPoints(Number(preTaxAmount));
-    const pointsPrice = document.createElement("h3");
-    pointsPrice.textContent = `Order cost in points: ${orderCostInPoints} points`;
-    pointsPrice.style.marginLeft = "2%";
-    pointsPrice.style.marginTop = "1%";
-    pointsPrice.style.fontSize = "1.3rem";
-    pointsPrice.style.color = "#000000ff";
-    cartDiv.appendChild(pointsPrice);
-    
-    // Display points that will be earned from this order (5 points per $1)
-    pointsToEarn = calculatePointsToEarn(Number(preTaxAmount));
-    const earnedPoints = document.createElement("h3");
-    earnedPoints.textContent = `Points you'll earn: ${pointsToEarn} points`;
-    earnedPoints.style.marginLeft = "2%";
-    earnedPoints.style.marginTop = "0.5%";
-    earnedPoints.style.fontSize = "1.3rem";
-    earnedPoints.style.color = "#ee81efff";
-    earnedPoints.style.marginBottom = "1%";
-    cartDiv.appendChild(earnedPoints);
-    
-    // Re-translate cart after rendering
-    if (pageTranslator.currentLanguage === 'ES') {
-      setTimeout(() => pageTranslator.translatePage('ES'), 100);
-    }
-
-    document.querySelectorAll(".removeBtn").forEach(btn => {
-        btn.addEventListener("click", async e => {
-          const index = e.currentTarget.dataset.index;
-          const item = items[index];
-
-          // Play TTS if enabled
-          if (ttsEnabled) {
-            const drinkMods = e.currentTarget.dataset.text.replace(/<[^>]*>/g, "");
-            await speak(`Removing ${item.name} with ${drinkMods}`);
-          }
-
-          items.splice(index, 1);
-          sessionStorage.setItem("cartItems", JSON.stringify(items));
-          location.reload(); // re-render cart
-        });
-    });
-
-  document.querySelectorAll(".ttsButton").forEach(btn => {
-    btn.addEventListener("click", async e => {
-      if (!ttsEnabled) {
-        return;
-      }
-
-      e.preventDefault();
-
-      const textToSpeak = btn.dataset.text;
-      if (textToSpeak == null) {
-        return;
-      }
-      await speak(textToSpeak);
-
-      const link = e.target.closest("a");
-      const url = link ? link.getAttribute("href") : null;
-      if (url) {
-        console.log("here");
-        window.location.href = url;
-      }
-    });
-  });
 });
 
 // load page
