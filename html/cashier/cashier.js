@@ -633,12 +633,12 @@ async function handlePlaceOrder() {
 }
 
 
-document.getElementById("cardBtn").addEventListener("click", () => {
+document.getElementById("cardPaymentBtn").addEventListener("click", () => {
     selectedPaymentMethod = "card";
     updatePaymentButtonStyles();
 });
 
-document.getElementById("cashBtn").addEventListener("click", () => {
+document.getElementById("cashPaymentBtn").addEventListener("click", () => {
     selectedPaymentMethod = "cash";
     updatePaymentButtonStyles();
 });
