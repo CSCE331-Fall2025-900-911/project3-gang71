@@ -120,7 +120,7 @@ function renderOrders(orders) {
 
                 itemsHTML +=
                     "<li>" + 
-                        '<div class="item-name">' + item.quantity + "x " + item.name + "</div>" + 
+                        '<div class="item-name">' + (item.quantity || 1)+ "x " + item.name + "</div>" + 
                         customizationsHTML +
                     "</li>";
             }

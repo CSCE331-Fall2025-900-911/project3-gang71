@@ -296,7 +296,7 @@ async function handlePlaceOrder() {
       total: total,
       items: cartItems.map(item => ({
         name: item.name,
-        quantity: 1,
+        quantity: item.quantity || 1,
         price: item.price,
         modifications: item.modifications
       })),
