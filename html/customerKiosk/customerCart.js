@@ -7,6 +7,7 @@ let customerPoints = 0;
 let pointsToEarn = 0;
 let orderCostInPoints = 0;
 
+//----------------------------------- REWARDS SYSTEM -----------------------------------------//
 // Function to fetch customer's current points from database
 async function fetchCustomerPoints() {
   try {
@@ -76,6 +77,7 @@ async function updateCustomerPoints(pointsChange, action) {
   }
 }
 
+//------------------------------- PLACE ORDER ----------------------------------------//
 async function checkout() {
   // Fetch customer's current points before showing payment screen
   await fetchCustomerPoints();
@@ -236,40 +238,123 @@ function calculateTotalPriceWithTip(currentTotal, tipAmount = 0) {
   return temp.toFixed(2);
 }
 
-// tts function
-function speak(text) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const response = await fetch("/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
-      });
+// Handle placing the order
+async function handlePlaceOrder() {
+  let cartItems = JSON.parse(sessionStorage.getItem("cartItems")) || [];
+  
+  // Check if cart is empty
+  if (cartItems.length === 0) {
+    alert("Your cart is empty! Please add items before placing an order.");
+    return;
+  }
 
-      if (!response.ok) throw new Error("TTS request failed");
-
-      const arrayBuffer = await response.arrayBuffer();
-      const audioBlob = new Blob([arrayBuffer], { type: "audio/wav" });
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      const audio = new Audio(audioUrl);
-
-      audio.onended = () => {
-        resolve(); // resolve when audio finishes
-      };
-
-      audio.onerror = (err) => {
-        reject(err); // reject on error
-      };
-
-      audio.play();
-    } catch (err) {
-      console.error("Error during TTS:", err);
-      resolve(); // resolve anyway so navigation doesn't break
+  // Check if payment method is selected
+  if (!selectedPaymentMethod) {
+    alert("Please select a payment method before placing the order.");
+    return;
+  }
+  
+  // If paying with points, check if customer has enough
+  if (selectedPaymentMethod === "points") {
+    if (customerPoints < orderCostInPoints) {
+      alert(`You don't have enough points. You need ${orderCostInPoints} points but only have ${customerPoints}.`);
+      return;
     }
-  });
+  }
+
+  try {
+    // Get current order number
+    let orderNumber = 0;
+    fetch('/api/orders')
+    .then((response) => response.json())
+    .then(async orders => {
+        orders.forEach(orderNum => {
+          orderNumber = orderNum.max + 1;
+        });
+        console.log(orderNumber);
+
+    // Calculate totals
+    const subtotal = calculateSubtotal();
+    const tax = calculateTax(subtotal);
+    const tipAmount = Number(document.getElementById("tipInputAmount").value);
+    if (isNaN(tipAmount) || tipAmount < 0) {
+      alert("Please enter a valid tip amount");
+      if (ttsEnabled) {
+        speak("Please enter a valid tip amount");
+      }
+      return;
+    }
+    const total = calculateTotalPriceWithTip(calculateTotalPriceBeforeTip(subtotal, tax), tipAmount);
+
+    // Prepare order data for database
+    const orderData = {
+      orderNumber: orderNumber,
+      paymentMethod: selectedPaymentMethod,
+      subtotal: subtotal,
+      tax: tax,
+      tip: tipAmount,
+      total: total,
+      items: cartItems.map(item => ({
+        name: item.name,
+        quantity: 1,
+        price: item.price,
+        modifications: item.modifications
+      })),
+      timestamp: new Date().toISOString()
+    };
+
+    // Send order to database
+    const response = await fetch('/api/orders/placeOrder', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to place order: ${response.status}`);
+    }
+
+    // Handle points after successful order
+    if (selectedPaymentMethod === "points") {
+      // Subtract points used for payment
+      await updateCustomerPoints(orderCostInPoints, 'subtract');
+      alert(`Order placed successfully! You paid with ${orderCostInPoints} points.\nRemaining points: ${customerPoints}`);
+    } else {
+      // Add points earned from purchase (1 point per dollar spent)
+      await updateCustomerPoints(pointsToEarn, 'add');
+      alert(`Order placed successfully! You earned ${pointsToEarn} points.\nTotal points: ${customerPoints}`);
+    }
+
+    // Success!
+    showThankYouScreen();
+
+    // Clear the cart
+    sessionStorage.removeItem("cartItems");
+
+    // Reset payment buttons
+    selectedPaymentMethod = null;
+  })
+
+  } catch (error) {
+    console.error("Error placing order:", error);
+    alert("Error placing order. Please try again.");
+  }
 }
 
+function updatePaymentButtonStyles() {
+    const cardBtn = document.getElementById("cardPaymentBtn");
+    const cashBtn = document.getElementById("cashPaymentBtn");
+    const pointsBtn = document.getElementById("pointsPaymentBtn");
+
+    cardBtn.classList.toggle("selected", selectedPaymentMethod === "card");
+    cashBtn.classList.toggle("selected", selectedPaymentMethod === "cash");
+    pointsBtn.classList.toggle("selected", selectedPaymentMethod === "points");
+}
+
+//------------------------------------ LOAD WINDOW / PAGE --------------------------------//
+// load window
 window.addEventListener("DOMContentLoaded", async () => {
     // Fetch customer points when page loads
     await fetchCustomerPoints();
@@ -421,7 +506,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-// load employee name
+// load page
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("custName").innerHTML = sessionStorage.getItem('currentCustomer');
 
@@ -453,6 +538,41 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+//---------------------------- TEXT-TO-SPEECH -----------------------------------------//
+// tts function
+function speak(text) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch("/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+
+      if (!response.ok) throw new Error("TTS request failed");
+
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBlob = new Blob([arrayBuffer], { type: "audio/wav" });
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      const audio = new Audio(audioUrl);
+
+      audio.onended = () => {
+        resolve(); // resolve when audio finishes
+      };
+
+      audio.onerror = (err) => {
+        reject(err); // reject on error
+      };
+
+      audio.play();
+    } catch (err) {
+      console.error("Error during TTS:", err);
+      resolve(); // resolve anyway so navigation doesn't break
+    }
+  });
+}
+
 document.getElementById("paymentScreen").addEventListener("click", async (e) => {
   const button = e.target.closest(".ttsButton");
   if (!ttsEnabled) {
@@ -479,125 +599,7 @@ document.getElementById("paymentScreen").addEventListener("click", async (e) => 
   }
 });
 
-// Handle placing the order
-async function handlePlaceOrder() {
-  let cartItems = JSON.parse(sessionStorage.getItem("cartItems")) || [];
-  
-  // Check if cart is empty
-  if (cartItems.length === 0) {
-    alert("Your cart is empty! Please add items before placing an order.");
-    return;
-  }
-
-  // Check if payment method is selected
-  if (!selectedPaymentMethod) {
-    alert("Please select a payment method before placing the order.");
-    return;
-  }
-  
-  // If paying with points, check if customer has enough
-  if (selectedPaymentMethod === "points") {
-    if (customerPoints < orderCostInPoints) {
-      alert(`You don't have enough points. You need ${orderCostInPoints} points but only have ${customerPoints}.`);
-      return;
-    }
-  }
-
-  try {
-    // Get current order number
-    let orderNumber = 0;
-    fetch('/api/orders')
-    .then((response) => response.json())
-    .then(async orders => {
-        orders.forEach(orderNum => {
-          orderNumber = orderNum.max + 1;
-        });
-        console.log(orderNumber);
-
-    // Calculate totals
-    const subtotal = calculateSubtotal();
-    const tax = calculateTax(subtotal);
-    const tipAmount = Number(document.getElementById("tipInputAmount").value);
-    if (isNaN(tipAmount) || tipAmount < 0) {
-      alert("Please enter a valid tip amount");
-      if (ttsEnabled) {
-        speak("Please enter a valid tip amount");
-      }
-      return;
-    }
-    const total = calculateTotalPriceWithTip(calculateTotalPriceBeforeTip(subtotal, tax), tipAmount);
-
-    cartItems.forEach(item => {
-      console.log(item.modifications);
-    });
-
-    // Prepare order data for database
-    const orderData = {
-      orderNumber: orderNumber,
-      paymentMethod: selectedPaymentMethod,
-      subtotal: subtotal,
-      tax: tax,
-      tip: tipAmount,
-      total: total,
-      items: cartItems.map(item => ({
-        name: item.name,
-        quantity: 1,
-        price: item.price,
-        modifications: item.modifications
-      })),
-      timestamp: new Date().toISOString()
-    };
-
-    // Send order to database
-    const response = await fetch('/api/orders/placeOrder', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(orderData)
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to place order: ${response.status}`);
-    }
-
-    // Handle points after successful order
-    if (selectedPaymentMethod === "points") {
-      // Subtract points used for payment
-      await updateCustomerPoints(orderCostInPoints, 'subtract');
-      alert(`Order placed successfully! You paid with ${orderCostInPoints} points.\nRemaining points: ${customerPoints}`);
-    } else {
-      // Add points earned from purchase (1 point per dollar spent)
-      await updateCustomerPoints(pointsToEarn, 'add');
-      alert(`Order placed successfully! You earned ${pointsToEarn} points.\nTotal points: ${customerPoints}`);
-    }
-
-    // Success!
-    showThankYouScreen();
-
-    // Clear the cart
-    sessionStorage.removeItem("cartItems");
-
-    // Reset payment buttons
-    selectedPaymentMethod = null;
-  })
-
-  } catch (error) {
-    console.error("Error placing order:", error);
-    alert("Error placing order. Please try again.");
-  }
-}
-
-function updatePaymentButtonStyles() {
-    const cardBtn = document.getElementById("cardPaymentBtn");
-    const cashBtn = document.getElementById("cashPaymentBtn");
-    const pointsBtn = document.getElementById("pointsPaymentBtn");
-
-    cardBtn.classList.toggle("selected", selectedPaymentMethod === "card");
-    cashBtn.classList.toggle("selected", selectedPaymentMethod === "cash");
-    pointsBtn.classList.toggle("selected", selectedPaymentMethod === "points");
-}
-
+//----------------------------- LOGOUT -----------------------------------//
 // Handle logout
 function handleLogout() {
   // Clear session storage

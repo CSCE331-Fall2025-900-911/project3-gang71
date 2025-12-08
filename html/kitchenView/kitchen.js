@@ -5,6 +5,7 @@ const refreshButton = document.getElementById("refreshButton");
 const clockELement = document.getElementById("clock");
 let lastDeliveredOrder = null; // track only the last delivered order
 
+//----------------------------- TOP OF PAGE ---------------------------------//
 // clock in header
 function startClock() {
     function tick() {
@@ -20,6 +21,18 @@ function startClock() {
     setInterval(tick, 1000);
 }
 
+function formatTime(timeString) {
+    if (!timeString) {
+        return "";
+    }
+
+    const parts = timeString.split(":");
+    const hh = parts[0];
+    const mm = parts[1];
+    return hh + ":" + mm;
+}
+
+//--------------------------------- DISPLAY ORDERS -------------------------------//
 // fetch orders from backend
 async function fetchOrders() {
     const response = await fetch(API_BASE + "/api/kitchen/orders");
@@ -30,17 +43,6 @@ async function fetchOrders() {
     
     const data = await response.json();
     return data;
-}
-
-function formatTime(timeString) {
-    if (!timeString) {
-        return "";
-    }
-
-    const parts = timeString.split(":");
-    const hh = parts[0];
-    const mm = parts[1];
-    return hh + ":" + mm;
 }
 
 function renderOrders(orders) {
@@ -182,6 +184,7 @@ function renderOrders(orders) {
     });
 }
 
+//-------------------------- ORDER FUNCTIONS ----------------------------------//
 async function updateStatus(orderId, status) {
     await fetch(API_BASE + "/api/kitchen/orders/" + orderId + "/status", {
         method: "PATCH",
@@ -229,6 +232,7 @@ async function refresh() {
     renderOrders(orders);
 }
 
+//------------------------------ LOAD PAGE -----------------------------//
 document.addEventListener("DOMContentLoaded", function() {
     startClock();
     refresh();

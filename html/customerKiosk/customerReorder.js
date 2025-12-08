@@ -295,40 +295,6 @@ function calculateModifiedPrice() {
   return newPrice;
 }
 
-// tts function
-function speak(text) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const response = await fetch("/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
-      });
-
-      if (!response.ok) throw new Error("TTS request failed");
-
-      const arrayBuffer = await response.arrayBuffer();
-      const audioBlob = new Blob([arrayBuffer], { type: "audio/wav" });
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      const audio = new Audio(audioUrl);
-
-      audio.onended = () => {
-        resolve(); // resolve when audio finishes
-      };
-
-      audio.onerror = (err) => {
-        reject(err); // reject on error
-      };
-
-      audio.play();
-    } catch (err) {
-      console.error("Error during TTS:", err);
-      resolve(); // resolve anyway so navigation doesn't break
-    }
-  });
-}
-
 //-------------------- CART FUNCTIONS --------------------//
 // THIS IS THE KEY CHANGE: Save to sessionStorage instead of local cart array
 document.getElementById("addItemToCart").addEventListener("click", async () => {
@@ -375,7 +341,7 @@ document.getElementById("addItemToCart").addEventListener("click", async () => {
   closeModificationsPopupNav(); // nav function reduces TTS if navigating to cart
 });
 
-
+//-------------------------- LOAD PAGE ---------------------------------//
 //----- get menu items from database using API
 document.addEventListener("DOMContentLoaded", () => {
   // load toppings at startup
@@ -416,6 +382,41 @@ window.addEventListener('load', () => {
   console.log('Set padding to:', document.documentElement.scrollHeight);
 });
 
+//--------------------------- TEXT-TO-SPEECH --------------------------------//
+// tts function
+function speak(text) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch("/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+
+      if (!response.ok) throw new Error("TTS request failed");
+
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBlob = new Blob([arrayBuffer], { type: "audio/wav" });
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      const audio = new Audio(audioUrl);
+
+      audio.onended = () => {
+        resolve(); // resolve when audio finishes
+      };
+
+      audio.onerror = (err) => {
+        reject(err); // reject on error
+      };
+
+      audio.play();
+    } catch (err) {
+      console.error("Error during TTS:", err);
+      resolve(); // resolve anyway so navigation doesn't break
+    }
+  });
+}
+
 document.querySelectorAll(".ttsButton").forEach(button => {
   button.addEventListener("click", async (e) => {
     if (!ttsEnabled) {
@@ -441,6 +442,7 @@ document.querySelectorAll(".ttsButton").forEach(button => {
   });
 });
 
+//------------------------------- WEATHER API --------------------------------//
 async function getWeather() {
   const res = await fetch('/weather');
   const data = await res.json();
@@ -511,6 +513,8 @@ function getWeatherCategory(feelsLikeTemp) {
   if (feelsLikeTemp >= 40) return "cold";
   return "cold"; // below 40°F
 }
+
+//----------------------------- DRINK RECOMMENDATIONS -----------------------------//
 
 function fetchDrinkOptions(weather) {
   const keywordMap = {
@@ -615,10 +619,12 @@ async function getDrinkRec(weatherCategory) {
   }
 }
 
+//------------------------------------ DRINK REORDER --------------------------------------//
 async function reorderDrinks() {
   const response = await fetch('/api/menu/Topping');
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   availableToppings = await response.json();
+  
   // retrieve all drinks ordered by current customer in order of most recent
   fetch(`/api/reorder?name=${sessionStorage.getItem('currentCustomer')}`)
   .then(res => res.json())
@@ -628,6 +634,7 @@ async function reorderDrinks() {
       return;
     }
 
+    // takes four most recent drinks (that aren't duplicates) and adds them to list to display
     let reorderItems = [];
     data.forEach(async drink => {
       if(reorderItems.length < 4) {
@@ -644,6 +651,7 @@ async function reorderDrinks() {
             return topping ? { id: toppingId, name: topping.itemname, price: topping.itemprice } : null;
           }).filter(t => t !== null);
 
+          // constructs drink with necessary info for later
           const reorderDrink = {
             name: drink.itemname,
             menuid: drink.menuid,
@@ -668,6 +676,7 @@ async function reorderDrinks() {
   });
 }
 
+// adds reorder drink options to HTML
 async function displayReorder(items) {
   // accessing HTML element for where reorder recommendations will display
   const reorderDiv = document.getElementById("reorderDiv");
@@ -686,10 +695,12 @@ async function displayReorder(items) {
     const mods = drink.modifications || {};
     let modsText = '';
 
+    // gets the name of the base drink based on its menuID
     const drinkSize = await fetch(`/api/namebyid?id=${mods.cup}`);
     const cup = await drinkSize.json();
     modsText += `Size: ${cup[0].itemname.split(' ')[0]}<br>`;
 
+    // translates sugar, ice, and toppings to their names based on their IDs
     const drinkSugar = await fetch(`/api/namebyid?id=${mods.sugar}`);
     const sugar = await drinkSugar.json();
     let sugarAmount = "";
@@ -719,7 +730,7 @@ async function displayReorder(items) {
 
     let plainModsText = modsText.replace(/<br>/g, ", ").replace(/&nbsp;/g, " ").trim();
 
-    // USE modsText here, not the old code!
+    // adds HTML with drinks
     drinkDiv.innerHTML = `
     <img src="${drink.photo}" alt="${drink.name}" class="menuItemImg">
     <h2 class = "menuItemH2" data-translate>${drink.name}</h2>
@@ -733,7 +744,7 @@ async function displayReorder(items) {
 
     reorderDiv.appendChild(drinkDiv);
 
-    // event listeners
+    // event listeners for adding drink to cart
     const addDrinkToOrderButton = drinkDiv.querySelector(".menuItemButton");
     addDrinkToOrderButton.addEventListener("click", async e => {
       const res = await fetch(`/api/drinkbyid?id=${drink.menuid}`);
@@ -757,6 +768,7 @@ async function displayReorder(items) {
   }
 }
 
+//---------------------------------- LOGOUT -----------------------------------//
 // Handle logout
 function handleLogout() {
   // Clear session storage

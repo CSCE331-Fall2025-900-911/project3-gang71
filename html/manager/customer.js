@@ -23,8 +23,12 @@ document.addEventListener("DOMContentLoaded", () => {
       tableBody.innerHTML =
         "<tr><td colspan='4'>Failed to load customer data</td></tr>";
     });
+
+  // load employee name
+  document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
 });
 
+// search bar functionality
 function filterContent() {
   const filter = document.getElementById("search-bar").value.toLowerCase().trim();
   const tableBody = document.getElementById("customerBody");
@@ -54,8 +58,3 @@ function filterContent() {
     tableBody.appendChild(noItemRow);
   }
 }
-
-// load employee name
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
-});

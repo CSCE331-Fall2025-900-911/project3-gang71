@@ -379,38 +379,33 @@ function calculateModifiedPrice() {
   return newPrice;
 }
 
-// tts function
-function speak(text) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const response = await fetch("/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
-      });
+function trapFocus(popup) {
+  const focusableElements = popup.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  const firstEl = focusableElements[0];
+  const lastEl = focusableElements[focusableElements.length - 1];
 
-      if (!response.ok) throw new Error("TTS request failed");
-
-      const arrayBuffer = await response.arrayBuffer();
-      const audioBlob = new Blob([arrayBuffer], { type: "audio/wav" });
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      const audio = new Audio(audioUrl);
-
-      audio.onended = () => {
-        resolve(); // resolve when audio finishes
-      };
-
-      audio.onerror = (err) => {
-        reject(err); // reject on error
-      };
-
-      audio.play();
-    } catch (err) {
-      console.error("Error during TTS:", err);
-      resolve(); // resolve anyway so navigation doesn't break
+  function handleTab(e) {
+    if (e.key === "Tab") {
+      if (e.shiftKey) {
+        if (document.activeElement === firstEl) {
+          e.preventDefault();
+          lastEl.focus();
+        }
+      } else {
+        if (document.activeElement === lastEl) {
+          e.preventDefault();
+          firstEl.focus();
+        }
+      }
     }
-  });
+    if (e.key === "Escape") {
+      closeModificationsPopup();
+    }
+  }
+  popup.addEventListener("keydown", handleTab);
+  return () => popup.removeEventListener("keydown", handleTab);
 }
 
 //-------------------- CART FUNCTIONS --------------------//
@@ -459,8 +454,8 @@ document.getElementById("addItemToCart").addEventListener("click", async () => {
   closeModificationsPopupNav(); // nav function reduces TTS if navigating to cart
 });
 
-
-//----- get menu items from database using API
+//-------------------------------- LOAD PAGE -----------------------------------//
+//----- get menu items from database using API and other setup tasks
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("custName").innerHTML = sessionStorage.getItem('currentCustomer');
   const menuRows = document.querySelectorAll(".menuRow");
@@ -494,10 +489,7 @@ document.addEventListener("DOMContentLoaded", () => {
         menuRow.innerHTML = "<p>Failed to load menu items</p>";
       });
     });
-});
 
-// load employee name
-document.addEventListener("DOMContentLoaded", () => {
   // get elements
   const ttsToggle = document.getElementById("ttsToggle");
   const ttsButtonText = document.getElementById("ttsLabel");
@@ -529,8 +521,55 @@ document.addEventListener("DOMContentLoaded", () => {
       sessionStorage.setItem("ttsEnabled", JSON.stringify(ttsEnabled));
     });
   }
+
+  getWeather();
+
+  document.querySelectorAll('.categoryLink').forEach(link => {
+    link.addEventListener('click', function (e) {
+      setTimeout(() => {
+        const logoutButton = document.getElementById("logoutButton"); 
+        if (logoutButton) logoutButton.focus();
+      }, 50);
+
+    });
+  });
 });
 
+
+//----------------------------- TEXT-TO-SPEECH ---------------------------------//
+// tts function
+function speak(text) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch("/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+
+      if (!response.ok) throw new Error("TTS request failed");
+
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBlob = new Blob([arrayBuffer], { type: "audio/wav" });
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      const audio = new Audio(audioUrl);
+
+      audio.onended = () => {
+        resolve(); // resolve when audio finishes
+      };
+
+      audio.onerror = (err) => {
+        reject(err); // reject on error
+      };
+
+      audio.play();
+    } catch (err) {
+      console.error("Error during TTS:", err);
+      resolve(); // resolve anyway so navigation doesn't break
+    }
+  });
+}
 
 document.querySelectorAll(".ttsButton").forEach(button => {
   button.addEventListener("click", async (e) => {
@@ -557,27 +596,18 @@ document.querySelectorAll(".ttsButton").forEach(button => {
   });
 });
 
+const ttsButton = document.getElementById("ttsButton");
+const ttsToggle = document.getElementById("ttsToggle");
 
-
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  getWeather();
+ttsButton.addEventListener("click", async () => {
+  ttsToggle.checked = !ttsToggle.checked;
+  ttsButton.textContent = ttsToggle.checked ? "Disable TTS" : "Enable TTS";
+  ttsEnabled = ttsToggle.checked;
+  sessionStorage.setItem("ttsEnabled", JSON.stringify(ttsEnabled));
+  await speak(ttsToggle.checked ? "TTS enabled" : "TTS disabled");
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll('.categoryLink').forEach(link => {
-    link.addEventListener('click', function (e) {
-      setTimeout(() => {
-        const logoutButton = document.getElementById("logoutButton"); 
-        if (logoutButton) logoutButton.focus();
-      }, 50);
-
-    });
-  });
-});
-
-
+//-------------------------------- WEATHER --------------------------------//
 
 async function getWeather() {
   const res = await fetch('/weather');
@@ -650,6 +680,7 @@ function getWeatherCategory(feelsLikeTemp) {
   return "cold"; // below 40°F
 }
 
+//------------------------------ DRINK RECOMMENDATION ------------------------------//
 function fetchDrinkOptions(weather) {
   const keywordMap = {
     "hot": ["Slush", "Coconut", "Winter Melon", "Green Tea", "Delight", "Snow", "Mania", "Flurry", "Breeze", "Bliss", "Yogurt"],
@@ -753,47 +784,7 @@ async function getDrinkRec(weatherCategory) {
   }
 }
 
-
-function trapFocus(popup) {
-  const focusableElements = popup.querySelectorAll(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-  );
-  const firstEl = focusableElements[0];
-  const lastEl = focusableElements[focusableElements.length - 1];
-
-  function handleTab(e) {
-    if (e.key === "Tab") {
-      if (e.shiftKey) {
-        if (document.activeElement === firstEl) {
-          e.preventDefault();
-          lastEl.focus();
-        }
-      } else {
-        if (document.activeElement === lastEl) {
-          e.preventDefault();
-          firstEl.focus();
-        }
-      }
-    }
-    if (e.key === "Escape") {
-      closeModificationsPopup();
-    }
-  }
-  popup.addEventListener("keydown", handleTab);
-  return () => popup.removeEventListener("keydown", handleTab);
-}
-
-const ttsButton = document.getElementById("ttsButton");
-const ttsToggle = document.getElementById("ttsToggle");
-
-ttsButton.addEventListener("click", async () => {
-  ttsToggle.checked = !ttsToggle.checked;
-  ttsButton.textContent = ttsToggle.checked ? "Disable TTS" : "Enable TTS";
-  ttsEnabled = ttsToggle.checked;
-  sessionStorage.setItem("ttsEnabled", JSON.stringify(ttsEnabled));
-  await speak(ttsToggle.checked ? "TTS enabled" : "TTS disabled");
-});
-
+//--------------------------- LOGOUT --------------------------//
 // Handle logout
 function handleLogout() {
   // Clear session storage

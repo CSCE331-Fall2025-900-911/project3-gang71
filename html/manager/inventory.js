@@ -26,9 +26,6 @@ function fetchInventory () {
     });
 }
 
-// Run function on page load
-document.addEventListener("DOMContentLoaded", fetchInventory);
-
 //searching the inventory table based on name in search bar
 function filterContent() {
   const filter = document.getElementById("search-bar").value.toLowerCase().trim();
@@ -160,7 +157,8 @@ document.getElementById("removeItemBtn").addEventListener("click", async () => {
   }
 });
 
-// load employee name
+// run function on page load and show employee name
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
+  fetchInventory();
 });

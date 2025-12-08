@@ -27,10 +27,8 @@ function fetchEmployees () {
     });
 }
 
-// load employee name
+// run function on page load and show employee name
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
+  fetchEmployees();
 });
-
-// Run function on page load
-document.addEventListener("DOMContentLoaded", fetchEmployees);

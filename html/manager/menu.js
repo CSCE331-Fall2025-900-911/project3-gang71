@@ -26,9 +26,6 @@ function fetchMenu () {
     });
 }
 
-// Run function on page load
-document.addEventListener("DOMContentLoaded", fetchMenu);
-
 // function to search through table and find menu items based on name entered 
 function filterContent() {
   const filter = document.getElementById("search-bar").value.toLowerCase().trim();
@@ -155,7 +152,8 @@ document.getElementById("removeMenuBtn").addEventListener("click", async () => {
   }
 });
 
-// load employee name
+// call function on load and show employee name
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("empName").innerHTML = sessionStorage.getItem('currentEmployee');
+  fetchMenu();
 });

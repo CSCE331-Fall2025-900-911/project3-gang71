@@ -43,6 +43,7 @@ const pool = new Pool({
   // ssl: { rejectUnauthorized: false }, // needed for secure remote connections
 });
 
+//------------------------ LOGIN / LOGOUT -------------------------------//
 // function requireLogin(req, res, next) {
 //   if (!req.session.user) {
 //     return res.redirect('/index.html');
@@ -52,6 +53,71 @@ const pool = new Pool({
 
 app.use(express.static(path.join(__dirname, 'public'))); // serve login page
 
+// login for employees
+app.get('/api/employeeLogin', async (req, res) => {
+  const { user, userPassword } = req.query;
+
+  const result = await pool.query(
+    'SELECT firstname, lastname, employeerole FROM employee WHERE username=$1 AND password=$2',
+    [user, userPassword]
+  );
+
+  if (result.rows.length === 0) {
+    return res.json([]); // ALWAYS return array
+  }
+
+  const userData = result.rows[0];
+
+  // create session
+  req.session.user = {
+    firstname: userData.firstname,
+    lastname: userData.lastname,
+    role: userData.employeerole
+  };
+
+  return res.json([userData]);
+});
+
+// login for customers
+app.get("/api/customerlogin", async (req,res) => {
+  const phoneNumber = req.query.phone;
+  
+  const result = await pool.query(
+    "SELECT firstName, lastName FROM customer WHERE phoneNumber = $1;",
+    [phoneNumber]
+  );
+
+  if (result.rows.length === 0) {
+    return res.json([]);
+  }
+
+  const userData = result.rows[0];
+
+  req.session.user = {
+    firstname: userData.firstname,
+    lastname: userData.lastname,
+    role: "Customer"
+  };
+    
+  res.json([userData]);
+});
+
+app.get('/api/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Logout failed");
+    }
+    // res.clearCookie('connect.sid') // clears the cookie in browser
+    // res.redirect('public/index.html');
+    res.clearCookie('connect.sid', { path: '/' });
+    res.redirect('/');
+  });
+});
+
+/*---------------------------------- MANAGER VIEW -----------------------------------*/
+
+// INVENTORY TAB
 
 // show inventory.html
 app.get("/", (req, res) => {
@@ -71,56 +137,6 @@ app.get("/api/inventory", async (req, res) => {
   }
 });
 
-// API route to get employee data
-app.get("/api/employee", async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT employeeid, firstname, lastname, employeerole, payrate, hoursworked FROM employee ORDER BY employeeid;"
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Database error:", err);
-    res.status(500).json({ error: "Database query for employee failed" });
-  }
-});
-
-// API route to get all menu items
-app.get("/api/menu", async (req, res) => {
-  try {
-    const search = req.query.search || ""; // get the search keyword or default to empty string
-
-    // ILIKE for case-insensitive matching
-    const result = await pool.query(
-      `SELECT menuid, itemname, itemprice, itemcategory, itemdescrip
-       FROM menu
-       WHERE itemname ILIKE $1
-       ORDER BY menuid;`,
-      [`%${search}%`] // parameterized query to avoid SQL injection
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Database error:", err);
-    res.status(500).json({ error: "Database query for menu failed" });
-  }
-});
-
-
-app.get("/api/menu/:category", async (req, res) => {
-  try {
-    const category = req.params.category;
-    console.log("Category requested:", category); // <--- check this
-    const result = await pool.query(
-      "SELECT * FROM menu WHERE itemcategory = $1",
-      [category]
-    );
-    console.log("Rows returned:", result.rows.length); // <--- check this
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Database query failed" });
-  }
-});
-
 // API route to add an inventory item
 app.post("/api/inventory", async (req, res) => {
   try {
@@ -132,32 +148,6 @@ app.post("/api/inventory", async (req, res) => {
     const result = await pool.query(
       "INSERT INTO inventory (supplyname, supplyprice, unit, quantityonhand) VALUES ($1, $2, $3, $4) RETURNING *",
       [name, price, unit, quantity]
-    );
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error("Database error:", err);
-    res.status(500).json({ error: "Database insert failed" });
-  }
-});
-
-// API route to add a menu item
-app.post("/api/menu", async (req, res) => {
-  try {
-    const { name, price, category, description } = req.body;
-    if (!name || isNaN(price) || !category) {
-      return res.status(400).json({ error: "Invalid input" });
-    }
-
-    // Start a transaction
-    await pool.query('BEGIN');
-
-    // Get the next available menuid
-    const maxIdResult = await pool.query('SELECT MAX(menuid) FROM menu');
-    const nextId = (maxIdResult.rows[0].max || 0) + 1;
-
-    const result = await pool.query(
-      "INSERT INTO menu (menuid, itemname, itemprice, itemcategory, itemdescrip) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [nextId, name, price, category, description]
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -190,6 +180,68 @@ app.delete("/api/inventory/:name", async (req, res) => {
   }
 });
 
+// EMPLOYEE TAB
+
+// API route to get employee data
+app.get("/api/employee", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT employeeid, firstname, lastname, employeerole, payrate, hoursworked FROM employee ORDER BY employeeid;"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database query for employee failed" });
+  }
+});
+
+// MENU TAB
+
+// API route to get all menu items
+app.get("/api/menu", async (req, res) => {
+  try {
+    const search = req.query.search || ""; // get the search keyword or default to empty string
+
+    // ILIKE for case-insensitive matching
+    const result = await pool.query(
+      `SELECT menuid, itemname, itemprice, itemcategory, itemdescrip
+       FROM menu
+       WHERE itemname ILIKE $1
+       ORDER BY menuid;`,
+      [`%${search}%`] // parameterized query to avoid SQL injection
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database query for menu failed" });
+  }
+});
+
+// API route to add a menu item
+app.post("/api/menu", async (req, res) => {
+  try {
+    const { name, price, category, description } = req.body;
+    if (!name || isNaN(price) || !category) {
+      return res.status(400).json({ error: "Invalid input" });
+    }
+
+    // Start a transaction
+    await pool.query('BEGIN');
+
+    // Get the next available menuid
+    const maxIdResult = await pool.query('SELECT MAX(menuid) FROM menu');
+    const nextId = (maxIdResult.rows[0].max || 0) + 1;
+
+    const result = await pool.query(
+      "INSERT INTO menu (menuid, itemname, itemprice, itemcategory, itemdescrip) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [nextId, name, price, category, description]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database insert failed" });
+  }
+});
 
 //API route to delete a menu item
 app.delete("/api/menu/:name", async (req, res) => {
@@ -214,6 +266,8 @@ app.delete("/api/menu/:name", async (req, res) => {
     res.status(500).json({ error: "Database delete failed" });
   }
 });
+
+// TRENDS TAB
 
 // API route to get daily sales
 app.get("/api/dailySales", async (req, res) => {
@@ -494,7 +548,24 @@ app.get("/api/xReport", async (req, res) => {
   }
 });
 
+//---------------------------------- CUSTOMER / CASHIER -------------------------------//
+app.get("/api/menu/:category", async (req, res) => {
+  try {
+    const category = req.params.category;
+    //console.log("Category requested:", category); // <--- check this
+    const result = await pool.query(
+      "SELECT * FROM menu WHERE itemcategory = $1",
+      [category]
+    );
+    //console.log("Rows returned:", result.rows.length); // <--- check this
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
 
+//-------------------------------- GOOGLE OAUTH ------------------------------//
 
 // API route to get customer data
 app.get("/api/customer", async (req, res) => {
@@ -507,55 +578,6 @@ app.get("/api/customer", async (req, res) => {
     console.error("Database error:", err);
     res.status(500).json({ error: "Database query for customer failed" });
   }
-});
-
-// login for employees
-app.get('/api/employeeLogin', async (req, res) => {
-  const { user, userPassword } = req.query;
-
-  const result = await pool.query(
-    'SELECT firstname, lastname, employeerole FROM employee WHERE username=$1 AND password=$2',
-    [user, userPassword]
-  );
-
-  if (result.rows.length === 0) {
-    return res.json([]); // ALWAYS return array
-  }
-
-  const userData = result.rows[0];
-
-  // create session
-  req.session.user = {
-    firstname: userData.firstname,
-    lastname: userData.lastname,
-    role: userData.employeerole
-  };
-
-  return res.json([userData]);
-});
-
-// login for customers
-app.get("/api/customerlogin", async (req,res) => {
-  const phoneNumber = req.query.phone;
-  
-  const result = await pool.query(
-    "SELECT firstName, lastName FROM customer WHERE phoneNumber = $1;",
-    [phoneNumber]
-  );
-
-  if (result.rows.length === 0) {
-    return res.json([]);
-  }
-
-  const userData = result.rows[0];
-
-  req.session.user = {
-    firstname: userData.firstname,
-    lastname: userData.lastname,
-    role: "Customer"
-  };
-    
-  res.json([userData]);
 });
 
 // retrieve client id from .env file
@@ -634,19 +656,7 @@ app.get("/api/customeroauth", async (req, res) => {
   res.json([userData]);
 });
 
-app.get('/api/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send("Logout failed");
-    }
-    // res.clearCookie('connect.sid') // clears the cookie in browser
-    // res.redirect('public/index.html');
-    res.clearCookie('connect.sid', { path: '/' });
-    res.redirect('/');
-  });
-});
-
+//------------------------------------------ CASHIER VIEW --------------------------------------//
 
 // get order number for cashier view
 app.get("/api/orders", async (req, res) => {
@@ -796,7 +806,10 @@ app.post('/api/orders/place', async (req, res) => {
   }
 });
 
-// LOYALTY POINTS APIs---
+//------------------------------------- CUSTOMER VIEW ---------------------------------------//
+
+// LOYALTY POINTS APIs
+
 // Get customer's current loyalty points
 app.get("/api/customer/points", async (req, res) => {
   try {
@@ -898,16 +911,16 @@ app.post('/api/orders/placeOrder', async (req, res) => {
     const orderDate = orderDateTime.toISOString().split('T')[0]; // YYYY-MM-DD
     const orderTime = orderDateTime.toTimeString().split(' ')[0]; // HH:MM:SS
     
-    // Get the employeeID from session
-    // You'll need to modify your login to also store employeeID in the session
-    // For now, we'll query it based on the employee name in session
+    // Get the customerID from session
+    // You'll need to modify your login to also store customerID in the session
+    // For now, we'll query it based on the customer name in session
     const customerName = req.session.user ? `${req.session.user.firstname} ${req.session.user.lastname}` : null;
     
     if (!customerName) {
       return res.status(401).json({ error: 'Not logged in' });
     }
     
-    // Get employeeID from the employee table
+    // Get customerID from the customer table
     const custResult = await pool.query(
       'SELECT customerid FROM customer WHERE firstname = $1 AND lastname = $2',
       [req.session.user.firstname, req.session.user.lastname]
@@ -1023,6 +1036,7 @@ app.post('/api/orders/placeOrder', async (req, res) => {
   }
 });
 
+//---------------------------------- TEXT-TO-SPEECH -----------------------------//
 app.post("/tts", async (req, res) => {
   try {
     const { text } = req.body;
@@ -1063,6 +1077,7 @@ app.post("/tts", async (req, res) => {
   }
 });
 
+//-------------------------------- TRANSLATION --------------------------------------//
 // Translation endpoint using DeepL API with server-side cache
 app.post("/api/translate", async (req, res) => {
   try {
@@ -1188,6 +1203,7 @@ app.post("/api/translate", async (req, res) => {
   }
 });
 
+//----------------------------------- WEATHER ------------------------------------//
 
 app.get('/weather', async (req, res) => {
   const city = 'College Station';
@@ -1198,6 +1214,7 @@ app.get('/weather', async (req, res) => {
   res.json(data);
 });
 
+//----------------------------------- REORDER ----------------------------------//
 // get menu item by id
 app.get('/api/namebyid', async (req, res) => {
   try {
@@ -1255,6 +1272,7 @@ app.get('/api/reorder', async (req, res) => {
   }
 });
 
+//----------------------------------------- KITCHEN VIEW -----------------------------------//
 // api route to get kitchen order statuses
 app.get("/api/kitchen/orders", async (req, res) => {
   try {
