@@ -1414,22 +1414,13 @@ app.post("/api/kitchen/orders/:id/recall", (req, res) => {
 })
 
 // kitchen view
-// app.use("/manager", requireLogin, express.static(path.join(__dirname, "html", "manager")));
-// app.use("/kitchenView", requireLogin, express.static(path.join(__dirname, "html", "kitchenView")));
-// app.get("/kitchen", requireLogin, (req, res) => {
-//   res.redirect("/kitchenView/kitchen.html");
-// })
-
-// app.use(requireLogin, express.static(path.join(__dirname, "html")));
-// app.use(express.static(path.join(__dirname, "html/menuBoard")));
-
-app.use("/manager", express.static(path.join(__dirname, "html", "manager")));
-app.use("/kitchenView", express.static(path.join(__dirname, "html", "kitchenView")));
-app.get("/kitchen", (req, res) => {
+app.use("/manager", requireLogin, express.static(path.join(__dirname, "html", "manager")));
+app.use("/kitchenView", requireLogin, express.static(path.join(__dirname, "html", "kitchenView")));
+app.get("/kitchen", requireLogin, (req, res) => {
   res.redirect("/kitchenView/kitchen.html");
 })
 
-app.use(express.static(path.join(__dirname, "html")));
+app.use(requireLogin, express.static(path.join(__dirname, "html")));
 app.use(express.static(path.join(__dirname, "html/menuBoard")));
 
 // start server
