@@ -12,6 +12,7 @@ let currentDrink = null;
 let currentBasePrice = 0;
 let currentModifications = {
   size: 'small',
+  temperature: 'iced',
   sweetness: '100%',
   ice: '100%',
   toppings: []
@@ -110,11 +111,15 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
   if (currentModifications.size === "medium") document.getElementById("mediumDrinkButton").classList.add("selected");
   if (currentModifications.size === "large") document.getElementById("largeDrinkButton").classList.add("selected");
 
-  // Pull modification sections (sweetness is #2, ice is #3)
+  // Pull modification sections (sweetness is #3, ice is #4)
   const modificationDivs = document.querySelectorAll(".modification");
 
+  // --- TEMPERATURE ---
+  if (currentModifications.temperature === "iced") document.getElementById("icedButton").classList.add("selected");
+  if (currentModifications.temperature === "hot") document.getElementById("hotButton").classList.add("selected");
+
   // --- SWEETNESS ---
-  const sweetnessButtons = modificationDivs[1].querySelectorAll(".fourModificationChoices button");
+  const sweetnessButtons = modificationDivs[2].querySelectorAll(".fourModificationChoices button");
   sweetnessButtons.forEach(btn => {
     if (btn.textContent.trim() === currentModifications.sweetness) {
       btn.classList.add("selected");
@@ -122,7 +127,7 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
   });
 
   // --- ICE ---
-  const iceButtons = modificationDivs[2].querySelectorAll(".fourModificationChoices button");
+  const iceButtons = modificationDivs[3].querySelectorAll(".fourModificationChoices button");
   iceButtons.forEach(btn => {
     if (btn.textContent.trim() === currentModifications.ice) {
       btn.classList.add("selected");
@@ -289,6 +294,7 @@ function updateCartItem() {
     quantity: preservedQuantity,
     modifications: {
       size: currentModifications.size,
+      temperature: currentModifications.temperature,
       sweetness: currentModifications.sweetness,
       ice: currentModifications.ice,
       // FIXED: Ensure each topping has id, name, and price as a number
@@ -355,6 +361,9 @@ function renderCartItems() {
     
     if (mods.size) {
       modsText += `<span data-translate>Size</span>: ${mods.size}<br>`;
+    }
+    if (mods.temperature) {
+      modsText += `<span data-translate>Temperature</span>: ${mods.temperature}<br>`;
     }
     if (mods.sweetness) {
       modsText += `<span data-translate>Sweetness</span>: ${mods.sweetness}<br>`;
@@ -636,7 +645,7 @@ async function checkout() {
           toppingString = `${item.modifications.toppings[0].name} and ${item.modifications.toppings[1].name}`;
         }
 
-        orderString = `A $${item.price.toFixed(2)} ${item.modifications.size} ${item.name} 
+        orderString = `A $${item.price.toFixed(2)} ${item.modifications.size} ${item.temperature} ${item.name} 
           with ${item.modifications.sweetness} sweetness, 
           ${item.modifications.ice} ice, 
           and ${toppingString}`;
@@ -910,13 +919,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const ttsToggle = document.getElementById("ttsToggle");
   if (ttsToggle) {
     ttsToggle.checked = ttsEnabled;
-    const ttsButtonText = document.getElementById("ttsLabel");
 
     if (ttsToggle.checked) {
-      ttsButtonText.textContent = "Disable TTS";
+      ttsToggle.textContent = "Disable TTS";
     }
     else {
-      ttsButtonText.textContent = "Enable TTS";
+      ttsToggle.textContent = "Enable TTS";
     }
 
     ttsToggle.addEventListener("change", async (e) => {
