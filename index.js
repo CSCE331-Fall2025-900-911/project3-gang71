@@ -753,6 +753,16 @@ app.post('/api/orders/place', async (req, res) => {
           const sizeResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE '%large%' LIMIT 1");
           cupSize = sizeResult.rows.length > 0 ? sizeResult.rows[0].menuid : null;
         }
+
+        // Map temperature to menuID
+        let temperature = null;
+        if (item.modifications.temperature === 'iced') {
+          const tempResult = await pool.query("SELECT menuid FROM menu WHERE itemname = 'Iced'");
+          temperature = tempResult.rows.length > 0 ? tempResult.rows[0].menuid : null;
+        } else if (item.modifications.temperature === 'hot') {
+          const tempResult = await pool.query("SELECT menuid FROM menu WHERE itemname = 'Hot'");
+          temperature = tempResult.rows.length > 0 ? tempResult.rows[0].menuid : null;
+        } 
         
         // Map sugar level to menuID
         let sugarLevel = null;
@@ -768,6 +778,7 @@ app.post('/api/orders/place', async (req, res) => {
         else { ice = "More"; }
         const iceResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE $1 LIMIT 1", [`%${ice}%ice%`]);
         iceAmount = iceResult.rows.length > 0 ? iceResult.rows[0].menuid : null;
+        console.log(iceResult)
         
         // Get topping menuIDs
         const topping1 = item.modifications.toppings[0] ? parseInt(item.modifications.toppings[0].id) : null;
@@ -775,8 +786,8 @@ app.post('/api/orders/place', async (req, res) => {
         
         // Insert the drink
         const drinkQuery = `
-          INSERT INTO drinks (drinkid, orderid, menuid, cupsize, sugarlevel, iceamount, topping1, topping2, totaldrinkprice)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          INSERT INTO drinks (drinkid, orderid, menuid, cupsize, temperature, sugarlevel, iceamount, topping1, topping2, totaldrinkprice)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         `;
         
         await pool.query(drinkQuery, [
@@ -784,6 +795,7 @@ app.post('/api/orders/place', async (req, res) => {
           orderNumber,
           menuID,
           cupSize,
+          temperature,
           sugarLevel,
           iceAmount,
           topping1,
@@ -983,6 +995,16 @@ app.post('/api/orders/placeOrder', async (req, res) => {
           const sizeResult = await pool.query("SELECT menuid FROM menu WHERE itemname ILIKE '%large%' LIMIT 1");
           cupSize = sizeResult.rows.length > 0 ? sizeResult.rows[0].menuid : null;
         }
+
+        // Map temperature to menuID
+        let temperature = null;
+        if (item.modifications.temperature === 'iced') {
+          const tempResult = await pool.query("SELECT menuid FROM menu WHERE itemname = 'Iced'");
+          temperature = tempResult.rows.length > 0 ? tempResult.rows[0].menuid : null;
+        } else if (item.modifications.temperature === 'hot') {
+          const tempResult = await pool.query("SELECT menuid FROM menu WHERE itemname = 'Hot'");
+          temperature = tempResult.rows.length > 0 ? tempResult.rows[0].menuid : null;
+        } 
         
         // Map sugar level to menuID
         let sugarLevel = null;
@@ -1005,8 +1027,8 @@ app.post('/api/orders/placeOrder', async (req, res) => {
         
         // Insert the drink
         const drinkQuery = `
-          INSERT INTO drinks (drinkid, orderid, menuid, cupsize, sugarlevel, iceamount, topping1, topping2, totaldrinkprice)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          INSERT INTO drinks (drinkid, orderid, menuid, cupsize, temperature, sugarlevel, iceamount, topping1, topping2, totaldrinkprice)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         `;
         
         await pool.query(drinkQuery, [
@@ -1014,6 +1036,7 @@ app.post('/api/orders/placeOrder', async (req, res) => {
           orderNumber,
           menuID,
           cupSize,
+          temperature,
           sugarLevel,
           iceAmount,
           topping1,
@@ -1285,11 +1308,13 @@ app.get("/api/kitchen/orders", async (req, res) => {
         d.quantity,
         m.itemname,
         d.cupsize,
+        d.temperature,
         d.sugarlevel,
         d.iceamount,
         d.topping1,
         d.topping2,
         sm.itemname AS sizename,
+        tm.itemname AS temperaturename, 
         sgm.itemname AS sugarname,
         im.itemname AS icename,
         t1m.itemname AS topping1name,
@@ -1299,6 +1324,7 @@ app.get("/api/kitchen/orders", async (req, res) => {
       JOIN menu m ON d.menuid = m.menuid
       LEFT JOIN customer c ON o.customerid = c.customerid
       LEFT JOIN menu sm ON d.cupsize = sm.menuid
+      LEFT JOIN menu tm ON d.temperature = tm.menuid
       LEFT JOIN menu sgm ON d.sugarlevel = sgm.menuid
       LEFT JOIN menu im ON d.iceamount = im.menuid
       LEFT JOIN menu t1m ON d.topping1 = t1m.menuid
@@ -1331,6 +1357,7 @@ app.get("/api/kitchen/orders", async (req, res) => {
           name: r.itemname,
           quantity: r.quantity,
           size: r.sizename,
+          temperature: r.tempname,
           sugar: r.sugarname,
           ice: r.icename,
           topping1: r.topping1name,

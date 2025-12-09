@@ -43,7 +43,7 @@ async function fetchOrders() {
     
     const data = await response.json();
     return data;
-}
+} 
 
 function renderOrders(orders) {
     board.innerHTML = "";
@@ -98,10 +98,13 @@ function renderOrders(orders) {
                 // Include customizations if they exist
                 let customizationsHTML = '';
 
-                if (item.size || item.sugar || item.ice || item.topping1 || item.topping2) {
+                if (item.size || item.temperature || item.sugar || item.ice || item.topping1 || item.topping2) {
                     customizationsHTML = '<div class="item-customizations">';
                     if (item.size) {
                         customizationsHTML += '<div>Size: ' + item.size + '</div>';
+                    }
+                    if (item.temperature) {
+                        customizationsHTML += '<div>Temperature: ' + item.temperature + '</div>';
                     }
                     if (item.sugar) {
                         customizationsHTML += '<div>Sugar: ' + item.sugar + '</div>';

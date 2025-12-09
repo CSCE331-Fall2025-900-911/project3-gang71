@@ -3,6 +3,7 @@ let currentDrink = null;
 let currentBasePrice = 0;
 let currentModifications = {
   size: 'small',
+  temperature: 'iced',
   sweetness: '100%',
   ice: '100%',
   toppings: []
@@ -132,6 +133,7 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
   if (existingModifications) {
     currentModifications = {
       size: existingModifications.size,
+      temperature: existingModifications.temperature,
       sweetness: existingModifications.sweetness,
       ice: existingModifications.ice,
       toppings: existingModifications.toppings ? [...existingModifications.toppings] : []
@@ -140,6 +142,7 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
     // reset modification values for new item
     currentModifications = {
       size: 'small',
+      temperature: 'iced',
       sweetness: '100%',
       ice: '100%',
       toppings: []
@@ -170,9 +173,16 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
   if (currentModifications.size === 'small' && smallBtn) smallBtn.classList.add("selected");
   else if (currentModifications.size === 'medium' && mediumBtn) mediumBtn.classList.add("selected");
   else if (currentModifications.size === 'large' && largeBtn) largeBtn.classList.add("selected");
+
+  // Set temperature button
+  const icedBtn = document.getElementById("icedButton");
+  const hotBtn = document.getElementById("hotButton");
+
+  if (currentModifications.temperature === 'iced' && icedBtn) icedBtn.classList.add("selected");
+  else if (currentModifications.temperature === 'hot' && hotBtn) hotBtn.classList.add("selected");
   
   // Set sweetness button
-  const sweetnessButtons = document.querySelectorAll('.modification:nth-of-type(3) .fourModificationChoices button');
+  const sweetnessButtons = document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button');
   sweetnessButtons.forEach(btn => {
     if (btn.textContent.trim() === currentModifications.sweetness) {
       btn.classList.add("selected");
@@ -180,7 +190,7 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
   });
   
   // Set ice button
-  const iceButtons = document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button');
+  const iceButtons = document.querySelectorAll('.modification:nth-of-type(5) .fourModificationChoices button');
   iceButtons.forEach(btn => {
     if (btn.textContent.trim() === currentModifications.ice) {
       btn.classList.add("selected");
@@ -216,6 +226,16 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
     };
   });
 
+  // add temperature listeners
+  const tempButtons = document.querySelectorAll(".temp-button");
+  tempButtons.forEach(btn => {
+    btn.onclick = () => {
+      tempButtons.forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      currentModifications.temperature = btn.dataset.temp;
+    };
+  });
+
   // add topping listeners
   toppingSelectElements.forEach(select => {
     select.onchange = () => {
@@ -234,9 +254,9 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
   });
 
   // add sweetness listeners
-  document.querySelectorAll('.modification:nth-of-type(3) .fourModificationChoices button').forEach(btn => {
+  document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button').forEach(btn => {
     btn.onclick = () => {
-      document.querySelectorAll('.modification:nth-of-type(3) .fourModificationChoices button')
+      document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button')
         .forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       currentModifications.sweetness = btn.textContent.trim();
@@ -244,11 +264,12 @@ function openModificationsPopup(drink, existingModifications = null, itemIndex =
   });
 
   // add ice listeners 
-  document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button').forEach(btn => {
+  document.querySelectorAll('.modification:nth-of-type(5) .fourModificationChoices button').forEach(btn => {
     btn.onclick = () => {
-      document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button')
+      document.querySelectorAll('.modification:nth-of-type(5) .fourModificationChoices button')
         .forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
+      console.log(btn)
       currentModifications.ice = btn.textContent.trim();
     };
   });
@@ -328,6 +349,7 @@ document.getElementById("addItemToCart").addEventListener("click", () => {
     quantity: preservedQuantity,
     modifications: {
       size: currentModifications.size,
+      temperature: currentModifications.temperature,
       sweetness: currentModifications.sweetness,
       ice: currentModifications.ice,
       toppings: currentModifications.toppings ? [...currentModifications.toppings] : []
@@ -386,6 +408,7 @@ function renderCart() {
         <div style="flex: 1;">
           <h2 style="margin: 0 0 5px 0;">${item.name}</h2>
           <p style="margin: 2px 0;">Size: ${item.modifications.size.charAt(0).toUpperCase() + item.modifications.size.slice(1)}</p>
+          <p style="margin: 2px 0;">Temperature: ${item.modifications.temperature.charAt(0).toUpperCase() + item.modifications.temperature.slice(1)}</p>
           <p style="margin: 2px 0;">Ice Level: ${item.modifications.ice}</p>
           <p style="margin: 2px 0;">Sugar Level: ${item.modifications.sweetness}</p>
           ${toppingsText}

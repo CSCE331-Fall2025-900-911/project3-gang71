@@ -3,6 +3,7 @@ let currentDrink = null;
 let currentBasePrice = 0;
 let currentModifications = {
   size: 'small',
+  temperature: 'iced',
   sweetness: '100%',
   ice: '100%',
   toppings: []
@@ -123,14 +124,11 @@ function adjustSidebarHeight() {
   
   // add room for rows
   menuRows.forEach((row, i) => {
-    console.log(`Row ${i} height:`, row.offsetHeight);
     totalHeight += row.offsetHeight;
   });
 
   let extraRoom = 30;
   totalHeight += extraRoom;
-
-  console.log('Total content height needed:', totalHeight);
   
   const difference = totalHeight - categories.offsetHeight;
   if (difference > 0) {
@@ -141,8 +139,6 @@ function adjustSidebarHeight() {
     spacer.className = 'sidebar-spacer';
     spacer.style.height = difference + 'px';
     categories.appendChild(spacer);
-    
-    console.log('Spacer added:', difference + 'px');
   }
 }
 
@@ -166,6 +162,7 @@ function openModificationsPopup(drink, existingModifications = null) {
   if (existingModifications) {
     currentModifications = {
       size: existingModifications.size,
+      temperature: existingModifications.temperature,
       sweetness: existingModifications.sweetness,
       ice: existingModifications.ice,
       toppings: existingModifications.toppings ? [...existingModifications.toppings] : []
@@ -174,6 +171,7 @@ function openModificationsPopup(drink, existingModifications = null) {
     // reset modification values for new item
     currentModifications = {
       size: 'small',
+      temperature: 'iced',
       sweetness: '100%',
       ice: '100%',
       toppings: []
@@ -207,8 +205,16 @@ function openModificationsPopup(drink, existingModifications = null) {
   else if (currentModifications.size === 'medium' && mediumBtn) mediumBtn.classList.add("selected");
   else if (currentModifications.size === 'large' && largeBtn) largeBtn.classList.add("selected");
 
+  // Set temperature button
+  const icedBtn = document.getElementById("icedButton");
+  const hotBtn = document.getElementById("hotButton");
+
+  if (currentModifications.temperature === 'iced' && icedBtn) icedBtn.classList.add("selected");
+  else if (currentModifications.temperature === 'hot' && hotBtn) hotBtn.classList.add("selected");
+  
+
   // Set sweetness button
-  const sweetnessButtons = document.querySelectorAll('.modification:nth-of-type(3) .fourModificationChoices button');
+  const sweetnessButtons = document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button');
   sweetnessButtons.forEach(btn => {
     if (btn.textContent.trim() === currentModifications.sweetness) {
       btn.classList.add("selected");
@@ -216,7 +222,7 @@ function openModificationsPopup(drink, existingModifications = null) {
   });
   
   // Set ice button
-  const iceButtons = document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button');
+  const iceButtons = document.querySelectorAll('.modification:nth-of-type(5) .fourModificationChoices button');
   iceButtons.forEach(btn => {
     if (btn.textContent.trim() === currentModifications.ice) {
       btn.classList.add("selected");
@@ -256,6 +262,22 @@ function openModificationsPopup(drink, existingModifications = null) {
 
   // Calculate and display price
   calculateModifiedPrice();
+
+  // add temperature listeners
+  const tempButtons = [icedBtn, hotBtn];
+  tempButtons.forEach(btn => {
+      if (!btn) return;
+
+      btn.onclick = () => {
+          tempButtons.forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          currentModifications.temperature = btn.dataset.temp;
+          if (ttsEnabled) {
+              speak(btn.dataset.text);
+          }
+      };
+  });
+
   
   // add topping listeners
   toppingSelects.forEach(select => {
@@ -285,9 +307,9 @@ function openModificationsPopup(drink, existingModifications = null) {
   });
 
   // add sweetness listeners
-  document.querySelectorAll('.modification:nth-of-type(3) .fourModificationChoices button').forEach(btn => {
+  document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button').forEach(btn => {
     btn.onclick = () => {
-      document.querySelectorAll('.modification:nth-of-type(3) .fourModificationChoices button')
+      document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button')
         .forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       currentModifications.sweetness = btn.textContent.trim();
@@ -300,9 +322,9 @@ function openModificationsPopup(drink, existingModifications = null) {
   });
 
   // add ice listeners 
-  document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button').forEach(btn => {
+  document.querySelectorAll('.modification:nth-of-type(5) .fourModificationChoices button').forEach(btn => {
     btn.onclick = () => {
-      document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button')
+      document.querySelectorAll('.modification:nth-of-type(5) .fourModificationChoices button')
         .forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       currentModifications.ice = btn.textContent.trim();
@@ -429,6 +451,7 @@ document.getElementById("addItemToCart").addEventListener("click", async () => {
     url: currentDrink.itemphoto,
     modifications: {
       size: currentModifications.size,
+      temperature: currentModifications.temperature,
       sweetness: currentModifications.sweetness,
       ice: currentModifications.ice,
       toppings: toppingDetails // Store full topping info, not just IDs
