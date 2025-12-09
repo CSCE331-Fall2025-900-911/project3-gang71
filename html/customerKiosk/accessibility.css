@@ -179,6 +179,27 @@ body.high-contrast .cartItemDiv {
     box-shadow: none !important;
 }
 
+body.high-contrast .itemMods span,
+body.high-contrast .cartItemDiv span,
+body.high-contrast .cartItemDiv button {
+    background-color: #000 !important;
+    color: #fff !important;
+    border-color: #fff !important;
+}
+
+body.high-contrast .qty-btn {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+}
+
+body.high-contrast .quantity-controls span {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+    border-radius: 5px;
+}
+
 body.high-contrast .bannerButtons,
 body.high-contrast .languageToggleBtn {
     display: inline-block;
