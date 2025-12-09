@@ -101,7 +101,7 @@ document.getElementById("addItemBtn").addEventListener("click", async () => {
   const response = await fetch("/api/inventory", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, price, unit, quantity }),
+    body: JSON.stringify({ name, price: parseFloat(price), unit, quantity: parseInt(quantity) }),
   });
   
   
@@ -117,9 +117,15 @@ document.getElementById("addItemBtn").addEventListener("click", async () => {
     document.getElementById("item-unit").value = "";
     document.getElementById("item-quantity").value = "";
   } else {
-    const text = await response.text();
-    console.error("Failed to add item:", text);
-    alert("Failed to add item.");
+    try {
+      const data = await response.json();
+      console.error("Failed to add item:", data);
+      alert("Failed to add item: " + (data.details || data.error));
+    } catch (e) {
+      const text = await response.text();
+      console.error("Failed to add item:", text);
+      alert("Failed to add item.");
+    }
   }
 });
 
