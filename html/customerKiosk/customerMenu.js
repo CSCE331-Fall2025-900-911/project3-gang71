@@ -775,10 +775,10 @@ async function getDrinkRec(weatherCategory) {
   const drinkRecSectionElement = document.getElementById("drinkRecSectionDiv");
   if (drinkRecSectionElement) {
     drinkRecSectionElement.innerHTML = `
-      <p id="drinkRecTitle">Based on the weather, we recommend:<p>
+      <p id="drinkRecTitle" data-translate>Based on the weather, we recommend:<p>
       <ul class="drinksList">
-        <li><p style="font-size: 1.07rem;">${randomResult.drinks[0]} (${randomResult.categories[0]})</p></li>
-        <li><p style="font-size: 1.07rem;">${randomResult.drinks[1]} (${randomResult.categories[1]})</p></li>
+        <li><p style="font-size: 1.07rem;" data-translate>${randomResult.drinks[0]} (${randomResult.categories[0]})</p></li>
+        <li><p style="font-size: 1.07rem;" data-translate>${randomResult.drinks[1]} (${randomResult.categories[1]})</p></li>
       </ul>
     `;
   }

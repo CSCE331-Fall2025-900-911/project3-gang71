@@ -663,9 +663,9 @@ function showPaymentScreen(totalPrice) {
   document.getElementById("paymentScreen").innerHTML = `
       <h2 style="margin-left: 2%; margin-top: 2%;">Select Payment Method:</h2>
       
-      <button class="ttsButton bannerButtons" data-text="Pay with card" id="cardPaymentBtn" style="margin-left: 2%; margin-top: 1%; margin-right: 10px;">Card</button>
-      <button class="ttsButton bannerButtons" data-text="Pay with cash" id="cashPaymentBtn" style="margin-right: 10px;">Cash</button>
-      <button class="ttsButton bannerButtons" data-text="Pay with points" id="pointsPaymentBtn" ${pointsButtonDisabled} style="${pointsButtonStyle}">
+      <button class="ttsButton bannerButtons" data-text="Pay with card" id="cardPaymentBtn" style="margin-left: 2%; margin-top: 1%; margin-right: 10px;" data-translate>Card</button>
+      <button class="ttsButton bannerButtons" data-text="Pay with cash" id="cashPaymentBtn" style="margin-right: 10px;" data-translate>Cash</button>
+      <button class="ttsButton bannerButtons" data-text="Pay with points" id="pointsPaymentBtn" data-translate ${pointsButtonDisabled} style="${pointsButtonStyle}">
         Points (${orderCostInPoints} pts)
       </button>
       
@@ -673,15 +673,15 @@ function showPaymentScreen(totalPrice) {
       ${!hasEnoughPoints ? `<p style="margin-left: 2%; color: #FFB6C1;">You need ${orderCostInPoints - customerPoints} more points to pay with points.</p>` : ''}
       
       <div style="margin-left: 2%; margin-top: 2%;">
-        <input id="tipInputAmount" type="text" placeholder="Enter tip amount" class="ttsButton" data-text="Enter tip amount">
-        <button onclick="addTip()" class="ttsButton bannerButtons" data-text="Add tip" style="margin-left: 10px;">Add Tip</button>
+        <input id="tipInputAmount" type="text" placeholder="Enter tip amount" class="ttsButton" data-text="Enter tip amount" data-translate>
+        <button onclick="addTip()" class="ttsButton bannerButtons" data-text="Add tip" style="margin-left: 10px;" data-translate>Add Tip</button>
       </div>
       
-      <h2 id="totalPriceH2" style="margin-left: 2%; margin-top: 2%;">Total price: $${totalPrice}</h2>
+      <h2 id="totalPriceH2" style="margin-left: 2%; margin-top: 2%;" data-translate>Total price: $${totalPrice}</h2>
       
-      <button class="ttsButton bannerButtons" data-text="Pay" onclick="handlePlaceOrder()" style="margin-left: 2%; margin-top: 2%; margin-right: 10px;">Pay</button>
+      <button class="ttsButton bannerButtons" data-text="Pay" onclick="handlePlaceOrder()" style="margin-left: 2%; margin-top: 2%; margin-right: 10px;" data-translate>Pay</button>
       <a href="customerCart.html" style="text-decoration: none; color: black;">
-          <button class="ttsButton bannerButtons" data-text="Back to cart">Back to cart</button>
+          <button class="ttsButton bannerButtons" data-text="Back to cart" data-translate>Back to cart</button>
       </a>
   `;
 
@@ -709,7 +709,7 @@ function showThankYouScreen() {
   sessionStorage.removeItem("cartItems");
 
   document.getElementById("paymentScreen").innerHTML = "";
-  document.getElementById("paymentScreen").innerHTML = "<h1 style='margin-left: 2%; margin-top: 2%;'>Your order is placed. Thank you for visiting!</h1>";
+  document.getElementById("paymentScreen").innerHTML = "<h1 style='margin-left: 2%; margin-top: 2%;' data-translate>Your order is placed. Thank you for visiting!</h1>";
   if (ttsEnabled) {
     speak("Your order is placed. Thank you for visiting!");
   }

@@ -145,14 +145,18 @@ app.post("/api/inventory", async (req, res) => {
       return res.status(400).json({ error: "Invalid input" });
     }
 
+    // Get the next supplyid
+    const idResult = await pool.query("SELECT MAX(supplyid) as max_id FROM inventory");
+    const nextId = (idResult.rows[0].max_id || 0) + 1;
+
     const result = await pool.query(
-      "INSERT INTO inventory (supplyname, supplyprice, unit, quantityonhand) VALUES ($1, $2, $3, $4) RETURNING *",
-      [name, price, unit, quantity]
+      "INSERT INTO inventory (supplyid, supplyname, supplyprice, unit, quantityonhand) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [nextId, name, parseFloat(price), unit, parseInt(quantity)]
     );
     res.json(result.rows[0]);
   } catch (err) {
     console.error("Database error:", err);
-    res.status(500).json({ error: "Database insert failed" });
+    res.status(500).json({ error: "Database insert failed", details: err.message });
   }
 });
 
