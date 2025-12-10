@@ -52,7 +52,6 @@
       <li><a href = "milkCaps.html#milkCapHeading" class="ttsButton" data-text="Milk Caps" data-translate>Milk Caps</a></li>
       <li><a href = "coffees.html#coffeeHeading" class="ttsButton" data-text="Coffees" data-translate>Coffees</a></li>
       <li><a href = "yogurts.html#yogurtHeading" class="ttsButton" data-text="Yogurts" data-translate>Yogurts</a></li>
-      <li><a href = "seasonal.html#seasonalHeading" class="ttsButton" data-text="Seasonal" data-translate>Seasonal</a></li>
       <li><a href = "reorder.html#reorderHeading" class="ttsButton" data-text="Reorder" data-translate>Reorder</a></li>
     </ul>
   </nav>
@@ -80,22 +79,12 @@
         </div>
 
         <div class="modification">
-          <h3>Temperature</h3>
-          <div class="fourModificationChoices">
-              <button id="icedButton" class="temp-button selected" data-temp="iced">Iced</button>
-              <button id="hotButton" class="temp-button" data-temp="hot">Hot</button>
-          </div>
-        </div>
-
-        <div class="modification">
             <h2 class = "drinkOptions" data-translate>Sweetness:</h2>
             <div class="fourModificationChoices">
                 <button class="buttonText" data-translate>0%</button>
-                <button class="buttonText" data-translate>35%</button>
                 <button class="buttonText" data-translate>50%</button>
                 <button class="buttonText" data-translate>75%</button>
                 <button class="buttonText" data-translate>100%</button>
-                <button class="buttonText" data-translate>120%</button>
             </div>
         </div>
 
@@ -124,8 +113,8 @@
         <h3 style="font-size: 2rem;" id="modifiedDrinkPrice"></h3>
 
         <div id="confirmModificationsDiv">
-            <button style="font-size: 1rem;" onclick="closeModificationsPopup()" data-translate>Cancel</button>
-            <button style="font-size: 1rem;"id="addItemToCart" data-translate>Add to Cart</button>
+            <button style="font-size: 1rem;" onclick="closeModificationsPopup()">Cancel</button>
+            <button style="font-size: 1rem;"id="addItemToCart">Add to Cart</button>
         </div>
     </div>
 
@@ -134,10 +123,10 @@
       <h1 id="classicsHeading" data-translate>Classics</h1>
       <div class="weatherAndRecs">
         <div class="weather">
-          <div id="weather" aria-live="polite" data-translate>Weather loading...</div>
+          <div id="weather" aria-live="polite">Weather loading...</div>
         </div>
         <div id="drinkRecSectionDiv" role="region" aria-label="Drink recommendations">
-          <p id="drinkRecSectionDiv" aria-live="polite" data-translate>Drink recommendations loading...</p>
+          <p id="drinkRecSectionDiv" aria-live="polite">Drink recommendations loading...</p>
         </div>
       </div>
     </div>

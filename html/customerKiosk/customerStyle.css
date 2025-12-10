@@ -310,13 +310,6 @@ body {
     background-color: white;
 }
 
-.fourModificationChoices {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 10px;
-}
-
-
 #modifiedDrinkPrice {
     width: fit-content;
     padding-top: 0;

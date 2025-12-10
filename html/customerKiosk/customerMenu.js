@@ -9,65 +9,151 @@ let currentModifications = {
   toppings: []
 };
 let availableToppings = [];
-let ttsEnabled = JSON.parse(sessionStorage.getItem("ttsEnabled") || "false"); // get tts setting from storage or use default setting
+let ttsEnabled = JSON.parse(sessionStorage.getItem("ttsEnabled") || "false");
 
 
 //-------------------- TOPPING HELPER FUNCTIONS --------------------//
-//----- get toppings from the databse //
+//----- get toppings from the database //
 async function loadToppings() {
   try {
     const response = await fetch('/api/menu/Topping');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     availableToppings = await response.json();
-    populateToppingDropdowns();
+    populateToppingButtons();
   } catch (err) {
     console.error("Error loading toppings:", err);
   }
 }
 
-//----- display toppings in each of the drop down menus //
-function populateToppingDropdowns() {
-  const topping1Select = document.querySelector('select[name="topping1"]');
-  const topping2Select = document.querySelector('select[name="topping2"]');
-
-  // clear selected toppings
-  [topping1Select, topping2Select].forEach(select => {
-    while (select.options.length > 1) {
-      select.remove(1);
-    }
-  });
-
-  // add "No Topping" option at the top
-  [topping1Select, topping2Select].forEach(select => {
-    const noToppingOption = document.createElement('option');
-    noToppingOption.value = "";
-    noToppingOption.textContent = "No Topping";
-    noToppingOption.dataset.price = "0";
-    noToppingOption.dataset.name = "No Topping";
-    noToppingOption.setAttribute('data-translate', ''); //  data-translate attribute
-    select.appendChild(noToppingOption);
-  });
-
-  // for the user - sort them in alphabetical order before displaying in dropdowns
+//----- display toppings as selectable buttons instead of dropdowns //
+function populateToppingButtons() {
+  const toppingContainer = document.getElementById('toppingButtonContainer');
+  
+  // Clear existing buttons
+  toppingContainer.innerHTML = '';
+  
+  // Sort toppings alphabetically for better UX
   availableToppings.sort((a, b) => a.itemname.localeCompare(b.itemname, undefined, { sensitivity: 'base' }));
-
-  // populate dropdowns
+  
+  // Create a button for each topping
   availableToppings.forEach(topping => {
-    const option1 = document.createElement('option');
-    option1.value = topping.menuid;
-    option1.textContent = `${topping.itemname} (+$${Number(topping.itemprice).toFixed(2)})`;
-    option1.dataset.price = topping.itemprice;
-    option1.dataset.name = topping.itemname;
-    option1.setAttribute('data-translate', ''); //  data-translate attribute
-    topping1Select.appendChild(option1);
-
-    const option2 = option1.cloneNode(true);
-    topping2Select.appendChild(option2);
+    const button = document.createElement('button');
+    button.className = 'topping-btn';
+    button.dataset.toppingId = topping.menuid;
+    button.dataset.toppingName = topping.itemname;
+    button.dataset.toppingPrice = topping.itemprice;
+    button.dataset.translate = '';
+    button.textContent = `${topping.itemname} (+${Number(topping.itemprice).toFixed(2)})`;
+    
+    // Click handler to toggle selection
+    button.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const isSelected = button.classList.contains('selected');
+      
+      if (isSelected) {
+        // Deselect topping
+        button.classList.remove('selected');
+        const index = currentModifications.toppings.findIndex(t => t.id === topping.menuid.toString());
+        if (index > -1) {
+          currentModifications.toppings.splice(index, 1);
+        }
+        
+        if (ttsEnabled) {
+          await speak(`${topping.itemname} removed`);
+        }
+      } else {
+        // Select topping
+        button.classList.add('selected');
+        currentModifications.toppings.push({
+          id: topping.menuid.toString(),
+          name: topping.itemname,
+          price: topping.itemprice
+        });
+        
+        if (ttsEnabled) {
+          await speak(`${topping.itemname} added. The extra cost is ${topping.itemprice}`);
+        }
+      }
+      
+      updateSelectAllButton();
+      calculateModifiedPrice();
+    });
+    
+    toppingContainer.appendChild(button);
   });
+  
+  // Setup Select All button
+  setupSelectAllButton();
   
   // Re-translate toppings if already in Spanish mode
   if (pageTranslator && pageTranslator.currentLanguage === 'ES') {
     setTimeout(() => pageTranslator.translatePage('ES'), 50);
+  }
+}
+
+// Setup the Select All button functionality
+function setupSelectAllButton() {
+  const selectAllBtn = document.getElementById('selectAllToppingsBtn');
+  if (!selectAllBtn) return;
+  
+  selectAllBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    
+    const allToppingButtons = document.querySelectorAll('.topping-btn');
+    const allSelected = Array.from(allToppingButtons).every(btn => btn.classList.contains('selected'));
+    
+    if (allSelected) {
+      // Deselect all
+      allToppingButtons.forEach(btn => btn.classList.remove('selected'));
+      currentModifications.toppings = [];
+      
+      if (ttsEnabled) {
+        await speak('All toppings deselected');
+      }
+    } else {
+      // Select all
+      allToppingButtons.forEach(btn => {
+        if (!btn.classList.contains('selected')) {
+          btn.classList.add('selected');
+          const toppingId = btn.dataset.toppingId;
+          const toppingName = btn.dataset.toppingName;
+          const toppingPrice = btn.dataset.toppingPrice;
+          
+          // Add to modifications if not already there
+          if (!currentModifications.toppings.find(t => t.id === toppingId)) {
+            currentModifications.toppings.push({
+              id: toppingId,
+              name: toppingName,
+              price: toppingPrice
+            });
+          }
+        }
+      });
+      
+      if (ttsEnabled) {
+        await speak('All toppings selected');
+      }
+    }
+    
+    updateSelectAllButton();
+    calculateModifiedPrice();
+  });
+}
+
+// Update Select All button text based on current state
+function updateSelectAllButton() {
+  const selectAllBtn = document.getElementById('selectAllToppingsBtn');
+  if (!selectAllBtn) return;
+  
+  const allToppingButtons = document.querySelectorAll('.topping-btn');
+  const allSelected = Array.from(allToppingButtons).every(btn => btn.classList.contains('selected'));
+  
+  if (allSelected) {
+    selectAllBtn.textContent = 'Deselect All';
+    selectAllBtn.classList.add('all-selected');
+  } else {
+    selectAllBtn.textContent = 'Select All';
+    selectAllBtn.classList.remove('all-selected');
   }
 }
 
@@ -100,7 +186,7 @@ function renderDrinks(drinks, menuRow) {
       }
     });
   });
-  // Only re-translate if user has already switched to Spanish (don't auto-translate on first load)
+  // Only re-translate if user has already switched to Spanish
   if (pageTranslator.currentLanguage === 'ES') {
     pageTranslator.translatePage('ES');
   }
@@ -117,12 +203,10 @@ function adjustSidebarHeight() {
     return;
   }
 
-  // force a reflow to ensure accurate measurements
   void categories.offsetHeight;
 
-  let totalHeight = menuHeader.offsetHeight; // start with header
+  let totalHeight = menuHeader.offsetHeight;
   
-  // add room for rows
   menuRows.forEach((row, i) => {
     totalHeight += row.offsetHeight;
   });
@@ -143,7 +227,7 @@ function adjustSidebarHeight() {
 }
 
 window.addEventListener('load', () => {
-  setTimeout(adjustSidebarHeight, 1000); // wait until everything is loaded
+  setTimeout(adjustSidebarHeight, 1000);
 });
 
 //----- shows the pop up that allows the customer to make modifications to their drink before adding to the cart
@@ -151,12 +235,14 @@ function openModificationsPopup(drink, existingModifications = null) {
   currentDrink = drink;
   currentBasePrice = Number(drink.itemprice);
 
-  // reset modifications UI (size, sweetness, ice, toppings)
+  // reset modifications UI
   document.getElementById("smallDrinkButton").dataset.selected = "false";
   document.getElementById("mediumDrinkButton").dataset.selected = "false";
   document.getElementById("largeDrinkButton").dataset.selected = "false";
   document.querySelectorAll(".threeModificationChoices button, .fourModificationChoices button").forEach(btn => btn.classList.remove("selected"));
-  document.querySelectorAll("select").forEach(sel => sel.selectedIndex = 0);
+  
+  // Reset topping buttons
+  document.querySelectorAll('.topping-btn').forEach(btn => btn.classList.remove('selected'));
 
   // If editing existing item, load its modifications
   if (existingModifications) {
@@ -193,9 +279,6 @@ function openModificationsPopup(drink, existingModifications = null) {
   document.getElementById("largeDrinkButton").classList.add("ttsButton");
   document.getElementById("largeDrinkButton").dataset.text = "Large drink size selected. The extra cost is $1.00.";
 
-  // populate drop menus
-  populateToppingDropdowns();
-
   // Set size button based on current modifications
   const smallBtn = document.getElementById("smallDrinkButton");
   const mediumBtn = document.getElementById("mediumDrinkButton");
@@ -211,7 +294,6 @@ function openModificationsPopup(drink, existingModifications = null) {
 
   if (currentModifications.temperature === 'iced' && icedBtn) icedBtn.classList.add("selected");
   else if (currentModifications.temperature === 'hot' && hotBtn) hotBtn.classList.add("selected");
-  
 
   // Set sweetness button
   const sweetnessButtons = document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button');
@@ -229,7 +311,23 @@ function openModificationsPopup(drink, existingModifications = null) {
     }
   });
 
-  // add event listeners for modifications to recalc order price 
+  // Set previously selected toppings
+  if (existingModifications && existingModifications.toppings && existingModifications.toppings.length > 0) {
+    existingModifications.toppings.forEach(topping => {
+      const toppingBtn = document.querySelector(`[data-topping-id="${topping.id}"]`);
+      if (toppingBtn) {
+        toppingBtn.classList.add('selected');
+      }
+    });
+  }
+  
+  // Update Select All button state
+  updateSelectAllButton();
+
+  // Calculate and display price
+  calculateModifiedPrice();
+
+  // add event listeners for size modifications
   const sizeButtons = document.querySelectorAll(".size-button");
   sizeButtons.forEach(btn => {
     btn.onclick = () => {
@@ -246,62 +344,17 @@ function openModificationsPopup(drink, existingModifications = null) {
     };
   });
 
-  const toppingSelects = document.querySelectorAll('select[name="topping1"], select[name="topping2"]');
-  
-  // Set toppings AFTER dropdowns are populated
-  toppingSelects.forEach(sel => sel.selectedIndex = 0); // Reset first
-  
-  if (existingModifications && existingModifications.toppings && existingModifications.toppings.length > 0) {
-    existingModifications.toppings.forEach((topping, index) => {
-      if (toppingSelects[index]) {
-        // Set by menuid/id
-        toppingSelects[index].value = topping.id;
-      }
-    });
-  }
-
-  // Calculate and display price
-  calculateModifiedPrice();
-
   // add temperature listeners
   const tempButtons = [icedBtn, hotBtn];
   tempButtons.forEach(btn => {
-      if (!btn) return;
+    if (!btn) return;
 
-      btn.onclick = () => {
-          tempButtons.forEach(b => b.classList.remove("selected"));
-          btn.classList.add("selected");
-          currentModifications.temperature = btn.dataset.temp;
-          if (ttsEnabled) {
-              speak(btn.dataset.text);
-          }
-      };
-  });
-
-  
-  // add topping listeners
-  toppingSelects.forEach(select => {
-    select.onchange = async () => {
-      // store only currently selected toppings
-      toppingIds = Array.from(toppingSelects)
-        .map(sel => sel.value)
-        .filter(v => v);
-
-      currentModifications.toppings = toppingIds.map(toppingId => {
-        const topping = availableToppings.find(t => String(t.menuid) === String(toppingId));
-        return topping ? { id: toppingId, name: topping.itemname, price: topping.itemprice } : null;
-      }).filter(t => t !== null);
-
-      calculateModifiedPrice();
-
+    btn.onclick = () => {
+      tempButtons.forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      currentModifications.temperature = btn.dataset.temp;
       if (ttsEnabled) {
-        const newValue = select.value; // only capture the new value
-        const topping = availableToppings.find(t => String(t.menuid) === String(newValue)); // get topping for TTS
-
-        if (topping) {
-          const toppingText = "Topping selected: " + topping.itemname + ". The extra cost is $" + topping.itemprice;
-          await speak(toppingText);
-        }
+        speak(btn.dataset.text);
       }
     };
   });
@@ -380,11 +433,11 @@ async function closeModificationsPopupNav() {
 function calculateModifiedPrice() {
   let newPrice = currentBasePrice;
 
-  // just do a single re-calc instead of running sum
+  // Add size fees
   if (currentModifications.size === "medium") newPrice += 0.50;
   else if (currentModifications.size === "large") newPrice += 1.00;
 
-  // add topping fees
+  // Add topping fees (all selected toppings)
   if (currentModifications.toppings && currentModifications.toppings.length > 0) {
     currentModifications.toppings.forEach(topping => {
       if (topping && topping.price) {
@@ -393,7 +446,7 @@ function calculateModifiedPrice() {
     });
   }
 
-  // display / overwrite this new price 
+  // Display the new price 
   const priceElement = document.getElementById("modifiedDrinkPrice");
   if (priceElement) {
     priceElement.textContent = `$${newPrice.toFixed(2)}`;
@@ -431,20 +484,14 @@ function trapFocus(popup) {
 }
 
 //-------------------- CART FUNCTIONS --------------------//
-// THIS IS THE KEY CHANGE: Save to sessionStorage instead of local cart array
+// Add to cart - stores ALL selected toppings in sessionStorage
 document.getElementById("addItemToCart").addEventListener("click", async () => {
   if (!currentDrink) return;
 
   // compute final price using YOUR working calculation
   const finalPrice = calculateModifiedPrice();
 
-  // Get topping names for display (not just IDs)
-  const toppingDetails = currentModifications.toppings.map(toppingId => {
-    const topping = availableToppings.find(t => String(t.menuid) === String(toppingId));
-    return topping ? { id: toppingId, name: topping.itemname, price: topping.itemprice } : null;
-  }).filter(t => t !== null);
-
-  // Create cart item with proper structure
+  // Create cart item with ALL selected toppings (not just first 2)
   const cartItem = {
     name: currentDrink.itemname,
     price: finalPrice,
@@ -454,7 +501,7 @@ document.getElementById("addItemToCart").addEventListener("click", async () => {
       temperature: currentModifications.temperature,
       sweetness: currentModifications.sweetness,
       ice: currentModifications.ice,
-      toppings: toppingDetails // Store full topping info, not just IDs
+      toppings: [...currentModifications.toppings] // Store all toppings
     }
   };
 
@@ -471,10 +518,16 @@ document.getElementById("addItemToCart").addEventListener("click", async () => {
   if (ttsEnabled) {
     await speak(`${currentDrink.itemname} added to cart!`);
   }
-  alert(`${currentDrink.itemname} added to cart!`);
+  
+  // Show appropriate message based on topping count
+  let message = `${currentDrink.itemname} added to cart!`;
+  // if (currentModifications.toppings.length > 2) {
+  //   message += `\n\nNote: You selected ${currentModifications.toppings.length} toppings. All will be shown in cart, but only the first 2 will be processed in the final order due to system limitations.`;
+  // }
+  
+  alert(message);
 
-  // close popup after adding to cart
-  closeModificationsPopupNav(); // nav function reduces TTS if navigating to cart
+  closeModificationsPopupNav();
 });
 
 //-------------------------------- LOAD PAGE -----------------------------------//
@@ -513,7 +566,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-  // get elements
+  // TTS toggle setup
   const ttsToggle = document.getElementById("ttsToggle");
   const ttsButtonText = document.getElementById("ttsLabel");
 
@@ -524,10 +577,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // handle Enter/Space key toggling
     ttsToggle.addEventListener("keydown", async (e) => {
       if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault(); // prevent scrolling for space
+        e.preventDefault();
         ttsToggle.checked = !ttsToggle.checked;
         const event = new Event("change");
-        ttsToggle.dispatchEvent(event); // trigger existing change handler
+        ttsToggle.dispatchEvent(event);
       }
     });
 
@@ -553,7 +606,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const logoutButton = document.getElementById("logoutButton"); 
         if (logoutButton) logoutButton.focus();
       }, 50);
-
     });
   });
 });
@@ -579,17 +631,17 @@ function speak(text) {
       const audio = new Audio(audioUrl);
 
       audio.onended = () => {
-        resolve(); // resolve when audio finishes
+        resolve();
       };
 
       audio.onerror = (err) => {
-        reject(err); // reject on error
+        reject(err);
       };
 
       audio.play();
     } catch (err) {
       console.error("Error during TTS:", err);
-      resolve(); // resolve anyway so navigation doesn't break
+      resolve();
     }
   });
 }
@@ -599,9 +651,7 @@ document.querySelectorAll(".ttsButton").forEach(button => {
     if (!ttsEnabled) {
       return;
     }
-    e.preventDefault(); // stop navigation
-    console.log("Raw clicked element:", e.target);
-    console.log("Closest .ttsButton:", button);
+    e.preventDefault();
     const text = button.dataset.text;
     if (text == null) {
       return;
@@ -631,17 +681,14 @@ ttsButton.addEventListener("click", async () => {
 });
 
 //-------------------------------- WEATHER --------------------------------//
-
 async function getWeather() {
   const res = await fetch('/weather');
   const data = await res.json();
-
 
   if (data.cod === 200) {
     const resultDiv = document.getElementById('weather');
     const weatherMain = data.weather[0].main;
     let icon = 'partly_cloudy_day';
-
 
     switch (weatherMain) {
       case 'Clear':
@@ -675,24 +722,23 @@ async function getWeather() {
         icon = 'partly_cloudy_day';
     }
 
-
     resultDiv.innerHTML = `
-                <span class="weatherLocation" style ="font-size: 1.25rem"> ${data.name} </span>
-                <div class = "weatherRow">
-                    <div class="weatherColumn">
-                        <i class="material-symbols-outlined" style="font-size:50px;" alt="${weatherMain}">${icon}</i>
-                    </div>
-                    <div class="weatherColumn">
-                        <p style="font-size: 1.07rem; margin-top: 10px;">${data.main.temp}°F</p> 
-                        <p style="font-size: 1.07rem;">Feels like: ${data.main.feels_like}°F</p>
-                        <p style="font-size: 1.07rem;">Wind: ${data.wind.speed} m/s</p>       
-                    </div>
-                  </div>
-                `;
+      <span class="weatherLocation" style ="font-size: 1.25rem"> ${data.name} </span>
+      <div class = "weatherRow">
+        <div class="weatherColumn">
+          <i class="material-symbols-outlined" style="font-size:50px;" alt="${weatherMain}">${icon}</i>
+        </div>
+        <div class="weatherColumn">
+          <p style="font-size: 1.07rem; margin-top: 10px;">${data.main.temp}°F</p> 
+          <p style="font-size: 1.07rem;">Feels like: ${data.main.feels_like}°F</p>
+          <p style="font-size: 1.07rem;">Wind: ${data.wind.speed} m/s</p>       
+        </div>
+      </div>
+    `;
   }
   
   let category = getWeatherCategory(data.main.feels_like);
-  getDrinkRec(category); // get drink recommendations based on weather category
+  getDrinkRec(category);
 }
 
 function getWeatherCategory(feelsLikeTemp) {
@@ -700,7 +746,7 @@ function getWeatherCategory(feelsLikeTemp) {
   if (feelsLikeTemp >= 70) return "warm";
   if (feelsLikeTemp >= 55) return "cool";
   if (feelsLikeTemp >= 40) return "cold";
-  return "cold"; // below 40°F
+  return "cold";
 }
 
 //------------------------------ DRINK RECOMMENDATION ------------------------------//
@@ -719,26 +765,19 @@ function fetchDrinkOptions(weather) {
     fetch(`/api/menu?search=${encodeURIComponent(keyword)}`)
       .then(res => res.json())
       .then(data => {
-      if (!data || data.length === 0) {
-        console.log("No drinks found for " + keyword);
-        return { drinks: [], categories: [] };
-      }
+        if (!data || data.length === 0) {
+          return { drinks: [], categories: [] };
+        }
 
-      // filter out unwanted categories
-      const excludedCategories = ['Topping', 'Modification'];
-      const filteredData = data.filter(drink => 
-        !excludedCategories.includes(drink.itemcategory)
-      );
+        const excludedCategories = ['Topping', 'Modification'];
+        const filteredData = data.filter(drink => 
+          !excludedCategories.includes(drink.itemcategory)
+        );
 
-      if (filteredData.length === 0) {
-        console.log("No valid drinks found for " + keyword);
-      }
-
-      // extract names and categories
-      let drink = filteredData.map(drink => drink.itemname);
-      let category = filteredData.map(drink => drink.itemcategory);
-      return { drink, category };
-    })
+        let drink = filteredData.map(drink => drink.itemname);
+        let category = filteredData.map(drink => drink.itemcategory);
+        return { drink, category };
+      })
       .catch(err => {
         console.error("Error fetching drink recommendation options:", err);
         return { drinks: [], categories: [] };
@@ -749,8 +788,7 @@ function fetchDrinkOptions(weather) {
   return Promise.all(promises).then(results => results.flat());
 }
 
-function selectRandomDrinks(result, count = 2) { // default 2 drink recs
-  // flatten
+function selectRandomDrinks(result, count = 2) {
   let allDrinks = [];
   let allCategories = [];
   
@@ -763,19 +801,15 @@ function selectRandomDrinks(result, count = 2) { // default 2 drink recs
     }
   });
 
-  // get 2 random indices
   let indices = [];
   while (indices.length < count) {
     let randomIndex = Math.floor(Math.random() * allDrinks.length);
-    if (!indices.includes(randomIndex)) { // no duplicate recs
+    if (!indices.includes(randomIndex)) {
       indices.push(randomIndex);
     }
   }
 
-  console.log(indices);
-  // extract drinks and categories using the same indices
   let drinks = indices.map(i => allDrinks[i]);
-  console.log(drinks);
   let categories = indices.map(i => allCategories[i]);  
   return { drinks, categories };
 }
@@ -785,8 +819,7 @@ async function getDrinkRec(weatherCategory) {
  
   let randomResult;
   if (storedDrinks) {
-    randomResult = JSON.parse(storedDrinks); // use existing recommendations
-
+    randomResult = JSON.parse(storedDrinks);
   } else {
     const result = await fetchDrinkOptions(weatherCategory);
     randomResult = selectRandomDrinks(result);
