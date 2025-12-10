@@ -1047,6 +1047,11 @@ app.post('/api/orders/placeOrder', async (req, res) => {
           topping2,
           parseFloat(item.price)
         ]);
+
+        for(i = 0; i < item.modifications.toppings.length; ++i) {
+          curToppingId = item.modifications.toppings[i] ? parseInt(item.modifications.toppings[i].id) : null
+          await pool.query(`INSERT INTO toppings (drinkid, toppingID) VALUES ($1, $2)`, [currentDrinkId, curToppingId]);
+        }
       }
     }
     
@@ -1282,18 +1287,33 @@ app.get('/api/reorder', async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT m.itemName, d.menuID, o.orderDate, m.itemPhoto, d.cupSize, d.sugarLevel, d.iceAmount, d.topping1, d.topping2, d.totalDrinkPrice 
+      `SELECT m.itemName, d.menuID, o.orderDate, m.itemPhoto, d.cupSize, d.sugarLevel, d.iceAmount, d.temperature, d.totalDrinkPrice 
         FROM drinks d JOIN "order" o ON d.orderID = o.orderID 
           JOIN customer c ON c.customerID = o.customerID 
           JOIN menu m ON d.menuID = m.menuID
         WHERE c.customerID = (SELECT customerID FROM customer
           WHERE firstName = $1 AND lastName = $2)
-        ORDER BY o.orderDate DESC;`,
+        ORDER BY o.orderDate DESC
+        LIMIT 4;`,
       [namesSeparated[0], namesSeparated[1]]
     );
     res.json(result.rows);
   } catch (err) {
     console.error("Reorder query failed: ", err);
+    res.status(500).json({ error: "Reorder failed" });
+  }
+});
+
+app.get("/api/reorder/drinkToppings", async (req, res) => {
+  try {
+    const drinkID = req.query.drinkID;
+    const result = await pool.query(
+      `SELECT toppingID FROM toppings WHERE drinkID = $1;`,
+      [drinkID]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Toppings query failed: ", err);
     res.status(500).json({ error: "Reorder failed" });
   }
 });
