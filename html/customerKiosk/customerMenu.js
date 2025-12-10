@@ -71,7 +71,7 @@ function populateToppingButtons() {
         });
         
         if (ttsEnabled) {
-          await speak(`${topping.itemname} added. The extra cost is ${topping.itemprice}`);
+          await speak(`${topping.itemname} added. The extra cost is $${topping.itemprice}`);
         }
       }
       
@@ -131,7 +131,7 @@ function setupSelectAllButton() {
       });
       
       if (ttsEnabled) {
-        await speak('All toppings selected');
+        await speak('All toppings selected the extra cost is $' + availableToppings.reduce((sum, t) => sum + Number(t.itemprice), 0).toFixed(2));
       }
     }
     
@@ -361,31 +361,7 @@ function openModificationsPopup(drink, existingModifications = null) {
 
   
   // add topping listeners
-  toppingSelects.forEach(select => {
-    select.onchange = async () => {
-      // store only currently selected toppings
-      toppingIds = Array.from(toppingSelects)
-        .map(sel => sel.value)
-        .filter(v => v);
-
-      currentModifications.toppings = toppingIds.map(toppingId => {
-        const topping = availableToppings.find(t => String(t.menuid) === String(toppingId));
-        return topping ? { id: toppingId, name: topping.itemname, price: topping.itemprice } : null;
-      }).filter(t => t !== null);
-
-      calculateModifiedPrice();
-
-      if (ttsEnabled) {
-        const newValue = select.value; // only capture the new value
-        const topping = availableToppings.find(t => String(t.menuid) === String(newValue)); // get topping for TTS
-
-        if (topping) {
-          const toppingText = "Topping selected: " + topping.itemname + ". The extra cost is $" + topping.itemprice;
-          await speak(toppingText);
-        }
-      }
-    };
-  });
+  // move these to only the topping population area because toppingselected doesn't exist anymore (since that was for the dropdown container)
 
   // add sweetness listeners
   document.querySelectorAll('.modification:nth-of-type(4) .fourModificationChoices button').forEach(btn => {
