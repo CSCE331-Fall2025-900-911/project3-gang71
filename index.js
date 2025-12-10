@@ -1287,7 +1287,7 @@ app.get('/api/reorder', async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT m.itemName, d.menuID, o.orderDate, m.itemPhoto, d.cupSize, d.sugarLevel, d.iceAmount, d.temperature, d.totalDrinkPrice 
+      `SELECT m.itemName, d.drinkID, d.menuID, o.orderDate, m.itemPhoto, d.cupSize, d.sugarLevel, d.iceAmount, d.temperature, d.totalDrinkPrice 
         FROM drinks d JOIN "order" o ON d.orderID = o.orderID 
           JOIN customer c ON c.customerID = o.customerID 
           JOIN menu m ON d.menuID = m.menuID
