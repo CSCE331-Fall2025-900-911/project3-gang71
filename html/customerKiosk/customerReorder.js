@@ -886,8 +886,9 @@ async function displayDrink(item) {
     }
   });
 
-  if (pageTranslator.currentLanguage === 'ES') {
-    pageTranslator.translatePage('ES');
+  // Re-translate toppings if already in Spanish mode
+  if (pageTranslator && pageTranslator.currentLanguage === 'ES') {
+    setTimeout(() => pageTranslator.translatePage('ES'), 50);
   }
 }
 
