@@ -273,7 +273,7 @@ function openModificationsPopup(drink, existingModifications = null) {
           btn.classList.add("selected");
           currentModifications.temperature = btn.dataset.temp;
           if (ttsEnabled) {
-              speak(btn.dataset.text);
+            speak(`${btn.dataset.temp} temperature selected`);
           }
       };
   });
