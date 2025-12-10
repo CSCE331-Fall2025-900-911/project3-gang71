@@ -626,18 +626,44 @@ async function getWeather() {
 
 
     resultDiv.innerHTML = `
-                <span class="weatherLocation"> ${data.name} </span>
-                <div class = "weatherRow">
-                    <div class="weatherColumn">
-                        <i class="material-symbols-outlined" style="font-size:50px;" alt="${weatherMain}">${icon}</i>
-                    </div>
-                    <div class="weatherColumn">
-                        <p style="font-size: 1rem;">${data.main.temp}°F</p> 
-                        <p style="font-size: 1rem;">Feels like: ${data.main.feels_like}°F</p>
-                        <p style="font-size: 1rem;">Wind: ${data.wind.speed} m/s</p>       
-                    </div>
-                  </div>
-                `;
+      <span class="weatherLocation"
+        style="font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 15px;">
+        <span data-translate>Location:</span> ${data.name}
+      </span>
+
+      <div class="weatherRow" style="display: flex; gap: 20px; align-items: center;">
+        <div class="weatherColumn" style="flex-shrink: 0;">
+          <i class="material-symbols-outlined"
+            style="font-size: 60px; color: #d56087ff;"
+            alt="${weatherMain}">
+            ${icon}
+          </i>
+        </div>
+
+        <div class="weatherColumn" style="flex: 1;">
+          <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;">
+            <span data-translate>Temperature:</span>
+            <span class="dynamic" style="font-weight: bold; color: #d56087ff;">
+              ${data.main.temp}°F
+            </span>
+          </p>
+
+          <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;">
+            <span data-translate>Feels like:</span>
+            <span class="dynamic" style="font-weight: bold; color: #d56087ff;">
+              ${data.main.feels_like}°F
+            </span>
+          </p>
+
+          <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;">
+            <span data-translate>Wind:</span>
+            <span class="dynamic" style="font-weight: bold; color: #d56087ff;">
+              ${data.wind.speed} m/s
+            </span>
+          </p>
+        </div>
+      </div>
+    `;
   }
   
   let category = getWeatherCategory(data.main.feels_like);
@@ -746,10 +772,10 @@ async function getDrinkRec(weatherCategory) {
   const drinkRecSectionElement = document.getElementById("drinkRecSectionDiv");
   if (drinkRecSectionElement) {
     drinkRecSectionElement.innerHTML = `
-      <p id="drinkRecTitle" data-translate>Based on the weather, we recommend:<p>
-      <ul class="drinksList">
-        <li><p data-translate>${randomResult.drinks[0]} (${randomResult.categories[0]})</p></li>
-        <li><p data-translate>${randomResult.drinks[1]} (${randomResult.categories[1]})</p></li>
+      <p style="font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 15px;" id="drinkRecTitle" data-translate>Based on the weather, we recommend:<p>
+      <ul style="list-style-type: none;" class="drinksList">
+        <li><p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;" data-translate>${randomResult.drinks[0]} (${randomResult.categories[0]})</p></li>
+        <li><p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;" data-translate>${randomResult.drinks[1]} (${randomResult.categories[1]})</p></li>
       </ul>
     `;
   }
