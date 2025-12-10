@@ -427,12 +427,14 @@ function renderCartItems() {
     minusBtn.addEventListener("click", () => {
       minusBtn.style.backgroundColor = "#FF69B4";
       setTimeout(() => minusBtn.style.backgroundColor = "#FFB6C1", 150);
-      
+
       if (item.quantity > 1) {
         item.quantity--;
+        speak(`Reduced ${item.name} by 1`);
         sessionStorage.setItem('cartItems', JSON.stringify(items));
         renderCartItems(); // NO RELOAD: Re-render instead of reload
       } else {
+        speak(`Remove ${item.name} from cart?`);
         if (confirm("Remove this item from cart?")) {
           items.splice(index, 1);
           sessionStorage.setItem('cartItems', JSON.stringify(items));
@@ -446,6 +448,7 @@ function renderCartItems() {
       setTimeout(() => plusBtn.style.backgroundColor = "#FFB6C1", 150);
       
       item.quantity++;
+      speak(`Increased ${item.name} by 1`);
       sessionStorage.setItem('cartItems', JSON.stringify(items));
       renderCartItems(); // NO RELOAD: Re-render instead of reload
     });
@@ -454,8 +457,8 @@ function renderCartItems() {
     const removeBtn = itemDiv.querySelector(".removeBtn");
     removeBtn.addEventListener("click", async () => {
       if (ttsEnabled) {
-        const drinkMods = plainModsText;
-        await speak(`Removing ${item.name} with ${drinkMods}`);
+        // const drinkMods = plainModsText;
+        await speak(`Removing ${item.name} from cart`);
       }
 
       items.splice(index, 1);
@@ -645,7 +648,7 @@ async function checkout() {
           toppingString = `${item.modifications.toppings[0].name} and ${item.modifications.toppings[1].name}`;
         }
 
-        orderString = `A $${item.price.toFixed(2)} ${item.modifications.size} ${item.temperature} ${item.name} 
+        orderString = `A $${item.price.toFixed(2)} ${item.modifications.size} ${item.modifications.temperature} ${item.name} 
           with ${item.modifications.sweetness} sweetness, 
           ${item.modifications.ice} ice, 
           and ${toppingString}`;

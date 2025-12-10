@@ -248,6 +248,35 @@ function openModificationsPopup(drink, existingModifications = null) {
   popup.dataset.removeFocusTrap = trapFocus(popup);
 }
 
+function trapFocus(popup) {
+  const focusableElements = popup.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  const firstEl = focusableElements[0];
+  const lastEl = focusableElements[focusableElements.length - 1];
+
+  function handleTab(e) {
+    if (e.key === "Tab") {
+      if (e.shiftKey) {
+        if (document.activeElement === firstEl) {
+          e.preventDefault();
+          lastEl.focus();
+        }
+      } else {
+        if (document.activeElement === lastEl) {
+          e.preventDefault();
+          firstEl.focus();
+        }
+      }
+    }
+    if (e.key === "Escape") {
+      closeModificationsPopup();
+    }
+  }
+  popup.addEventListener("keydown", handleTab);
+  return () => popup.removeEventListener("keydown", handleTab);
+}
+
 //----- closes popup and resets buttons 
 async function closeModificationsPopup() {
   const modificationsPopupDiv = document.getElementById("modificationsPopup");
@@ -737,16 +766,28 @@ async function displayReorder(items) {
     <p class="menuItemP" style="font-size: 1.07rem; margin-bottom: 25px" data-translate>${modsText || "No modifications"}</p>
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 50px";>
         <h1 class="menuItemH1" style="font-size: 2rem;">$${Number(drink.price).toFixed(2)}</h1>
-        <button class="menuItemButton" style="font-size: 1.1rem; margin-left: -30px;" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.name} with ${plainModsText || "no modifications"}" data-translate>Customize</button>
+        <button class="menuItemButton ttsButton" style="font-size: 1.1rem; margin-left: -30px;" data-id="${drink.menuid}" data-text="Customize ${drink.name}" data-translate>Customize</button>
       </div>
     </div>
     `;
+
+    console.log("Button created with data-text:", drink.menuid, drink.name, plainModsText);
+
 
     reorderDiv.appendChild(drinkDiv);
 
     // event listeners for adding drink to cart
     const addDrinkToOrderButton = drinkDiv.querySelector(".menuItemButton");
+    console.log("Selected button element:", addDrinkToOrderButton);
+console.log("Button dataset:", addDrinkToOrderButton?.dataset);
+console.log("Button dataset.text:", addDrinkToOrderButton?.dataset?.text);
+    
     addDrinkToOrderButton.addEventListener("click", async e => {
+      console.log("Clicked button:", e.currentTarget);
+      console.log("Clicked dataset:", e.currentTarget.dataset);
+      console.log("Clicked dataset.text:", e.currentTarget.dataset.text);
+      const drinkNameText = e.currentTarget.dataset.text;
+
       const res = await fetch(`/api/drinkbyid?id=${drink.menuid}`);
       const baseDrink = await res.json();
       openModificationsPopup(baseDrink[0], 
@@ -757,7 +798,6 @@ async function displayReorder(items) {
       });
 
       if (ttsEnabled) {
-        const drinkNameText = e.currentTarget.dataset.text;
         speak(drinkNameText);
       }
     });
@@ -777,3 +817,74 @@ function handleLogout() {
   // Redirect to logout endpoint which will clear server session
   window.location.href = '/api/logout';
 }
+
+//---------------------------------- TTS -----------------------------------//
+// tts function
+function speak(text) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch("/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+
+      if (!response.ok) throw new Error("TTS request failed");
+
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBlob = new Blob([arrayBuffer], { type: "audio/wav" });
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      const audio = new Audio(audioUrl);
+
+      audio.onended = () => {
+        resolve(); // resolve when audio finishes
+      };
+
+      audio.onerror = (err) => {
+        reject(err); // reject on error
+      };
+
+      audio.play();
+    } catch (err) {
+      console.error("Error during TTS:", err);
+      resolve(); // resolve anyway so navigation doesn't break
+    }
+  });
+}
+
+document.querySelectorAll(".ttsButton").forEach(button => {
+  button.addEventListener("click", async (e) => {
+    if (!ttsEnabled) {
+      return;
+    }
+    e.preventDefault(); // stop navigation
+    console.log("Raw clicked element:", e.target);
+    console.log("Closest .ttsButton:", button);
+    const text = button.dataset.text;
+    if (text == null) {
+      return;
+    }
+    console.log("TTS enabled?", ttsEnabled, "Text:", text);
+
+    const url = button.getAttribute("href");
+
+    if (ttsEnabled && text) {
+      await speak(text);
+      if (url) {
+        window.location.href = url;
+      }
+    }
+  });
+});
+
+const ttsButton = document.getElementById("ttsButton");
+const ttsToggle = document.getElementById("ttsToggle");
+
+ttsButton.addEventListener("click", async () => {
+  ttsToggle.checked = !ttsToggle.checked;
+  ttsButton.textContent = ttsToggle.checked ? "Disable TTS" : "Enable TTS";
+  ttsEnabled = ttsToggle.checked;
+  sessionStorage.setItem("ttsEnabled", JSON.stringify(ttsEnabled));
+  await speak(ttsToggle.checked ? "TTS enabled" : "TTS disabled");
+});

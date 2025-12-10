@@ -347,7 +347,33 @@ function openModificationsPopup(drink, existingModifications = null) {
   // add temperature listeners
   const tempButtons = [icedBtn, hotBtn];
   tempButtons.forEach(btn => {
-    if (!btn) return;
+      if (!btn) return;
+
+      btn.onclick = () => {
+          tempButtons.forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          currentModifications.temperature = btn.dataset.temp;
+          if (ttsEnabled) {
+            speak(`${btn.dataset.temp} temperature selected`);
+          }
+      };
+  });
+
+  
+  // add topping listeners
+  toppingSelects.forEach(select => {
+    select.onchange = async () => {
+      // store only currently selected toppings
+      toppingIds = Array.from(toppingSelects)
+        .map(sel => sel.value)
+        .filter(v => v);
+
+      currentModifications.toppings = toppingIds.map(toppingId => {
+        const topping = availableToppings.find(t => String(t.menuid) === String(toppingId));
+        return topping ? { id: toppingId, name: topping.itemname, price: topping.itemprice } : null;
+      }).filter(t => t !== null);
+
+      calculateModifiedPrice();
 
     btn.onclick = () => {
       tempButtons.forEach(b => b.classList.remove("selected"));
