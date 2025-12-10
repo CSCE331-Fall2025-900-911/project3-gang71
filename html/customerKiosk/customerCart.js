@@ -20,6 +20,19 @@ let currentModifications = {
 let availableToppings = [];
 let editingItemIndex = null;
 
+//-------------------- TRANSLATION HELPER FOR ALERTS --------------------//
+// Translate alert text using the pageTranslator
+async function alertTranslated(englishText) {
+  let textToShow = englishText;
+  
+  if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage === 'ES') {
+    // Get cached translation
+    textToShow = await pageTranslator.translate(englishText, 'ES');
+  }
+  
+  alert(textToShow);
+}
+
 //-------------------- EDIT FEATURE: TOPPING HELPER FUNCTIONS --------------------//
 // Load toppings from database
 async function loadToppings() {
@@ -496,7 +509,11 @@ function updateCartTotals() {
   const subtotal = document.createElement("h3");
   subtotal.id = "cartSubtotal";
   let subtotalAmount = calculateSubtotal();
-  subtotal.textContent = "Subtotal: $" + subtotalAmount;
+  // subtotal.textContent = "Subtotal: $" + subtotalAmount;
+  subtotal.innerHTML = `
+    <span data-translate> Subtotal: $ </span>
+    <span class="dynamic">${subtotalAmount}</span>
+  `;
   subtotal.style.marginLeft = "2%";
   subtotal.style.fontSize = "1.5rem";
   subtotal.style.marginBottom = "0";
@@ -505,7 +522,11 @@ function updateCartTotals() {
   const tax = document.createElement("h3");
   tax.id = "cartTax";
   let taxAmount = calculateTax(subtotalAmount);
-  tax.textContent = "Tax: $" + taxAmount;
+  // tax.textContent = "Tax: $" + taxAmount;
+  tax.innerHTML = `
+    <span data-translate> Tax: $ </span>
+    <span class="dynamic">${taxAmount}</span>
+  `;
   tax.style.marginLeft = "2%";
   tax.style.fontSize = "1.5rem";
   tax.style.marginTop = "1%";
@@ -515,7 +536,11 @@ function updateCartTotals() {
   const price = document.createElement("h2");
   price.id = "preTipPrice";
   preTaxAmount = calculateTotalPriceBeforeTip(subtotalAmount, taxAmount);
-  price.innerHTML = '<span data-translate>Total price</span>: $' + preTaxAmount;
+  // price.innerHTML = '<span data-translate>Total price</span>: $' + preTaxAmount;
+  price.innerHTML = `
+    <span data-translate> Total Price: $ </span>
+    <span class="dynamic">${preTaxAmount}</span>
+  `;
   price.style.marginLeft = "2%";
   price.style.marginTop = "1%";
   price.style.fontSize= "1.8rem";
@@ -524,7 +549,12 @@ function updateCartTotals() {
   orderCostInPoints = convertDollarsToPoints(Number(preTaxAmount));
   const pointsPrice = document.createElement("h3");
   pointsPrice.id = "cartPointsPrice";
-  pointsPrice.textContent = `Order cost in points: ${orderCostInPoints} points`;
+  // pointsPrice.textContent = `Order cost in points: ${orderCostInPoints} points`;
+  pointsPrice.innerHTML = `
+    <span data-translate>Order cost in points:</span> 
+    <span class="dynamic">${orderCostInPoints}</span> 
+    <span data-translate>points</span>
+  `;
   pointsPrice.style.marginLeft = "2%";
   pointsPrice.style.marginTop = "1%";
   pointsPrice.style.fontSize = "1.3rem";
@@ -534,7 +564,12 @@ function updateCartTotals() {
   pointsToEarn = calculatePointsToEarn(Number(preTaxAmount));
   const earnedPoints = document.createElement("h3");
   earnedPoints.id = "cartEarnedPoints";
-  earnedPoints.textContent = `Points you'll earn: ${pointsToEarn} points`;
+  // earnedPoints.textContent = `Points you'll earn: ${pointsToEarn} points`;
+  earnedPoints.innerHTML = `
+    <span data-translate>Points you'll earn: </span> 
+    <span id="dynamic">${pointsToEarn}</span> 
+    <span data-translate>points</span>
+  `;
   earnedPoints.style.marginLeft = "2%";
   earnedPoints.style.marginTop = "0.5%";
   earnedPoints.style.fontSize = "1.3rem";
@@ -673,16 +708,18 @@ function showPaymentScreen(totalPrice) {
 
   // ALIGNMENT FIX: Removed the wrapper divs around buttons to align them with text
   document.getElementById("paymentScreen").innerHTML = `
-      <h2 style="margin-left: 2%; margin-top: 2%;">Select Payment Method:</h2>
+      <h2 style="margin-left: 2%; margin-top: 2%;" data-translate>Select Payment Method:</h2>
       
       <button class="ttsButton bannerButtons" data-text="Pay with card" id="cardPaymentBtn" style="margin-left: 2%; margin-top: 1%; margin-right: 10px;" data-translate>Card</button>
       <button class="ttsButton bannerButtons" data-text="Pay with cash" id="cashPaymentBtn" style="margin-right: 10px;" data-translate>Cash</button>
       <button class="ttsButton bannerButtons" data-text="Pay with points" id="pointsPaymentBtn" data-translate ${pointsButtonDisabled} style="${pointsButtonStyle}">
-        Points (${orderCostInPoints} pts)
+        Points (<span class="dynamic">${orderCostInPoints}</span> pts)
       </button>
       
-      <h3 style="margin-left: 2%; margin-top: 2%; color: #f04e66ff;">Your Points Balance: ${customerPoints} points</h3>
-      ${!hasEnoughPoints ? `<p style="margin-left: 2%; color: #FFB6C1;">You need ${orderCostInPoints - customerPoints} more points to pay with points.</p>` : ''}
+      <h3 style="margin-left: 2%; margin-top: 2%; color: #f04e66ff;" data-translate>Your Points Balance: ${customerPoints} points</h3>
+
+      ${!hasEnoughPoints ? `<p data-translate style="margin-left: 2%; color: #FFB6C1;">
+          You need <span class="dynamic">${orderCostInPoints - customerPoints}</span> more points to pay with points. </p> ` : ''}
       
       <div style="margin-left: 2%; margin-top: 2%;">
         <input id="tipInputAmount" type="text" placeholder="Enter tip amount" class="ttsButton" data-text="Enter tip amount" data-translate>
@@ -696,6 +733,7 @@ function showPaymentScreen(totalPrice) {
           <button class="ttsButton bannerButtons" data-text="Back to cart" data-translate>Back to cart</button>
       </a>
   `;
+  pageTranslator.translatePage(pageTranslator.getCurrentLanguage());
 
   // Add event listener for points payment button
   document.getElementById("pointsPaymentBtn").addEventListener("click", () => {
@@ -731,7 +769,7 @@ function addTip() {
   const tipAmount = Number(document.getElementById("tipInputAmount").value);
 
   if (isNaN(tipAmount) || tipAmount < 0) {
-    alert("Please enter a valid tip amount");
+    alertTranslated("Please enter a valid tip amount");
     if (ttsEnabled) {
       speak("Please enter a valid tip amount");
     }
@@ -783,20 +821,20 @@ async function handlePlaceOrder() {
   
   // Check if cart is empty
   if (cartItems.length === 0) {
-    alert("Your cart is empty! Please add items before placing an order.");
+    await alertTranslated("Your cart is empty! Please add items before placing an order.");
     return;
   }
 
   // Check if payment method is selected
   if (!selectedPaymentMethod) {
-    alert("Please select a payment method before placing the order.");
+    await alertTranslated("Please select a payment method before placing the order.");
     return;
   }
   
   // If paying with points, check if customer has enough
   if (selectedPaymentMethod === "points") {
     if (customerPoints < orderCostInPoints) {
-      alert(`You don't have enough points. You need ${orderCostInPoints} points but only have ${customerPoints}.`);
+      await alertTranslated(`You don't have enough points. You need ${orderCostInPoints} points but only have ${customerPoints}.`);
       return;
     }
   }
@@ -817,7 +855,7 @@ async function handlePlaceOrder() {
     const tax = calculateTax(subtotal);
     const tipAmount = Number(document.getElementById("tipInputAmount").value);
     if (isNaN(tipAmount) || tipAmount < 0) {
-      alert("Please enter a valid tip amount");
+      await alertTranslated("Please enter a valid tip amount");
       if (ttsEnabled) {
         speak("Please enter a valid tip amount");
       }
@@ -859,11 +897,11 @@ async function handlePlaceOrder() {
     if (selectedPaymentMethod === "points") {
       // Subtract points used for payment
       await updateCustomerPoints(orderCostInPoints, 'subtract');
-      alert(`Order placed successfully! You paid with ${orderCostInPoints} points.\nRemaining points: ${customerPoints}`);
+      await alertTranslated(`Order placed successfully! You paid with ${orderCostInPoints} points.\nRemaining points: ${customerPoints}`);
     } else {
       // Add points earned from purchase (1 point per dollar spent)
       await updateCustomerPoints(pointsToEarn, 'add');
-      alert(`Order placed successfully! You earned ${pointsToEarn} points.\nTotal points: ${customerPoints}`);
+      await alertTranslated(`Order placed successfully! You earned ${pointsToEarn} points.\nTotal points: ${customerPoints}`);
     }
 
     // Success!
@@ -878,7 +916,7 @@ async function handlePlaceOrder() {
 
   } catch (error) {
     console.error("Error placing order:", error);
-    alert("Error placing order. Please try again.");
+    await alertTranslated("Error placing order. Please try again.");
   }
 }
 

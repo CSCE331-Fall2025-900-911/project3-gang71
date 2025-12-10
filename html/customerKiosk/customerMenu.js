@@ -11,6 +11,18 @@ let currentModifications = {
 let availableToppings = [];
 let ttsEnabled = JSON.parse(sessionStorage.getItem("ttsEnabled") || "false");
 
+//-------------------- TRANSLATION HELPER FOR ALERTS --------------------//
+// Translate alert text using the pageTranslator
+async function alertTranslated(englishText) {
+  let textToShow = englishText;
+  
+  if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage === 'ES') {
+    // Get cached translation
+    textToShow = await pageTranslator.translate(englishText, 'ES');
+  }
+  
+  alert(textToShow);
+}
 
 //-------------------- TOPPING HELPER FUNCTIONS --------------------//
 //----- get toppings from the database //
@@ -529,7 +541,7 @@ document.getElementById("addItemToCart").addEventListener("click", async () => {
   //   message += `\n\nNote: You selected ${currentModifications.toppings.length} toppings. All will be shown in cart, but only the first 2 will be processed in the final order due to system limitations.`;
   // }
   
-  alert(message);
+  alertTranslated(message);
 
   closeModificationsPopupNav();
 });
@@ -612,6 +624,20 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 50);
     });
   });
+
+  // Re-render weather when language changes
+  // if (typeof pageTranslator !== 'undefined') {
+  //   const originalTranslatePage = pageTranslator.translatePage.bind(pageTranslator);
+  //   pageTranslator.translatePage = async function(lang) {
+  //     await originalTranslatePage(lang);
+  //     // Refresh weather styling after translation, then re-translate
+  //     if (document.getElementById('weather')) {
+  //       await getWeather();
+  //       // Re-apply translations to the newly rendered weather box
+  //       setTimeout(() => originalTranslatePage(lang), 50);
+  //     }
+  //   };
+  // }
 });
 
 
@@ -726,20 +752,61 @@ async function getWeather() {
         icon = 'partly_cloudy_day';
     }
 
-    resultDiv.innerHTML = `
-      <span class="weatherLocation" style ="font-size: 1.25rem"> ${data.name} </span>
-      <div class = "weatherRow">
-        <div class="weatherColumn">
-          <i class="material-symbols-outlined" style="font-size:50px;" alt="${weatherMain}">${icon}</i>
-        </div>
-        <div class="weatherColumn">
-          <p style="font-size: 1.07rem; margin-top: 10px;">${data.main.temp}°F</p> 
-          <p style="font-size: 1.07rem;">Feels like: ${data.main.feels_like}°F</p>
-          <p style="font-size: 1.07rem;">Wind: ${data.wind.speed} m/s</p>       
-        </div>
-      </div>
-    `;
+  //   resultDiv.innerHTML = `
+  //       <span class="weatherLocation" style="font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 15px;">Location: ${data.name}</span>
+  //       <div class="weatherRow" style="display: flex; gap: 20px; align-items: center;">
+  //         <div class="weatherColumn" style="flex-shrink: 0;">
+  //           <i class="material-symbols-outlined" style="font-size: 60px; color: #d56087ff;" alt="${weatherMain}">${icon}</i>
+  //         </div>
+  //         <div class="weatherColumn" style="flex: 1;">
+  //           <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;"><span data-translate>Temperature:</span> <span class="dynamic" style="font-weight: bold; color: #d56087ff;">${data.main.temp}°F</span></p> 
+  //           <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;"><span data-translate>Feels like:</span> <span class="dynamic" style="font-weight: bold; color: #d56087ff;">${data.main.feels_like}°F</span></p>
+  //           <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;"><span data-translate>Wind:</span> <span class="dynamic" style="font-weight: bold; color: #d56087ff;">${data.wind.speed} m/s</span></p>       
+  //         </div>
+  //       </div>
+  //   `;
+  // }
+  resultDiv.innerHTML = `
+  <span class="weatherLocation"
+        style="font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 15px;">
+        <span data-translate>Location:</span> ${data.name}
+  </span>
+
+  <div class="weatherRow" style="display: flex; gap: 20px; align-items: center;">
+    <div class="weatherColumn" style="flex-shrink: 0;">
+      <i class="material-symbols-outlined"
+         style="font-size: 60px; color: #d56087ff;"
+         alt="${weatherMain}">
+         ${icon}
+      </i>
+    </div>
+
+    <div class="weatherColumn" style="flex: 1;">
+      <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;">
+        <span data-translate>Temperature:</span>
+        <span class="dynamic" style="font-weight: bold; color: #d56087ff;">
+          ${data.main.temp}°F
+        </span>
+      </p>
+
+      <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;">
+        <span data-translate>Feels like:</span>
+        <span class="dynamic" style="font-weight: bold; color: #d56087ff;">
+          ${data.main.feels_like}°F
+        </span>
+      </p>
+
+      <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;">
+        <span data-translate>Wind:</span>
+        <span class="dynamic" style="font-weight: bold; color: #d56087ff;">
+          ${data.wind.speed} m/s
+        </span>
+      </p>
+    </div>
+  </div>
+`;
   }
+
   
   let category = getWeatherCategory(data.main.feels_like);
   getDrinkRec(category);
@@ -835,10 +902,10 @@ async function getDrinkRec(weatherCategory) {
   const drinkRecSectionElement = document.getElementById("drinkRecSectionDiv");
   if (drinkRecSectionElement) {
     drinkRecSectionElement.innerHTML = `
-      <p id="drinkRecTitle" data-translate>Based on the weather, we recommend:<p>
-      <ul class="drinksList">
-        <li><p style="font-size: 1.07rem;" data-translate>${randomResult.drinks[0]} (${randomResult.categories[0]})</p></li>
-        <li><p style="font-size: 1.07rem;" data-translate>${randomResult.drinks[1]} (${randomResult.categories[1]})</p></li>
+      <p style="font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 15px;" id="drinkRecTitle" data-translate>Based on the weather, we recommend:<p>
+      <ul style="list-style-type: none;" class="drinksList">
+        <li><p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;" data-translate>${randomResult.drinks[0]} (${randomResult.categories[0]})</p></li>
+        <li><p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;" data-translate>${randomResult.drinks[1]} (${randomResult.categories[1]})</p></li>
       </ul>
     `;
   }

@@ -131,6 +131,8 @@ class PageTranslator {
             elToOriginal.forEach(({ el, original }, idx) => {
                 const translated = translatedMap[original] || original;
                 console.log('[translatePage] Setting element', idx, 'to:', translated);
+                // Simply set textContent - this preserves all child elements (like .dynamic spans)
+                // Each data-translate span is translated independently
                 el.textContent = translated;
             });
 
