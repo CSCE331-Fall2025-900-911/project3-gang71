@@ -53,81 +53,85 @@
       <li><a href = "milkCaps.html#milkCapHeading" class="ttsButton" data-text="Milk Caps" data-translate>Milk Caps</a></li>
       <li><a href = "coffees.html#coffeeHeading" class="ttsButton" data-text="Coffees" data-translate>Coffees</a></li>
       <li><a href = "yogurts.html#yogurtHeading" class="ttsButton"style = "color: #EB0C43;"  data-text="Yogurts" data-translate>Yogurts</a></li>
+      <li><a href = "seasonal.html#seasonalHeading" class="ttsButton" data-text="Seasonal" data-translate>Seasonal</a></li>
       <li><a href = "reorder.html#reorderHeading" class="ttsButton" data-text="Reorder" data-translate>Reorder</a></li>
     </ul>
   </nav>
 
-  <div id="drinksInCartSidebar" class="drinksInCartSidebar" role="complementary" aria-labelledby="cartHeading">
-        <h2 style="width: fit-content;">Cart</h2>
-        <div class="sidebar">
-        </div>
+  <!-- modifications popup -->
+  <div id="modificationsPopup" class="modificationsPopup" role="dialog" aria-modal="true" aria-labelledby="itemName">
+    <div class="toModifyDrinkInfo">
+      <img id="itemImage" alt="drink image">
+      <h2 id="itemName"></h2>
+      <p style="font-size: 1.2rem;"id="itemDescription"></p>
     </div>
 
-    <div id="modificationsPopup" class="modificationsPopup" role="dialog" aria-modal="true" aria-labelledby="itemName">
-        <div class="toModifyDrinkInfo">
-            <img id="itemImage" alt="drink image">
-            <h2 id="itemName"></h2>
-            <p style="font-size: 1.2rem;"id="itemDescription"></p>
-        </div>
-
-        <div class="modification">
-            <h2 class = "drinkOptions" data-translate>Cup Size:</h2>
-            <div class="threeModificationChoices">
-                <button id="smallDrinkButton" class="size-button" data-size="small" data-translate>Small</button>
-                <button id="mediumDrinkButton" class="size-button" data-size="medium" data-translate>Medium (+$0.50)</button>
-                <button id="largeDrinkButton" class="size-button" data-size="large" data-translate>Large (+$1.00)</button>
-            </div>
-        </div>
-
-        <div class="modification">
-            <h2 class = "drinkOptions" data-translate>Sweetness:</h2>
-            <div class="fourModificationChoices">
-                <button class="buttonText" data-translate>0%</button>
-                <button class="buttonText" data-translate>50%</button>
-                <button class="buttonText" data-translate>75%</button>
-                <button class="buttonText" data-translate>100%</button>
-            </div>
-        </div>
-
-        <div class="modification">
-            <h2 class = "drinkOptions" data-translate>Ice:</h2>
-            <div class="fourModificationChoices">
-                <button class="buttonText" data-translate>0%</button>
-                <button class="buttonText" data-translate>50%</button>
-                <button class="buttonText" data-translate>100%</button>
-                <button class="buttonText" data-translate>120%</button>
-            </div>
-        </div>
-
-        <div class="modification">
-            <h2 class = "drinkOptions" data-translate>Toppings:</h2>
-            <div class="twoModificationChoices" style="height: fit-content;">
-                <select name="topping1" style="font-size: 1.15rem; height: fit-content; margin-left: -70px;">
-                    <option value="" selected disabled hidden data-translate>Topping 1</option>
-                </select>
-                <select name="topping2" style="font-size: 1.15rem; height: fit-content;">
-                    <option value="" selected disabled hidden data-translate>Topping 2</option>
-                </select>
-            </div>
-        </div>
-
-        <h3 style="font-size: 2rem;"id="modifiedDrinkPrice"></h3>
-
-        <div id="confirmModificationsDiv">
-            <button style="font-size: 1rem;"onclick="closeModificationsPopup()">Cancel</button>
-            <button style="font-size: 1rem;"id="addItemToCart">Add to Cart</button>
-        </div>
+    <div class="modification">
+      <h2 class = "drinkOptions" data-translate>Cup Size:</h2>
+      <div class="threeModificationChoices">
+        <button id="smallDrinkButton" class="size-button" data-size="small" data-translate>Small</button>
+        <button id="mediumDrinkButton" class="size-button" data-size="medium" data-translate>Medium (+$0.50)</button>
+        <button id="largeDrinkButton" class="size-button" data-size="large" data-translate>Large (+$1.00)</button>
+      </div>
     </div>
+
+    <div class="modification">
+      <h2 class="drinkOptions" data-translate>Temperature:</h2>
+      <div class="threeModificationChoices">
+        <button id="icedButton" class="temp-button selected" data-temp="iced" data-text="Iced temperature selected" data-translate>Iced</button>
+        <button id="hotButton" class="temp-button" data-temp="hot" data-text="Hot temperature selected" data-translate>Hot</button>
+      </div>
+    </div>
+
+    <div class="modification">
+      <h2 class = "drinkOptions" data-translate>Sweetness:</h2>
+      <div class="fourModificationChoices">
+        <button class="buttonText" data-translate>0%</button>
+        <button class="buttonText" data-translate>35%</button>
+        <button class="buttonText" data-translate>50%</button>
+        <button class="buttonText" data-translate>75%</button>
+        <button class="buttonText selected" data-translate>100%</button>
+        <button class="buttonText" data-translate>120%</button>
+      </div>
+    </div>
+
+    <div class="modification">
+      <h2 class = "drinkOptions" data-translate>Ice:</h2>
+      <div class="fourModificationChoices">
+        <button data-translate class="buttonText">0%</button>
+        <button data-translate class="buttonText">50%</button>
+        <button data-translate class="buttonText selected">100%</button>
+        <button data-translate class="buttonText">120%</button>
+      </div>
+    </div>
+
+    <div class="modification">
+      <h2 class="drinkOptions" data-translate>Toppings:</h2>
+      <div class="topping-choices">
+        <button id="selectAllToppingsBtn" data-translate>Select All</button>
+        <div id="toppingButtonContainer" style="display: contents;">
+          <!-- Topping buttons will be dynamically inserted here -->
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-size: 2rem;"id="modifiedDrinkPrice"></h3>
+
+    <div id="confirmModificationsDiv">
+      <button style="font-size: 1rem;" onclick="closeModificationsPopup()" data-translate>Cancel</button>
+      <button style="font-size: 1rem;"id="addItemToCart" data-translate>Add to Cart</button>
+    </div>
+  </div>
 
   <main class="menu" id="menuContainer" tabindex="-1">
     <div class="menuHeader">
       <h1 id="yogurtHeading" data-translate>Yogurts</h1>
       <div class="weatherAndRecs">
         <div class="weather">
-          <div id="weather" aria-live="polite">Weather loading...</div>
+          <div id="weather" aria-live="polite" data-translate>Weather loading...</div>
         </div>
         <div id="drinkRecSectionDiv" role="region" aria-label="Drink recommendations">
-          <p id="drinkRecSectionDiv" aria-live="polite">Drink recommendations loading...</p>
+          <p id="drinkRecSectionDiv" aria-live="polite" data-translate>Drink recommendations loading...</p>
         </div>
       </div>
     </div>

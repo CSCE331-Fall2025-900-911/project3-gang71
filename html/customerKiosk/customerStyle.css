@@ -192,16 +192,12 @@ body {
 }
 
 .modificationsPopup h3 {
-    padding-top: 4%;
+    padding-top: 5%;
 }
 
 .modificationsPopup button {
     padding: 10px; 
     border-radius: 6px;
-}
-
-.modificationsPopup button:focus {
-    background-color: #ffe9ec;
 }
 
 .modifications {
@@ -309,6 +305,13 @@ body {
 #confirmModificationsDiv button:focus {
     background-color: white;
 }
+
+.fourModificationChoices {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+}
+
 
 #modifiedDrinkPrice {
     width: fit-content;
@@ -673,4 +676,95 @@ body {
 #tipInputAmount {
     margin-left: 0; /* Remove any inherited margin */
     width: 200px; /* Give it a fixed width */
+}
+
+/*--------------------------- TOPPING BUTTONS ON MODIFICATIONS POP UP --------------------------*/
+.modificationsPopup h3 {
+    padding-top: 20px !important;
+    padding-bottom: 10px !important;
+}
+
+/* Make modifications popup scrollable and taller */
+.modificationsPopup {
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-bottom: 40px !important;
+}
+
+/* Add extra margin to the bottom buttons so they're visible */
+#confirmModificationsDiv {
+  margin-top: 20px !important;
+  margin-bottom: 40px !important;
+}
+
+/* Topping button container - inline layout like other modifications */
+.topping-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+}
+
+/* Topping buttons styled to match other modification buttons */
+.topping-btn {
+  padding: 10px 15px;
+  border: 2px solid #000000;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.topping-btn.selected {
+  border-color: #000000;
+  background-color: #000000;
+  color: white;
+}
+
+/* Select All button styling */
+#selectAllToppingsBtn {
+  padding: 10px 15px;
+  border: 2px solid #666;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+#selectAllToppingsBtn.all-selected {
+  background-color: #666;
+  color: white;
+  border-color: #333;
+}
+
+/* Focus styles for accessibility */
+.topping-btn:focus,
+#selectAllToppingsBtn:focus {
+  outline: 3px solid #EB0C43;
+  background-color: #ffe9ec;
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling for modifications popup */
+.modificationsPopup::-webkit-scrollbar {
+  width: 10px;
+}
+
+.modificationsPopup::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 5px;
+}
+
+.modificationsPopup::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+.modificationsPopup::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
