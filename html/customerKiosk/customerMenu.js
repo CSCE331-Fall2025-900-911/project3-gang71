@@ -347,7 +347,7 @@ function openModificationsPopup(drink, existingModifications = null) {
   // add temperature listeners
   const tempButtons = [icedBtn, hotBtn];
   tempButtons.forEach(btn => {
-      if (!btn) return;
+    if (!btn) return;
 
       btn.onclick = () => {
           tempButtons.forEach(b => b.classList.remove("selected"));
@@ -375,12 +375,14 @@ function openModificationsPopup(drink, existingModifications = null) {
 
       calculateModifiedPrice();
 
-    btn.onclick = () => {
-      tempButtons.forEach(b => b.classList.remove("selected"));
-      btn.classList.add("selected");
-      currentModifications.temperature = btn.dataset.temp;
       if (ttsEnabled) {
-        speak(btn.dataset.text);
+        const newValue = select.value; // only capture the new value
+        const topping = availableToppings.find(t => String(t.menuid) === String(newValue)); // get topping for TTS
+
+        if (topping) {
+          const toppingText = "Topping selected: " + topping.itemname + ". The extra cost is $" + topping.itemprice;
+          await speak(toppingText);
+        }
       }
     };
   });
