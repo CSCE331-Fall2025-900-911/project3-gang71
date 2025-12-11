@@ -768,3 +768,10 @@ body {
 .modificationsPopup::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+h1[id] {
+    scroll-margin-top: 120px;
+}
+#logout {
+    scroll-margin-top: 120px; 
+}
