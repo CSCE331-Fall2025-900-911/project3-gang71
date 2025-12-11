@@ -517,18 +517,44 @@ async function getWeather() {
 
 
     resultDiv.innerHTML = `
-                <span class="weatherLocation"> ${data.name} </span>
-                <div class = "weatherRow">
-                    <div class="weatherColumn">
-                        <i class="material-symbols-outlined" style="font-size:50px;" alt="${weatherMain}">${icon}</i>
-                    </div>
-                    <div class="weatherColumn">
-                        <p style="font-size: 1rem;">${data.main.temp}°F</p> 
-                        <p style="font-size: 1rem;">Feels like: ${data.main.feels_like}°F</p>
-                        <p style="font-size: 1rem;">Wind: ${data.wind.speed} m/s</p>       
-                    </div>
-                  </div>
-                `;
+      <span class="weatherLocation"
+            style="font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 15px;">
+            <span data-translate>Location:</span> ${data.name}
+      </span>
+
+      <div class="weatherRow" style="display: flex; gap: 20px; align-items: center;">
+        <div class="weatherColumn" style="flex-shrink: 0;">
+          <i class="material-symbols-outlined"
+            style="font-size: 60px; color: #d56087ff;"
+            alt="${weatherMain}">
+            ${icon}
+          </i>
+        </div>
+
+        <div class="weatherColumn" style="flex: 1;">
+          <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;">
+            <span data-translate>Temperature:</span>
+            <span class="dynamic" style="font-weight: bold; color: #d56087ff;">
+              ${data.main.temp}°F
+            </span>
+          </p>
+
+          <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;">
+            <span data-translate>Feels like:</span>
+            <span class="dynamic" style="font-weight: bold; color: #d56087ff;">
+              ${data.main.feels_like}°F
+            </span>
+          </p>
+
+          <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;">
+            <span data-translate>Wind:</span>
+            <span class="dynamic" style="font-weight: bold; color: #d56087ff;">
+              ${data.wind.speed} m/s
+            </span>
+          </p>
+        </div>
+      </div>
+    `;
   }
   
   let category = getWeatherCategory(data.main.feels_like);
@@ -639,10 +665,10 @@ async function getDrinkRec(weatherCategory) {
   const drinkRecSectionElement = document.getElementById("drinkRecSectionDiv");
   if (drinkRecSectionElement) {
     drinkRecSectionElement.innerHTML = `
-      <p id="drinkRecTitle" data-translate>Based on the weather, we recommend:<p>
-      <ul class="drinksList">
-        <li><p data-translate>${randomResult.drinks[0]} (${randomResult.categories[0]})</p></li>
-        <li><p data-translate>${randomResult.drinks[1]} (${randomResult.categories[1]})</p></li>
+      <p style="font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 15px;" id="drinkRecTitle" data-translate>Based on the weather, we recommend:<p>
+      <ul style="list-style-type: none;" class="drinksList">
+        <li><p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;" data-translate>${randomResult.drinks[0]} (${randomResult.categories[0]})</p></li>
+        <li><p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;" data-translate>${randomResult.drinks[1]} (${randomResult.categories[1]})</p></li>
       </ul>
     `;
   }
@@ -727,7 +753,7 @@ async function displayReorder(items) {
     // gets the name of the base drink based on its menuID
     const drinkSize = await fetch(`/api/namebyid?id=${mods.cup}`);
     const cup = await drinkSize.json();
-    modsText += `Size: ${cup[0].itemname.split(' ')[0]}<br>`;
+    modsText += `<span data-translate>Size</span>: ${cup[0].itemname.split(' ')[0]}<br>`;
 
     // translates sugar, ice, and toppings to their names based on their IDs
     const drinkSugar = await fetch(`/api/namebyid?id=${mods.sugar}`);
@@ -737,7 +763,7 @@ async function displayReorder(items) {
     else if(sugar[0].itemname.split(' ')[0] === "30%" || sugar[0].itemname.split(' ')[0] === "50%") { sugarAmount = "50%"; }
     else if(sugar[0].itemname.split(' ')[0] === "70%") { sugarAmount = "75%"; }
     else { sugarAmount = "100%"; }
-    modsText += `Sweetness: ${sugarAmount}<br>`;
+    modsText += `<span data-translate>Sweetness</span>: ${sugarAmount}<br>`;
 
     const drinkIce = await fetch(`/api/namebyid?id=${mods.ice}`);
     const ice = await drinkIce.json();
@@ -746,16 +772,16 @@ async function displayReorder(items) {
     else if(ice[0].itemname.split(' ')[0] === "Less") { iceAmount = "50%"; }
     else if(ice[0].itemname.split(' ')[0] === "Regular") { iceAmount = "100%"; }
     else { iceAmount = "120%"; }
-    modsText += `Ice: ${iceAmount}<br>`;
+    modsText += `<span data-translate>Ice</span>: ${iceAmount}<br>`;
 
     if (mods.toppings && mods.toppings.length > 0) {
-      const toppingNames = mods.toppings.map(t => t.name).join(", ");
-      modsText += `Toppings: ${toppingNames}<br>`;
+      const toppingNames = mods.toppings.map(t => `<span data-translate>${t.name}</span>`).join(", ");
+      modsText += `<span data-translate>Toppings</span>: ${toppingNames}<br>`;
     }
     else {
-      modsText += `Toppings: None<br>`;
+      modsText += `<span data-translate>Toppings</span>: <span data-translate>None</span><br>`;
     }
-    modsText += `Last Ordered: ${drink.date.substring(0,10)}`;
+    modsText += `<span data-translate>Last Ordered</span>: ${drink.date.substring(0,10)}`;
 
     let plainModsText = modsText.replace(/<br>/g, ", ").replace(/&nbsp;/g, " ").trim();
 
@@ -763,7 +789,7 @@ async function displayReorder(items) {
     drinkDiv.innerHTML = `
     <img src="${drink.photo}" alt="${drink.name}" class="menuItemImg">
     <h2 class = "menuItemH2" data-translate>${drink.name}</h2>
-    <p class="menuItemP" style="font-size: 1.07rem; margin-bottom: 25px" data-translate>${modsText || "No modifications"}</p>
+    <p class="menuItemP" style="font-size: 1.07rem; margin-bottom: 25px" >${modsText || "No modifications"}</p>
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 50px";>
         <h1 class="menuItemH1" style="font-size: 2rem;">$${Number(drink.price).toFixed(2)}</h1>
         <button class="menuItemButton ttsButton" style="font-size: 1.1rem; margin-left: -30px;" data-id="${drink.menuid}" data-text="Customize ${drink.name}" data-translate>Customize</button>
