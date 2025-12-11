@@ -141,7 +141,7 @@ function setupSelectAllButton() {
 }
 
 // Update Select All button text based on current state
-function updateSelectAllButton() {
+async function updateSelectAllButton() {
   const selectAllBtn = document.getElementById('selectAllToppingsBtn');
   if (!selectAllBtn) return;
   
@@ -149,10 +149,24 @@ function updateSelectAllButton() {
   const allSelected = Array.from(allToppingButtons).every(btn => btn.classList.contains('selected'));
   
   if (allSelected) {
-    selectAllBtn.textContent = 'Deselect All';
+    // selectAllBtn.textContent = 'Deselect All';
+    // selectAllBtn.classList.add('all-selected');
+    let buttonText = 'Deselect All';
+    // Translate if in Spanish
+    if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage.toUpperCase() === 'ES') {
+      buttonText = await pageTranslator.translate(buttonText, 'ES');
+    }
+    selectAllBtn.textContent = buttonText;
     selectAllBtn.classList.add('all-selected');
   } else {
-    selectAllBtn.textContent = 'Select All';
+    // selectAllBtn.textContent = 'Select All';
+    // selectAllBtn.classList.remove('all-selected');
+    let buttonText = 'Select All';
+    // Translate if in Spanish
+    if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage.toUpperCase() === 'ES') {
+      buttonText = await pageTranslator.translate(buttonText, 'ES');
+    }
+    selectAllBtn.textContent = buttonText;
     selectAllBtn.classList.remove('all-selected');
   }
 }
@@ -912,9 +926,9 @@ async function displayDrink(item) {
     }
   });
 
-  // Re-translate toppings if already in Spanish mode
-  if (pageTranslator && pageTranslator.currentLanguage === 'ES') {
-    setTimeout(() => pageTranslator.translatePage('ES'), 50);
+  // Translate if in Spanish
+  if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage.toUpperCase() === 'ES') {
+    setTimeout(() => pageTranslator.translatePage('ES'), 100);
   }
 }
 
