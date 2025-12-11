@@ -99,7 +99,7 @@ function populateToppingButtons() {
   
   // Re-translate toppings if already in Spanish mode
   if (pageTranslator && pageTranslator.currentLanguage === 'ES') {
-    setTimeout(() => pageTranslator.translatePage('ES'), 50);
+    setTimeout(() => pageTranslator.translatePage('ES'), 200);
   }
 }
 
@@ -199,8 +199,9 @@ function renderDrinks(drinks, menuRow) {
     });
   });
   // Only re-translate if user has already switched to Spanish
+  // Add delay to allow DOM to fully render before translation
   if (pageTranslator.currentLanguage === 'ES') {
-    pageTranslator.translatePage('ES');
+    setTimeout(() => pageTranslator.translatePage('ES'), 150);
   }
 }
 
@@ -574,6 +575,11 @@ document.addEventListener("DOMContentLoaded", () => {
         startingIndex += 4;
         renderDrinks(chunk, menuRow);
       });
+      
+      // If page should start in Spanish, translate all content
+      if (pageTranslator && pageTranslator.currentLanguage === 'ES') {
+        setTimeout(() => pageTranslator.translatePage('ES'), 200);
+      }
     })
     .catch(err => {
       console.error("Error loading drinks:", err);
@@ -624,20 +630,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 50);
     });
   });
-
-  // Re-render weather when language changes
-  // if (typeof pageTranslator !== 'undefined') {
-  //   const originalTranslatePage = pageTranslator.translatePage.bind(pageTranslator);
-  //   pageTranslator.translatePage = async function(lang) {
-  //     await originalTranslatePage(lang);
-  //     // Refresh weather styling after translation, then re-translate
-  //     if (document.getElementById('weather')) {
-  //       await getWeather();
-  //       // Re-apply translations to the newly rendered weather box
-  //       setTimeout(() => originalTranslatePage(lang), 50);
-  //     }
-  //   };
-  // }
 });
 
 
@@ -752,20 +744,6 @@ async function getWeather() {
         icon = 'partly_cloudy_day';
     }
 
-  //   resultDiv.innerHTML = `
-  //       <span class="weatherLocation" style="font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 15px;">Location: ${data.name}</span>
-  //       <div class="weatherRow" style="display: flex; gap: 20px; align-items: center;">
-  //         <div class="weatherColumn" style="flex-shrink: 0;">
-  //           <i class="material-symbols-outlined" style="font-size: 60px; color: #d56087ff;" alt="${weatherMain}">${icon}</i>
-  //         </div>
-  //         <div class="weatherColumn" style="flex: 1;">
-  //           <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;"><span data-translate>Temperature:</span> <span class="dynamic" style="font-weight: bold; color: #d56087ff;">${data.main.temp}°F</span></p> 
-  //           <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;"><span data-translate>Feels like:</span> <span class="dynamic" style="font-weight: bold; color: #d56087ff;">${data.main.feels_like}°F</span></p>
-  //           <p style="font-size: 1.3rem; margin: 8px 0; font-weight: 500;"><span data-translate>Wind:</span> <span class="dynamic" style="font-weight: bold; color: #d56087ff;">${data.wind.speed} m/s</span></p>       
-  //         </div>
-  //       </div>
-  //   `;
-  // }
   resultDiv.innerHTML = `
   <span class="weatherLocation"
         style="font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 15px;">
