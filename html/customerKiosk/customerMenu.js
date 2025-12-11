@@ -16,7 +16,7 @@ let ttsEnabled = JSON.parse(sessionStorage.getItem("ttsEnabled") || "false");
 async function alertTranslated(englishText) {
   let textToShow = englishText;
   
-  if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage === 'ES') {
+  if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage.toUpperCase() === 'ES') {
     // Get cached translation
     textToShow = await pageTranslator.translate(englishText, 'ES');
   }
@@ -97,7 +97,10 @@ function populateToppingButtons() {
   // Setup Select All button
   setupSelectAllButton();
   
-  // Don't translate here - let the page-level translation handle it
+  // Re-translate toppings if already in Spanish mode
+  if (pageTranslator && pageTranslator.currentLanguage === 'ES') {
+    setTimeout(() => pageTranslator.translatePage('ES'), 200);
+  }
 }
 
 // Setup the Select All button functionality
@@ -150,7 +153,7 @@ function setupSelectAllButton() {
 }
 
 // Update Select All button text based on current state
-function updateSelectAllButton() {
+async function updateSelectAllButton() {
   const selectAllBtn = document.getElementById('selectAllToppingsBtn');
   if (!selectAllBtn) return;
   
@@ -158,10 +161,24 @@ function updateSelectAllButton() {
   const allSelected = Array.from(allToppingButtons).every(btn => btn.classList.contains('selected'));
   
   if (allSelected) {
-    selectAllBtn.textContent = 'Deselect All';
+    // selectAllBtn.textContent = 'Deselect All';
+    // selectAllBtn.classList.add('all-selected');
+    let buttonText = 'Deselect All';
+    // Translate if in Spanish
+    if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage.toUpperCase() === 'ES') {
+      buttonText = await pageTranslator.translate(buttonText, 'ES');
+    }
+    selectAllBtn.textContent = buttonText;
     selectAllBtn.classList.add('all-selected');
   } else {
-    selectAllBtn.textContent = 'Select All';
+    // selectAllBtn.textContent = 'Select All';
+    // selectAllBtn.classList.remove('all-selected');
+    let buttonText = 'Select All';
+    // Translate if in Spanish
+    if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage.toUpperCase() === 'ES') {
+      buttonText = await pageTranslator.translate(buttonText, 'ES');
+    }
+    selectAllBtn.textContent = buttonText;
     selectAllBtn.classList.remove('all-selected');
   }
 }
@@ -274,7 +291,6 @@ function openModificationsPopup(drink, existingModifications = null) {
   document.getElementById("itemImage").src = drink.itemphoto;
   document.getElementById("itemImage").textContent = drink.itemname;
   document.getElementById("itemName").textContent = drink.itemname;
-  document.getElementById("itemDescription").textContent = drink.itemdescrip;
   document.getElementById("modifiedDrinkPrice").textContent = `Total: $${currentBasePrice.toFixed(2)}`;
 
   // add tts text for drink size

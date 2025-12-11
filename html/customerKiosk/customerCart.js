@@ -25,7 +25,7 @@ let editingItemIndex = null;
 async function alertTranslated(englishText) {
   let textToShow = englishText;
   
-  if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage === 'ES') {
+  if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage.toUpperCase() === 'ES') {
     // Get cached translation
     textToShow = await pageTranslator.translate(englishText, 'ES');
   }
@@ -779,7 +779,11 @@ function showPaymentScreen(totalPrice) {
           <button class="ttsButton bannerButtons" data-text="Back to cart" data-translate>Back to cart</button>
       </a>
   `;
-  pageTranslator.translatePage(pageTranslator.getCurrentLanguage());
+  // pageTranslator.translatePage(pageTranslator.getCurrentLanguage());
+  // Translate if in Spanish
+  if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage.toUpperCase() === 'ES') {
+    setTimeout(() => pageTranslator.translatePage('ES'), 100);
+  }
 
   // Add event listener for points payment button
   document.getElementById("pointsPaymentBtn").addEventListener("click", () => {
@@ -806,6 +810,12 @@ function showThankYouScreen() {
 
   document.getElementById("paymentScreen").innerHTML = "";
   document.getElementById("paymentScreen").innerHTML = "<h1 style='margin-left: 2%; margin-top: 2%;' data-translate>Your order is placed. Thank you for visiting!</h1>";
+  
+  // Translate if in Spanish
+  if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage.toUpperCase() === 'ES') {
+    setTimeout(() => pageTranslator.translatePage('ES'), 100);
+  }
+  
   if (ttsEnabled) {
     speak("Your order is placed. Thank you for visiting!");
   }

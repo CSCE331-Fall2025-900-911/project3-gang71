@@ -194,9 +194,14 @@ window.pageTranslator = pageTranslator; // expose globally if other scripts call
 // Initialize language based on stored preference
 document.addEventListener('DOMContentLoaded', function () {
   const languageToggle = document.getElementById('languageToggle');
-  if (languageToggle && pageTranslator.getCurrentLanguage() === 'ES') {
+  const currentLang = pageTranslator.getCurrentLanguage();
+  
+  if (languageToggle && currentLang === 'es') {
     languageToggle.textContent = 'English';
     languageToggle.classList.add('active');
+    
+    // Auto-translate to Spanish if that was the last language used
+    setTimeout(() => pageTranslator.translatePage('ES'), 300);
   }
 });
 
