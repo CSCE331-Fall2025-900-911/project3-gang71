@@ -97,10 +97,7 @@ function populateToppingButtons() {
   // Setup Select All button
   setupSelectAllButton();
   
-  // Re-translate toppings if already in Spanish mode
-  if (pageTranslator && pageTranslator.currentLanguage === 'ES') {
-    setTimeout(() => pageTranslator.translatePage('ES'), 200);
-  }
+  // Don't translate here - let the page-level translation handle it
 }
 
 // Setup the Select All button functionality
@@ -198,11 +195,7 @@ function renderDrinks(drinks, menuRow) {
       }
     });
   });
-  // Only re-translate if user has already switched to Spanish
-  // Add delay to allow DOM to fully render before translation
-  if (pageTranslator.currentLanguage === 'ES') {
-    setTimeout(() => pageTranslator.translatePage('ES'), 150);
-  }
+  // Don't translate here - let the page-level translation handle it
 }
 
 // ensure that drinkCategoryPanel length goes all the way down the page
@@ -577,8 +570,9 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       
       // If page should start in Spanish, translate all content
+      // Increased delay to ensure DOM is fully settled
       if (pageTranslator && pageTranslator.currentLanguage === 'ES') {
-        setTimeout(() => pageTranslator.translatePage('ES'), 200);
+        setTimeout(() => pageTranslator.translatePage('ES'), 300);
       }
     })
     .catch(err => {
