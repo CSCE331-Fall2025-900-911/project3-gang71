@@ -81,6 +81,14 @@
         </div>
 
         <div class="modification">
+          <h2 class="drinkOptions" data-translate>Temperature:</h2>
+          <div class="threeModificationChoices">
+            <button id="icedButton" class="temp-button selected" data-temp="iced" data-text="Iced temperature selected" data-translate>Iced</button>
+            <button id="hotButton" class="temp-button" data-temp="hot" data-text="Hot temperature selected" data-translate>Hot</button>
+          </div>
+        </div>
+
+        <div class="modification">
             <h2 class = "drinkOptions" data-translate>Sweetness:</h2>
             <div class="fourModificationChoices">
                 <button class="buttonText" data-translate>0%</button>
@@ -103,15 +111,13 @@
         </div>
 
         <div class="modification">
-            <h2 class = "drinkOptions" data-translate>Toppings:</h2>
-            <div class="twoModificationChoices" style="height: fit-content;">
-                <select name="topping1" style="font-size: 1.15rem; height: fit-content; margin-left: -70px;">
-                    <option value="" selected disabled hidden data-translate>Topping 1</option>
-                </select>
-                <select name="topping2" style="font-size: 1.15rem; height: fit-content;">
-                    <option value="" selected disabled hidden data-translate>Topping 2</option>
-                </select>
+          <h2 class="drinkOptions" data-translate>Toppings:</h2>
+          <div class="topping-choices">
+            <button id="selectAllToppingsBtn" data-translate>Select All</button>
+            <div id="toppingButtonContainer" style="display: contents;">
+              <!-- Topping buttons will be dynamically inserted here -->
             </div>
+          </div>
         </div>
 
         <h3 style="font-size: 2rem;" id="modifiedDrinkPrice"></h3>
