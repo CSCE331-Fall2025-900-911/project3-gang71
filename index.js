@@ -1117,10 +1117,15 @@ app.post("/api/translate", async (req, res) => {
       return res.status(400).json({ error: "Missing text or targetLang" });
     }
 
-    // Normalize target language to DeepL format (ES, EN)
-    const targetNormalized = (typeof targetLang === 'string')
+    // Normalize target language to DeepL format (ES, EN-US, EN-GB)
+    let targetNormalized = (typeof targetLang === 'string')
       ? (targetLang.length === 2 ? targetLang.toUpperCase() : targetLang.toUpperCase())
       : 'ES';
+    
+    // Handle deprecated 'EN' code - convert to 'EN-US'
+    if (targetNormalized === 'EN') {
+      targetNormalized = 'EN-US';
+    }
 
     const originalKey = text.trim();
     // const cacheKey = `${targetNormalized}:${originalKey}`;
@@ -1165,6 +1170,8 @@ app.post("/api/translate", async (req, res) => {
       'Yogurts': 'Yogures',
       'Cart': 'Carrito',
       'Logout': 'Cerrar Sesión',
+      'Subtotal': 'Total Parcial',
+      'Tax': 'Impuesto',
       'Enable TTS': 'Habilitar TTS',
       'Cup Size:': 'Tamaño de Taza:',
       'Small': 'Pequeño',

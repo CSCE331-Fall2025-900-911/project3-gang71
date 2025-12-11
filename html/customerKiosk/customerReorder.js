@@ -627,8 +627,8 @@ async function getWeather() {
 
     resultDiv.innerHTML = `
       <span class="weatherLocation"
-        style="font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 15px;">
-        <span data-translate>Location:</span> ${data.name}
+            style="font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 15px;">
+            <span data-translate>Location:</span> ${data.name}
       </span>
 
       <div class="weatherRow" style="display: flex; gap: 20px; align-items: center;">
@@ -847,17 +847,17 @@ async function displayDrink(item) {
   // gets the name of the base drink based on its menuID
   const drinkSize = await fetch(`/api/namebyid?id=${mods.cup}`);
   const cup = await drinkSize.json();
-  modsText += `Size: ${cup[0].itemname.split(' ')[0]}<br>`;
+  modsText += `<span data-translate>Size</span>: ${cup[0].itemname.split(' ')[0]}<br>`;
 
   const drinkTemp = await fetch(`/api/namebyid?id=${mods.temperature}`);
   const temp = await drinkTemp.json();
-  modsText += `Temperature: ${temp[0].itemname}<br>`;
+  modsText += `<span data-translate>Temperature</span>: ${temp[0].itemname}<br>`;
 
   // translates sugar, ice, and toppings to their names based on their IDs
   const drinkSugar = await fetch(`/api/namebyid?id=${mods.sugar}`);
   const sugar = await drinkSugar.json();
   let sugarAmount = sugar[0].itemname.split(' ')[0];
-  modsText += `Sweetness: ${sugarAmount}<br>`;
+  modsText += `<span data-translate>Sweetness</span>: ${sugarAmount}<br>`;
 
   const drinkIce = await fetch(`/api/namebyid?id=${mods.ice}`);
   const ice = await drinkIce.json();
@@ -866,24 +866,24 @@ async function displayDrink(item) {
     else if(ice[0].itemname.split(' ')[0] === "Less") { iceAmount = "50%"; }
     else if(ice[0].itemname.split(' ')[0] === "Regular") { iceAmount = "100%"; }
     else { iceAmount = "120%"; }
-   modsText += `Ice: ${iceAmount}<br>`;
+    modsText += `<span data-translate>Ice</span>: ${iceAmount}<br>`;
 
-  if (mods.toppings && mods.toppings.length > 0) {
-    const toppingNames = mods.toppings.map(t => t.name).join(", ");
-    modsText += `Toppings: ${toppingNames}<br>`;
-  }
-  else {
-    modsText += `Toppings: None<br>`;
-  }
-  modsText += `Last Ordered: ${item.date.substring(0,10)}`;
+    if (mods.toppings && mods.toppings.length > 0) {
+      const toppingNames = mods.toppings.map(t => `<span data-translate>${t.name}</span>`).join(", ");
+      modsText += `<span data-translate>Toppings</span>: ${toppingNames}<br>`;
+    }
+    else {
+      modsText += `<span data-translate>Toppings</span>: <span data-translate>None</span><br>`;
+    }
+    modsText += `<span data-translate>Last Ordered</span>: ${item.date.substring(0,10)}`;
 
   let plainModsText = modsText.replace(/<br>/g, ", ").replace(/&nbsp;/g, " ").trim();
 
-  // adds HTML with drinks
-  drinkDiv.innerHTML = `
+    // adds HTML with drinks
+    drinkDiv.innerHTML = `
     <img src="${item.photo}" alt="${item.name}" class="menuItemImg">
     <h2 class = "menuItemH2" data-translate>${item.name}</h2>
-    <p class="menuItemP" style="font-size: 1.07rem; margin-bottom: 25px" data-translate>${modsText || "No modifications"}</p>
+    <p class="menuItemP" style="font-size: 1.07rem; margin-bottom: 25px" >${modsText || "No modifications"}</p>
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 50px";>
         <h1 class="menuItemH1" style="font-size: 2rem;">$${Number(item.price).toFixed(2)}</h1>
         <button class="menuItemButton ttsButton" style="font-size: 1.1rem; margin-left: -30px;" data-id="${item.menuid}" data-text="Customize ${item.name}" data-translate>Customize</button>

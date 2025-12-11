@@ -356,6 +356,17 @@ function renderCartItems() {
     return;
   }
 
+  // Create main container for side-by-side layout
+  const mainContainer = document.createElement("div");
+  mainContainer.style.display = "flex";
+  mainContainer.style.gap = "20px";
+  mainContainer.style.padding = "20px";
+
+  // Create items container (left side)
+  const itemsContainer = document.createElement("div");
+  itemsContainer.style.flex = "1";
+  itemsContainer.id = "cartItemsContainer";
+
   // Show checkout button
   const checkoutButton = document.getElementById("checkoutButton");
   if (checkoutButton) checkoutButton.style.display = "block";
@@ -373,10 +384,10 @@ function renderCartItems() {
     let modsText = '';
     
     if (mods.size) {
-      modsText += `<span data-translate>Size</span>: ${mods.size}<br>`;
+      modsText += `<span data-translate>Size</span>: <span data-translate>${mods.size}</span><br>`;
     }
     if (mods.temperature) {
-      modsText += `<span data-translate>Temperature</span>: ${mods.temperature}<br>`;
+      modsText += `<span data-translate>Temperature</span>: <span data-translate>${mods.temperature}</span><br>`;
     }
     if (mods.sweetness) {
       modsText += `<span data-translate>Sweetness</span>: ${mods.sweetness}<br>`;
@@ -385,7 +396,7 @@ function renderCartItems() {
       modsText += `<span data-translate>Ice</span>: ${mods.ice}<br>`;
     }
     if (mods.toppings && mods.toppings.length > 0) {
-      const toppingNames = mods.toppings.map(t => t.name).join(", ");
+      const toppingNames = mods.toppings.map(t => `<span data-translate>${t.name}</span>`).join(", ");
       modsText += `<span data-translate>Toppings</span>: ${toppingNames}`;
     }
 
@@ -398,7 +409,7 @@ function renderCartItems() {
         <img src="${item.url}" alt="${item.name}" class="cartItemImg">
         <div class="cartItemInfoDiv">
           <h3 data-translate>${item.name}</h3>
-          <p><span data-translate>Price</span>: $${Number(item.price).toFixed(2)} each</p>
+          <p><span data-translate>Price</span>: $${Number(item.price).toFixed(2)} <span data-translate>each</span></p>
           <p class="itemMods">${modsText || "<span data-translate>No modifications</span>"}</p>
           
           <div class="quantity-controls" style="display: flex; align-items: center; gap: 5px; margin-top: 10px;">
@@ -407,14 +418,14 @@ function renderCartItems() {
             <button class="qty-btn plus-btn" style="width: 30px; height: 30px; font-size: 18px; cursor: pointer; background-color: #FFB6C1; border: none; border-radius: 5px; color: white; font-weight: bold;">+</button>
           </div>
           
-          <p style="margin-top: 10px; font-weight: bold;"><span data-translate>Total</span>: $${(item.price * item.quantity).toFixed(2)}</p>
+          <p style="margin-top: 10px; font-weight: bold;"><span data-translate>Total: $ </span> ${(item.price * item.quantity).toFixed(2)}</p>
         </div>
         
         <span class="material-symbols-outlined removeBtn" data-index="${index}" data-text="Delete ${item.name} with ${plainModsText || "no modifications"}" data-translate style="position: absolute; bottom: 10px; right: 10px; border-radius: 50%; background-color: white; padding: 10px; cursor: pointer; border: 2px solid #f6bbd2;">delete</span>
       </div>
     `;
 
-    cartDiv.appendChild(itemDiv);
+    itemsContainer.appendChild(itemDiv);
 
     // EDIT FEATURE: Add edit button listener
     /**
@@ -443,11 +454,11 @@ function renderCartItems() {
 
       if (item.quantity > 1) {
         item.quantity--;
-        speak(`Reduced ${item.name} by 1`);
+        if (ttsEnabled) speak(`Reduced ${item.name} by 1`);
         sessionStorage.setItem('cartItems', JSON.stringify(items));
         renderCartItems(); // NO RELOAD: Re-render instead of reload
       } else {
-        speak(`Remove ${item.name} from cart?`);
+        if (ttsEnabled) speak(`Remove ${item.name} from cart?`);
         if (confirm("Remove this item from cart?")) {
           items.splice(index, 1);
           sessionStorage.setItem('cartItems', JSON.stringify(items));
@@ -461,7 +472,7 @@ function renderCartItems() {
       setTimeout(() => plusBtn.style.backgroundColor = "#FFB6C1", 150);
       
       item.quantity++;
-      speak(`Increased ${item.name} by 1`);
+      if (ttsEnabled) speak(`Increased ${item.name} by 1`);
       sessionStorage.setItem('cartItems', JSON.stringify(items));
       renderCartItems(); // NO RELOAD: Re-render instead of reload
     });
@@ -480,25 +491,60 @@ function renderCartItems() {
     });
   });
 
+  // Append items container to main container
+  mainContainer.appendChild(itemsContainer);
+  
+  // Create totals container (right side)
+  const totalsContainer = document.createElement("div");
+  totalsContainer.style.width = "300px";
+  totalsContainer.style.position = "sticky";
+  totalsContainer.style.top = "20px";
+  totalsContainer.style.right = "60px";
+  totalsContainer.style.height = "fit-content";
+  totalsContainer.id = "cartTotalsContainer";
+
+  // Append totals container to main container
+  mainContainer.appendChild(totalsContainer);
+
+  // Append main container to cart div
+  cartDiv.appendChild(mainContainer);
+
   // Update totals
   updateCartTotals();
+
+  // Style checkout button to appear in totals area (but keep it in original position in DOM)
+  const checkoutBtn = document.getElementById("checkoutButton");
+  if (checkoutBtn) {
+    checkoutBtn.style.display = "block";
+    checkoutBtn.style.width = "280px";
+    checkoutBtn.style.marginBottom = "30px";
+    checkoutBtn.style.padding = "12px 16px";
+    checkoutBtn.style.fontSize = "1.5rem";
+    checkoutBtn.style.fontWeight = "600";
+    checkoutBtn.style.background = "#ed82a2ff";
+    checkoutBtn.style.border = "none";
+    checkoutBtn.style.borderRadius = "8px";
+    checkoutBtn.style.cursor = "pointer";
+    checkoutBtn.style.transition = "all 0.3s";
+    checkoutBtn.style.marginRight = "30px";
+  }
   
   // Re-translate if in Spanish
   if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage === 'ES') {
-    setTimeout(() => pageTranslator.translatePage('ES'), 100);
+    setTimeout(() => pageTranslator.translatePage('ES'), 200);
   }
 }
 
 // NO RELOAD: Update cart totals without full re-render
 function updateCartTotals() {
-  const cartDiv = document.getElementById("cartPage");
+  const totalsContainer = document.getElementById("cartTotalsContainer") || document.getElementById("cartPage");
   
   // Remove old totals if they exist
-  const oldSubtotal = cartDiv.querySelector('#cartSubtotal');
-  const oldTax = cartDiv.querySelector('#cartTax');
-  const oldPrice = cartDiv.querySelector('#preTipPrice');
-  const oldPointsPrice = cartDiv.querySelector('#cartPointsPrice');
-  const oldEarnedPoints = cartDiv.querySelector('#cartEarnedPoints');
+  const oldSubtotal = totalsContainer.querySelector('#cartSubtotal');
+  const oldTax = totalsContainer.querySelector('#cartTax');
+  const oldPrice = totalsContainer.querySelector('#preTipPrice');
+  const oldPointsPrice = totalsContainer.querySelector('#cartPointsPrice');
+  const oldEarnedPoints = totalsContainer.querySelector('#cartEarnedPoints');
   
   if (oldSubtotal) oldSubtotal.remove();
   if (oldTax) oldTax.remove();
@@ -509,73 +555,73 @@ function updateCartTotals() {
   const subtotal = document.createElement("h3");
   subtotal.id = "cartSubtotal";
   let subtotalAmount = calculateSubtotal();
-  // subtotal.textContent = "Subtotal: $" + subtotalAmount;
   subtotal.innerHTML = `
-    <span data-translate> Subtotal: $ </span>
-    <span class="dynamic">${subtotalAmount}</span>
+    <span data-translate>Subtotal</span>: $<span class="dynamic">${subtotalAmount}</span>
   `;
-  subtotal.style.marginLeft = "2%";
-  subtotal.style.fontSize = "1.5rem";
-  subtotal.style.marginBottom = "0";
-  cartDiv.appendChild(subtotal);
+  subtotal.style.margin = "0 0 15px 0";
+  subtotal.style.fontSize = "1.6rem";
+  subtotal.style.color = "#2b2b2bff";
+  subtotal.style.fontWeight = "600";
+  totalsContainer.appendChild(subtotal);
 
   const tax = document.createElement("h3");
   tax.id = "cartTax";
   let taxAmount = calculateTax(subtotalAmount);
-  // tax.textContent = "Tax: $" + taxAmount;
   tax.innerHTML = `
-    <span data-translate> Tax: $ </span>
-    <span class="dynamic">${taxAmount}</span>
+    <span data-translate>Tax</span>: $<span class="dynamic">${taxAmount}</span>
   `;
-  tax.style.marginLeft = "2%";
-  tax.style.fontSize = "1.5rem";
-  tax.style.marginTop = "1%";
-  tax.style.marginBottom = "0";
-  cartDiv.appendChild(tax);
+  tax.style.margin = "0 0 15px 0";
+  tax.style.fontSize = "1.4rem";
+  tax.style.color = "#2d2b2bff";
+  tax.style.fontWeight = "500";
+  totalsContainer.appendChild(tax);
 
   const price = document.createElement("h2");
   price.id = "preTipPrice";
   preTaxAmount = calculateTotalPriceBeforeTip(subtotalAmount, taxAmount);
-  // price.innerHTML = '<span data-translate>Total price</span>: $' + preTaxAmount;
   price.innerHTML = `
-    <span data-translate> Total Price: $ </span>
-    <span class="dynamic">${preTaxAmount}</span>
+    <span data-translate>Total Price</span>: $<span class="dynamic">${preTaxAmount}</span>
   `;
-  price.style.marginLeft = "2%";
-  price.style.marginTop = "1%";
-  price.style.fontSize= "1.8rem";
-  cartDiv.appendChild(price);
+  price.style.margin = "0 0 20px 0";
+  price.style.padding = "12px";
+  price.style.fontSize = "1.8rem";
+  price.style.background = " #ffd1d8ff ";
+  price.style.borderRadius = "10px";
+  price.style.textAlign = "center";
+  price.style.fontWeight = "700";
+  totalsContainer.appendChild(price);
   
   orderCostInPoints = convertDollarsToPoints(Number(preTaxAmount));
   const pointsPrice = document.createElement("h3");
   pointsPrice.id = "cartPointsPrice";
-  // pointsPrice.textContent = `Order cost in points: ${orderCostInPoints} points`;
   pointsPrice.innerHTML = `
     <span data-translate>Order cost in points:</span> 
     <span class="dynamic">${orderCostInPoints}</span> 
     <span data-translate>points</span>
   `;
-  pointsPrice.style.marginLeft = "2%";
-  pointsPrice.style.marginTop = "1%";
+  pointsPrice.style.margin = "0 0 15px 0";
   pointsPrice.style.fontSize = "1.3rem";
-  pointsPrice.style.color = "#000000ff";
-  cartDiv.appendChild(pointsPrice);
+  pointsPrice.style.color = "#555";
+  totalsContainer.appendChild(pointsPrice);
   
   pointsToEarn = calculatePointsToEarn(Number(preTaxAmount));
   const earnedPoints = document.createElement("h3");
   earnedPoints.id = "cartEarnedPoints";
-  // earnedPoints.textContent = `Points you'll earn: ${pointsToEarn} points`;
   earnedPoints.innerHTML = `
-    <span data-translate>Points you'll earn: </span> 
-    <span id="dynamic">${pointsToEarn}</span> 
+    <span data-translate>Points you'll earn:</span> 
+    <span class="dynamic">${pointsToEarn}</span> 
     <span data-translate>points</span>
   `;
-  earnedPoints.style.marginLeft = "2%";
-  earnedPoints.style.marginTop = "0.5%";
-  earnedPoints.style.fontSize = "1.3rem";
-  earnedPoints.style.color = "#FFB6C1";
-  earnedPoints.style.marginBottom = "1%";
-  cartDiv.appendChild(earnedPoints);
+  earnedPoints.style.margin = "0";
+  earnedPoints.style.fontSize = "1.2rem";
+  earnedPoints.style.color = "#f37ea1ff";
+  earnedPoints.style.fontWeight = "600";
+  totalsContainer.appendChild(earnedPoints);
+  
+  // Re-translate totals if in Spanish
+  if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage === 'ES') {
+    setTimeout(() => pageTranslator.translatePage('ES'), 150);
+  }
 }
 
 //----------------------------------- REWARDS SYSTEM -----------------------------------------//
@@ -716,13 +762,13 @@ function showPaymentScreen(totalPrice) {
         Points (<span class="dynamic">${orderCostInPoints}</span> pts)
       </button>
       
-      <h3 style="margin-left: 2%; margin-top: 2%; color: #f04e66ff;" data-translate>Your Points Balance: ${customerPoints} points</h3>
+      <h3 style="margin-left: 2%; margin-top: 2%; font-size:24px; color: #f04e66ff;" data-translate>Your Points Balance: ${customerPoints} points</h3>
 
-      ${!hasEnoughPoints ? `<p data-translate style="margin-left: 2%; color: #FFB6C1;">
+      ${!hasEnoughPoints ? `<p data-translate style="margin-left: 2%; font-size:20px; color: #f78f9eff;">
           You need <span class="dynamic">${orderCostInPoints - customerPoints}</span> more points to pay with points. </p> ` : ''}
       
       <div style="margin-left: 2%; margin-top: 2%;">
-        <input id="tipInputAmount" type="text" placeholder="Enter tip amount" class="ttsButton" data-text="Enter tip amount" data-translate>
+        <input id="tipInputAmount" type="text" class="ttsButton" data-text="Enter tip amount" data-translate>
         <button onclick="addTip()" class="ttsButton bannerButtons" data-text="Add tip" style="margin-left: 10px;" data-translate>Add Tip</button>
       </div>
       
