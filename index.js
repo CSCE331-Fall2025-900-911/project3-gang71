@@ -1241,6 +1241,194 @@ app.post("/api/translate", async (req, res) => {
   }
 });
 
+
+// // Comprehensive hardcoded translation dictionary
+// const hardcodedTranslations = {
+//   // Navigation & UI
+//   'Logout': 'Cierre de sesión',
+//   'Cart': 'Carrito',
+//   'Reorder': 'Reordenar',
+//   'Back to ordering': 'Volver a hacer pedido',
+//   'Log out': 'Cerrar sesión',
+  
+//   // Categories
+//   'La Colombe Cold Brews': 'Cervezas frías La Colombe',
+//   'Milk Teas': 'Tés con leche',
+//   'Matcha': 'Matcha',
+//   'Slushes': 'Granizados',
+//   'Classics': 'Clásicos',
+//   'Punches': 'Punzones',
+//   'Milk Strikes': 'Huelgas de leche',
+//   'Oat Strikes': 'Huelgas de avena',
+//   'Milk Caps': 'Cápsulas de leche',
+//   'Coffees': 'Cafés',
+//   'Yogurts': 'Yogures',
+//   'Seasonal': 'Estacional',
+  
+//   // Drink names are loaded from database, so DON'T hardcode them here
+//   // Only hardcode UI elements, toppings, and static text
+  
+//   // Customization labels
+//   'Cup Size:': 'Talla de copa:',
+//   'Small': 'Pequeño',
+//   'Medium (+$0.50)': 'Mediana (+$0.50)',
+//   'Large (+$1.00)': 'Grande (+$1.00)',
+//   'Temperature:': 'Temperatura:',
+//   'Iced': 'Helado',
+//   'Hot': 'Caliente',
+//   'Sweetness:': 'Dulzura:',
+//   'Ice:': 'Hielo:',
+//   'Toppings:': 'Aderezos:',
+//   'Select All': 'Seleccionar todo',
+  
+//   // Percentages
+//   '0%': '0%',
+//   '35%': '35%',
+//   '50%': '50%',
+//   '75%': '75%',
+//   '100%': '100%',
+//   '120%': '120%',
+  
+//   // Toppings
+//   'Aloe Jelly (+0.95)': 'Jalea de Aloe (+0,95)',
+//   'Aloe Jelly + Lychee Crystal Boba (+1.00)': 'Jalea de Aloe + Boba de Cristal de Lichi (+1,00)',
+//   'Boba (+0.75)': 'Boba (+0,75)',
+//   'Boba + Pudding (+0.80)': 'Boba + Pudding (+0,80)',
+//   'Brown Sugar Boba + Panna Cotta (+1.00)': 'Boba de azúcar moreno + níscalo (+1,00)',
+//   'Brown Sugar Boba Wow (+0.95)': 'Boba Wow de azúcar moreno (+0,95)',
+//   'Chia Seeds (+0.75)': 'Semillas de chía (+0,75)',
+//   'Coffee Boba (+0.95)': 'Boba con café (+0,95)',
+//   'Crystal Boba (+0.95)': 'Boba de cristal (+0,95)',
+//   'Grape + Strawberry + Mango Popping (+1.40)': 'Uva + Fresa + Mango Popping (+1,40)',
+//   'Grape Boba (+0.95)': 'Boba de uvas (+0,95)',
+//   'Herbal Jelly (+0.75)': 'Jalea de hierbas (+0,75)',
+//   'Mango Jelly (+0.75)': 'Gelatina de mango (+0,75)',
+//   'Mango Jelly + Cream Jelly (+0.80)': 'Gelatina de mango + gelatina de nata (+0,80)',
+//   'Mango Boba (+0.95)': 'Boba de mango (+0,95)',
+//   'Matcha Milk Cap (+1.25)': 'Tapa de leche Matcha (+1,25)',
+//   'Panna Cotta (+1.25)': 'Níscalo (+1,25)',
+//   'Cream Jelly (+0.75)': 'Gelatina de nata (+0,75)',
+//   'OREO (+0.75)': 'OREO (+0,75)',
+//   'Pudding (+0.75)': 'Pudding (+0,75)',
+//   'Red Bean (+0.75)': 'Alubia roja (+0,75)',
+//   'Strawberry Panna Cotta (+1.25)': 'Níscalo de fresa (+1,25)',
+//   'Strawberry Boba (+0.95)': 'Boba de fresa (+0,95)',
+  
+//   // Buttons
+//   'Cancel': 'Cancelar',
+//   'Add to Cart': 'Añadir a la cesta',
+//   'Customize': 'Personalizar',
+//   'Personalizar': 'Personalizar',
+//   'Remove': 'Eliminar',
+//   'Enable TTS': 'Habilitar TTS',
+  
+//   // Weather
+//   'Location:': 'Ubicación:',
+//   'Feels Like:': 'Se siente como:',
+//   'Wind:': 'Viento:',
+//   'Based on the weather, we recommend:': 'Según el tiempo, recomendamos:',
+  
+//   // Weather recommendations
+//   'Iced Cocoa (Milk Strike)': 'Cacao helado (Huelga de leche)',
+//   'Malted Cocoa Bliss (Slush)': 'Malted Cocoa Bliss (Granizado)',
+//   'Malted Cocoa Bliss (Granizado)': 'Malted Cocoa Bliss (Granizado)',
+  
+//   // Cart
+//   'Your cart is empty.': 'Tu carrito está vacío.',
+//   'Subtotal': 'Total Parcial',
+//   'Tax': 'Impuesto',
+//   'Total': 'Total',
+//   'Size': 'Tamaño',
+//   'Price': 'Precio',
+//   'No modifications': 'Sin modificaciones',
+//   'Total price': 'Precio total',
+  
+//   // Accessibility
+//   'Small drink size selected.': 'Tamaño pequeño seleccionado.',
+//   'Medium drink size selected. The extra cost is $0.50.': 'Tamaño mediano seleccionado. El costo adicional es $0.50.',
+//   'Large drink size selected. The extra cost is $1.00.': 'Tamaño grande seleccionado. El costo adicional es $1.00.',
+//   '0% sweetness selected': '0% dulzura seleccionada',
+//   '35% sweetness selected': '35% dulzura seleccionada',
+//   '50% sweetness selected': '50% dulzura seleccionada',
+//   '75% sweetness selected': '75% dulzura seleccionada',
+//   '100% sweetness selected': '100% dulzura seleccionada',
+//   '120% sweetness selected': '120% dulzura seleccionada',
+//   '0% ice selected': '0% hielo seleccionado',
+//   '50% ice selected': '50% hielo seleccionado',
+//   '100% ice selected': '100% hielo seleccionado',
+//   '120% ice selected': '120% hielo seleccionado',
+//   'TTS enabled': 'TTS habilitado',
+//   'TTS disabled': 'TTS deshabilitado',
+//   'Closing modifications popup': 'Cerrando ventana emergente de modificaciones',
+//   'added to cart!': '¡añadido al carrito!'
+// };
+
+// //-------------------------------- TRANSLATION --------------------------------------//
+// // Single text translation endpoint
+// app.post("/api/translate", async (req, res) => {
+//   try {
+//     const { text, targetLang } = req.body;
+//     if (!text || !targetLang) {
+//       return res.status(400).json({ error: "Missing text or targetLang" });
+//     }
+
+//     const originalKey = text.trim();
+    
+//     // Normalize target language
+//     let targetNormalized = (typeof targetLang === 'string')
+//       ? targetLang.toUpperCase()
+//       : 'ES';
+    
+//     if (targetNormalized === 'EN') {
+//       targetNormalized = 'EN-US';
+//     }
+
+//     // Step 1: Check hardcoded dictionary first (instant, no API call)
+//     if (targetNormalized === 'ES' && hardcodedTranslations[originalKey]) {
+//       console.log(`[Translation] Using hardcoded: "${originalKey}" -> "${hardcodedTranslations[originalKey]}"`);
+//       return res.json({ translatedText: hardcodedTranslations[originalKey] });
+//     }
+
+//     // Step 2: Check server-side cache
+//     const cacheKey = `${targetNormalized}:${originalKey}`;
+//     if (translationCacheServer.has(cacheKey)) {
+//       const cached = translationCacheServer.get(cacheKey);
+//       console.log(`[Translation] Using cache: "${originalKey}" -> "${cached}"`);
+//       return res.json({ translatedText: cached });
+//     }
+
+//     // Step 3: Use DeepL API for dynamic content (descriptions, etc.)
+//     const deeplApiKey = process.env.DEEPL_API_KEY;
+//     if (deeplApiKey) {
+//       try {
+//         console.log(`[Translation] Calling DeepL API for: "${originalKey.substring(0, 100)}..."`);
+//         const translator = new deepl.Translator(deeplApiKey);
+//         const result = await translator.translateText(originalKey, null, targetNormalized);
+//         const translated = result?.text || (result?.translations && result.translations[0]?.text) || originalKey;
+
+//         // Cache the result
+//         translationCacheServer.set(cacheKey, translated);
+//         console.log(`[Translation] DeepL SUCCESS: "${originalKey.substring(0, 50)}..." -> "${translated.substring(0, 50)}..."`);
+
+//         return res.json({ translatedText: translated });
+//       } catch (clientErr) {
+//         console.error("DeepL API FAILED:", clientErr.message);
+//         console.error("Original text:", originalKey.substring(0, 100));
+//         // Return original text on error
+//         return res.json({ translatedText: originalKey });
+//       }
+//     }
+
+//     // Step 4: Fallback to original text if no API key
+//     console.log(`[Translation] No API key, returning original: "${originalKey}"`);
+//     return res.json({ translatedText: originalKey });
+
+//   } catch (err) {
+//     console.error("Translation endpoint error:", err);
+//     res.status(500).json({ error: "Translation request failed" });
+//   }
+// });
+
 //----------------------------------- WEATHER ------------------------------------//
 
 app.get('/weather', async (req, res) => {
