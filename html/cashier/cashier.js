@@ -606,6 +606,7 @@ async function handlePlaceOrder() {
 
     // Prepare order data for database
     const orderData = {
+      orderNumber: currentOrderNum,
       paymentMethod: selectedPaymentMethod,
       subtotal: subtotal.toFixed(2),
       tax: tax.toFixed(2),
