@@ -861,11 +861,13 @@ async function displayDrink(item) {
   // gets the name of the base drink based on its menuID
   const drinkSize = await fetch(`/api/namebyid?id=${mods.cup}`);
   const cup = await drinkSize.json();
-  modsText += `<span data-translate>Size</span>: ${cup[0].itemname.split(' ')[0]}<br>`;
+  const name = `<span data-translate>${cup[0].itemname.split(' ')[0]}</span>`;
+  modsText += `<span data-translate>Size</span>: ${name}<br>`;
 
   const drinkTemp = await fetch(`/api/namebyid?id=${mods.temperature}`);
   const temp = await drinkTemp.json();
-  modsText += `<span data-translate>Temperature</span>: ${temp[0].itemname}<br>`;
+  const temperature = `<span data-translate>${temp[0].itemname}</span>`;
+  modsText += `<span data-translate>Temperature</span>: ${temperature}<br>`;
 
   // translates sugar, ice, and toppings to their names based on their IDs
   const drinkSugar = await fetch(`/api/namebyid?id=${mods.sugar}`);
@@ -900,7 +902,7 @@ async function displayDrink(item) {
     <p class="menuItemP" style="font-size: 1.07rem; margin-bottom: 25px" >${modsText || "No modifications"}</p>
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 50px";>
         <h1 class="menuItemH1" style="font-size: 2rem;">$${Number(item.price).toFixed(2)}</h1>
-        <button class="menuItemButton ttsButton" style="font-size: 1.1rem; margin-left: -30px;" data-id="${item.menuid}" data-text="Customize ${item.name}" data-translate>Customize</button>
+        <button class="menuItemButton ttsButton" style="font-size: 1.1rem; margin-left: -30px;" data-id="${item.menuid}" data-text="Customize ${item.name}" data-translate-basic>Customize</button>
       </div>
     </div>`;
 
@@ -938,6 +940,7 @@ function handleLogout() {
   // Clear session storage
   sessionStorage.removeItem("currentEmployee");
   sessionStorage.removeItem("cartItems");
+  localStorage.setItem("currentLanguage", "EN");
   // Redirect to logout endpoint which will clear server session
   window.location.href = '/api/logout';
 }

@@ -531,7 +531,7 @@ function renderCartItems() {
   
   // Re-translate if in Spanish
   if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage === 'ES') {
-    setTimeout(() => pageTranslator.translatePage('ES'), 200);
+    setTimeout(() => pageTranslator.translateInBatch('[data-translate]','ES'), 200);
   }
 }
 
@@ -620,7 +620,7 @@ function updateCartTotals() {
   
   // Re-translate totals if in Spanish
   if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage === 'ES') {
-    setTimeout(() => pageTranslator.translatePage('ES'), 150);
+    setTimeout(() => pageTranslator.translateInBatch('[data-translate]','ES'), 150);
   }
 }
 
@@ -782,7 +782,7 @@ function showPaymentScreen(totalPrice) {
   // pageTranslator.translatePage(pageTranslator.getCurrentLanguage());
   // Translate if in Spanish
   if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage.toUpperCase() === 'ES') {
-    setTimeout(() => pageTranslator.translatePage('ES'), 100);
+    setTimeout(() => pageTranslator.translateInBatch('[data-translate]','ES'), 100);
   }
 
   // Add event listener for points payment button
@@ -813,7 +813,7 @@ function showThankYouScreen() {
   
   // Translate if in Spanish
   if (typeof pageTranslator !== 'undefined' && pageTranslator.currentLanguage.toUpperCase() === 'ES') {
-    setTimeout(() => pageTranslator.translatePage('ES'), 100);
+    setTimeout(() => pageTranslator.translateInBatch('[data-translate]','ES'), 100);
   }
   
   if (ttsEnabled) {
@@ -1005,7 +1005,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Apply translations if needed
     if (typeof pageTranslator !== "undefined" &&
         pageTranslator.currentLanguage === "ES") {
-        setTimeout(() => pageTranslator.translatePage("ES"), 100);
+        setTimeout(() => pageTranslator.translateInBatch('[data-translate]',"ES"), 100);
     }
 });
 

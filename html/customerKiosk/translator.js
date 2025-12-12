@@ -504,6 +504,118 @@ class PageTranslator {
         }
     }
 
+    async translateInBatch(htmlElementType = '[data-translate]', targetLang = 'ES') {
+        this.translationCache = JSON.parse(localStorage.getItem('translationCache') || '{}');
+        console.log(this.translationCache);
+        try {
+            // Normalize target language to uppercase
+            targetLang = targetLang.toUpperCase();
+
+            const elements = Array.from(document.querySelectorAll(htmlElementType));
+            if (elements.length === 0) {
+                console.warn('[translateInBatch] No elements found with data-translate attribute');
+                return;
+            }
+
+            const originals = [];
+            const elToOriginal = [];
+            elements.forEach((el) => {
+                const id = this.ensureElementId(el);
+                if (!this.originalContent[id]) {
+                    this.originalContent[id] = el.textContent.trim();
+                }
+                const original = this.originalContent[id];
+                //console.log('[translatePage] Element', idx, 'id:', id, 'original text:', original);
+                elToOriginal.push({ el, original });
+                originals.push(original);
+            });
+
+            const uniqueOriginals = Array.from(new Set(originals));
+            let translatedMap = {};
+            let totalTranslateText = "";
+            uniqueOriginals.forEach(t => {
+                const key = t.trim();
+            
+                if (this.translationCache[key] && this.translationCache[key][targetLang]) {
+                    console.log("Found in cache: ", key);
+                    translatedMap[t] = this.translationCache[key][targetLang];
+                    return;
+                }
+
+                totalTranslateText = totalTranslateText + key + " = ";
+                translatedMap[t] = "?";
+            });
+            
+            if(totalTranslateText === "") {
+                totalTranslateText = "something";
+            }
+            
+            const resp = await fetch('/api/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: totalTranslateText,  targetLang: targetLang, })
+            });
+
+            if (!resp.ok) {
+                console.error('Translate API response not ok', resp.status);
+                const errorData = await resp.json();
+                console.error('Error data:', errorData);
+                return totalTranslateText;
+            }
+
+            const data = await resp.json();
+            const transl = data.translatedText || originalText;
+            const translations = await Promise.all(transl);
+
+            const sepStrings = transl.split('=');
+            const originalText = totalTranslateText.split('=');
+
+            let transCount = 0;
+            Object.keys(translatedMap).forEach((key) => {
+                if(translatedMap[key] === "?") {
+                    if (!this.translationCache[key]) {
+                        this.translationCache[key] = {};
+                    }
+                    //console.log(key, " ", sepStrings[transCount], sepStrings[transCount] && key !== sepStrings[transCount].trim());
+                    if(sepStrings[transCount] && key !== sepStrings[transCount].trim()) {
+                        //console.log("made it here");
+                        this.translationCache[key][targetLang] = sepStrings[transCount].trim();
+                        translatedMap[key] = sepStrings[transCount].trim();
+                        transCount += 1;
+                        //console.log("updated cache: ", this.translationCache[key][targetLang]);
+                    } else {
+                        translatedMap[key] = originalText[transCount].trim();
+                        transCount += 1;
+                    }
+                }
+            });
+            //console.log(translatedMap);
+            localStorage.setItem('translationCache', JSON.stringify(this.translationCache));
+            
+            //console.log(elToOriginal);
+
+            // Apply translations to elements and update client cache
+            elToOriginal.forEach(({ el, original }, idx) => {
+                const translated = translatedMap[original] || original;
+                //console.log('[translatePage] Setting element', idx, 'to:', translated);
+                // Simply set textContent - this preserves all child elements (like .dynamic spans)
+                // Each data-translate span is translated independently
+                //console.log(original, " ", translatedMap[original]);
+                el.textContent = translated;
+            });
+            //console.log(elToOriginal);
+
+            this.currentLanguage = targetLang;
+            localStorage.setItem('currentLanguage', targetLang);
+            //console.log('[translatePage] Translation complete!');
+            //console.log('[translateBatch] Batch complete, results:', results);
+            //console.log('[translatePage] Got translations back:', translatedMap);
+        } catch (err) {
+            console.error('translateInBatch error:', err);
+            console.error('Error stack:', err.stack);
+        }
+    }
+
     async switchLanguage(lang) {
         const normalizedLang = lang.toUpperCase();
         if (normalizedLang === 'ES') {
@@ -542,7 +654,9 @@ document.addEventListener('DOMContentLoaded', function () {
     languageToggle.textContent = 'English';
     languageToggle.classList.add('active');
     
-    setTimeout(() => pageTranslator.translatePage('ES'), 300);
+    setTimeout(() => pageTranslator.translateInBatch('[data-translate]','ES'), 300);
+    setTimeout(() => pageTranslator.translateInBatch('[data-translate-basic]','ES'), 300);
+    setTimeout(() => pageTranslator.translateInBatch('[data-translate-descrip]','ES'), 300);
   }
 });
 

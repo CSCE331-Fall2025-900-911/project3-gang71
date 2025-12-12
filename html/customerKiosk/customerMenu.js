@@ -99,7 +99,7 @@ function populateToppingButtons() {
   
   // Re-translate toppings if already in Spanish mode
   if (pageTranslator && pageTranslator.currentLanguage === 'ES') {
-    setTimeout(() => pageTranslator.translatePage('ES'), 200);
+    setTimeout(() => pageTranslator.translateInBatch('[data-translate]','ES'), 200);
   }
 }
 
@@ -193,10 +193,10 @@ function renderDrinks(drinks, menuRow) {
     itemDiv.innerHTML = `
       <img src="${drink.itemphoto}" alt="Image of ${drink.itemname}" class="menuItemImg">
       <h2 class="menuItemH2" data-translate>${drink.itemname}</h2>
-      <p class="menuItemP" style="font-size: 1.07rem; margin-bottom: 25px" data-translate>${drink.itemdescrip}</p>
+      <p class="menuItemP" style="font-size: 1.07rem; margin-bottom: 25px" data-translate-descrip>${drink.itemdescrip}</p>
       <div style="display: flex; align-items: center; justify-content: space-between; gap: 50px";>
         <p class="menuItemH1" style="font-size: 2rem;">$${Number(drink.itemprice).toFixed(2)}</p>
-        <button class="menuItemButton" style="font-size: 1.1rem; margin-left: -30px;" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.itemname}." data-translate>Customize</button>
+        <button class="menuItemButton" style="font-size: 1.1rem; margin-left: -30px;" data-id="${drink.menuid}" data-text="Opened modifications popup for ${drink.itemname}." data-translate-basic>Customize</button>
       </div>
     `;
     menuRow.appendChild(itemDiv);
@@ -588,7 +588,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // If page should start in Spanish, translate all content
       // Increased delay to ensure DOM is fully settled
       if (pageTranslator && pageTranslator.currentLanguage === 'ES') {
-        setTimeout(() => pageTranslator.translatePage('ES'), 300);
+        setTimeout(() => pageTranslator.translateInBatch('[data-translate-basic]','ES'), 300);
+        setTimeout(() => pageTranslator.translateInBatch('[data-translate]','ES'), 300);
+        setTimeout(() => pageTranslator.translateInBatch('[data-translate-descrip]','ES'), 300);
       }
     })
     .catch(err => {
@@ -905,6 +907,7 @@ function handleLogout() {
   // Clear session storage
   sessionStorage.removeItem("currentEmployee");
   sessionStorage.removeItem("cartItems");
+  localStorage.setItem("currentLanguage", "EN");
   // Redirect to logout endpoint which will clear server session
   window.location.href = '/api/logout';
 }
