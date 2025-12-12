@@ -6,6 +6,7 @@ let currentModifications = {
   temperature: 'iced',
   sweetness: '100%',
   ice: '100%',
+  milk: 'regular',
   toppings: []
 };
 let availableToppings = [];
@@ -274,6 +275,7 @@ function openModificationsPopup(drink, existingModifications = null) {
       temperature: existingModifications.temperature,
       sweetness: existingModifications.sweetness,
       ice: existingModifications.ice,
+      milk: 'regular',
       toppings: existingModifications.toppings ? [...existingModifications.toppings] : []
     };
   } else {
@@ -283,6 +285,7 @@ function openModificationsPopup(drink, existingModifications = null) {
       temperature: 'iced',
       sweetness: '100%',
       ice: '100%',
+      milk: 'regular',
       toppings: []
     };
   }
@@ -332,6 +335,16 @@ function openModificationsPopup(drink, existingModifications = null) {
       btn.classList.add("selected");
     }
   });
+
+  // Set milk button if exists
+  const regular = document.getElementById("regularMilk");
+  const oat = document.getElementById("oatMilk");
+  const almond = document.getElementById("almondMilk");
+  if(regular && oat && almond) {
+    if (currentModifications.milk === 'regular' && regular) regular.classList.add("selected");
+    else if (currentModifications.milk === 'oat' && oat) oat.classList.add("selected");
+    else almond.classList.add("selected");
+  }
 
   // Set previously selected toppings
   if (existingModifications && existingModifications.toppings && existingModifications.toppings.length > 0) {
@@ -413,6 +426,21 @@ function openModificationsPopup(drink, existingModifications = null) {
         speak(iceText);
       }
     };
+  });
+
+  if(regular && oat && almond) {
+    milks = [regular, oat, almond];
+    milks.forEach(btn => {
+    if (!btn) return;
+
+      btn.onclick = () => {
+          milks.forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          currentModifications.milk = btn.dataset.milkType;
+          if (ttsEnabled) {
+            speak(`${btn.dataset.milkType} milk selected`);
+          }
+      };
   });
 
   // show popup
